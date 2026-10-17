@@ -40,7 +40,7 @@ along with this software (see the LICENSE.md file). If not, see
         <container-dialog id="ReceiveAssetDialog" button-text="Produce Asset">
             <form-single name="ReceiveAssetForm" transition="receiveAsset">
                 <field name="workEffortId"><default-field><hidden/></default-field></field>
-                <field name="facilityId" from="inventoryFacilityId ?: facilityId"><default-field title="Facility">
+                <field name="facilityId" from="inventoryFacilityId || facilityId"><default-field title="Facility">
                     <display-entity entity-name="mantle.facility.Facility" text="FacilityNameTemplate"/></default-field></field>
                 <field name="productId"><default-field title="Assigned Product"><drop-down allow-empty="true">
                     <list-options list="produceList" key="${productId}" text="ProductNameTemplate"/>
@@ -83,10 +83,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <link url="containerDetail" text="${containerId}" link-type="anchor" condition="containerId"/></default-field></field>
 
             <field name="issueButton" align="right">
-                <conditional-field condition="currentIssuanceList"><display text="Issued Back to Run"/></conditional-field>
+                <conditional-field condition="currentIssuanceList?.length"><display text="Issued Back to Run"/></conditional-field>
                 <default-field title="">
-                    <link url="issueAssetToWorkEffort" text="Issue Back to Run" parameter-map="[workEffortId:workEffortId,
-                        assetId:assetId, quantity:quantityAccepted, noConsumeProduct:'ignore', noOriginFacility:'ignore']"/>
+                    <link url="issueAssetToWorkEffort" text="Issue Back to Run" parameter-map="{workEffortId:workEffortId,
+                        assetId:assetId, quantity:quantityAccepted, noConsumeProduct:'ignore', noOriginFacility:'ignore'}"/>
                 </default-field>
             </field>
         </form-list>

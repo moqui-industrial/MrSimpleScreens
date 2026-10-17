@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
     <always-actions>
         <entity-find entity-name="mantle.request.RequestParty" list="checkRpList">
             <date-filter/><econdition field-name="requestId"/><econdition field-name="partyId" from="ec.user.userAccount.partyId"/></entity-find>
-        <if condition="!checkRpList"><return error="true" message="You are not a party to request ${requestId}"/></if>
+        <if condition="!checkRpList?.length"><return error="true" message="You are not a party to request ${requestId}"/></if>
     </always-actions>
 
     <transition name="updateRequest"><service-call name="mantle.request.RequestServices.update#Request"/><default-response url="."/></transition>
@@ -58,10 +58,10 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find entity-name="mantle.request.RequestParty" list="customerRpList">
             <date-filter/><econdition field-name="requestId"/><econdition field-name="roleTypeId" value="Customer"/></entity-find>
-        <set field="customerRp" from="customerRpList?.getAt(0)"/>
+        <set field="customerRp" from="customerRpList?.[0]"/>
         <entity-find entity-name="mantle.request.RequestParty" list="assignToRpList">
             <date-filter/><econdition field-name="requestId"/><econdition field-name="roleTypeId" value="Assignee"/></entity-find>
-        <set field="assignToRp" from="assignToRpList?.getAt(0)"/>
+        <set field="assignToRp" from="assignToRpList?.[0]"/>
 
         <entity-find entity-name="mantle.request.RequestNote" list="requestNoteList">
             <econdition field-name="requestId"/><order-by field-name="-noteDate"/></entity-find>
@@ -113,7 +113,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find-one entity-name="mantle.party.PersonWithUserAccount" value-field="paua">
                             <field-map field-name="userId" from="note.userId"/></entity-find-one>
                     </actions><widgets>
-                        <label text="By ${paua?.firstName?:''} ${paua?.lastName?:''} (${paua?.username ?: note.userId}) at ${ec.l10n.format(note.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
+                        <label text="By ${paua?.firstName||''} ${paua?.lastName||''} (${paua?.username || note.userId}) at ${ec.l10n.format(note.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
                         <label text="${note.noteText}" type="p"/>
                     </widgets></section-iterate>
                 </box-body></container-box>

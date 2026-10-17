@@ -136,14 +136,14 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="disabled" operator="not-equals" value="Y" or-null="true"/>
             <order-by field-name="userId"/>
         </entity-find>
-        <if condition="!userAccountList">
+        <if condition="!userAccountList?.length">
             <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
                 <econdition field-name="partyId"/>
                 <econdition field-name="disabled" value="Y"/>
                 <order-by field-name="userId"/>
             </entity-find>
         </if>
-        <set field="userAccount" from="userAccountList ? userAccountList[0] : null"/>
+        <set field="userAccount" from="userAccountList?.length ? userAccountList[0] : null"/>
 
         <entity-find-count entity-name="mantle.request.RequestAndParty" count-field="requestCount">
             <date-filter/><econdition field-name="partyId"/></entity-find-count>
@@ -177,24 +177,24 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find-count>
 
         <entity-find entity-name="mantle.party.PartyRole" list="partyRoleList"><econdition field-name="partyId"/></entity-find>
-        <set field="roleTypeIdList" from="partyRoleList*.roleTypeId"/>
+        <set field="roleTypeIdList" from="partyRoleList.map(it => it.roleTypeId)"/>
     </actions>
     <widgets>
         <container-row><row-col lg="6">
-            <link url="findRequest" text="Requests" badge="${requestCount}" parameter-map="[partyId:partyId]" condition="requestCount"/>
-            <link url="findOrder" text="Sales Orders" badge="${customerOrderPartCount}" parameter-map="[customerPartyId:partyId]" condition="customerOrderPartCount"/>
-            <link url="findOrder" text="Purchase Orders" badge="${vendorOrderPartCount}" parameter-map="[vendorPartyId:partyId]" condition="vendorOrderPartCount"/>
-            <link url="findShipment" text="Shipments From" badge="${fromShipmentCount}" parameter-map="[fromPartyId:partyId]" condition="fromShipmentCount"/>
-            <link url="findShipment" text="Shipments To" badge="${toShipmentCount}" parameter-map="[toPartyId:partyId]" condition="toShipmentCount"/>
+            <link url="findRequest" text="Requests" badge="${requestCount}" parameter-map="{partyId:partyId}" condition="requestCount"/>
+            <link url="findOrder" text="Sales Orders" badge="${customerOrderPartCount}" parameter-map="{customerPartyId:partyId}" condition="customerOrderPartCount"/>
+            <link url="findOrder" text="Purchase Orders" badge="${vendorOrderPartCount}" parameter-map="{vendorPartyId:partyId}" condition="vendorOrderPartCount"/>
+            <link url="findShipment" text="Shipments From" badge="${fromShipmentCount}" parameter-map="{fromPartyId:partyId}" condition="fromShipmentCount"/>
+            <link url="findShipment" text="Shipments To" badge="${toShipmentCount}" parameter-map="{toPartyId:partyId}" condition="toShipmentCount"/>
             <link url="findInvoice" text="Invoices From" badge="${fromInvoiceCount}" condition="fromInvoiceCount"
-                    parameter-map="[fromPartyId:partyId, orderByField:'-invoiceDate', statusId:'InvoiceCancelled', statusId_not:'Y']"/>
+                    parameter-map="{fromPartyId:partyId, orderByField:'-invoiceDate', statusId:'InvoiceCancelled', statusId_not:'Y'}"/>
             <link url="findInvoice" text="Invoices To" badge="${toInvoiceCount}" condition="toInvoiceCount"
-                    parameter-map="[toPartyId:partyId, orderByField:'-invoiceDate', statusId:'InvoiceCancelled', statusId_not:'Y']"/>
+                    parameter-map="{toPartyId:partyId, orderByField:'-invoiceDate', statusId:'InvoiceCancelled', statusId_not:'Y'}"/>
             <link url="findPayment" text="Payments From" badge="${fromPaymentCount}" condition="fromPaymentCount"
-                    parameter-map="[fromPartyId:partyId, orderByField:'-effectiveDate,-paymentId', statusId:'PmntCancelled,PmntVoid', statusId_not:'Y', statusId_op:'in']"/>
+                    parameter-map="{fromPartyId:partyId, orderByField:'-effectiveDate,-paymentId', statusId:'PmntCancelled,PmntVoid', statusId_not:'Y', statusId_op:'in'}"/>
             <link url="findPayment" text="Payments To" badge="${toPaymentCount}" condition="toPaymentCount"
-                    parameter-map="[toPartyId:partyId, orderByField:'-effectiveDate,-paymentId', statusId:'PmntCancelled,PmntVoid', statusId_not:'Y', statusId_op:'in']"/>
-            <link url="receivableStatement" text="Statement PDF" parameter-map="[toPartyId:partyId]" condition="toInvoiceCount || fromPaymentCount"/>
+                    parameter-map="{toPartyId:partyId, orderByField:'-effectiveDate,-paymentId', statusId:'PmntCancelled,PmntVoid', statusId_not:'Y', statusId_op:'in'}"/>
+            <link url="receivableStatement" text="Statement PDF" parameter-map="{toPartyId:partyId}" condition="toInvoiceCount || fromPaymentCount"/>
 
             <section name="NonUserPerson" condition="!userAccount"><actions><!-- NOTE: allowing accounts for Organization too: party?.partyTypeEnumId == 'PtyPerson' &amp;&amp;  -->
                 <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="primaryEmailList">
@@ -229,10 +229,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <container-dialog id="ConvertToPersonSection" button-text="Convert To Person">
                     <form-single name="ConvertToPersonForm" map="party" transition="convertPartyToPerson">
                         <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="firstName" from="party.organizationName.contains(' ') ? party.organizationName.substring(0, party.organizationName.lastIndexOf(' ')) : party.organizationName">
+                        <field name="firstName" from="party.organizationName.includes(' ') ? party.organizationName.substring(0, party.organizationName.lastIndexOf(' ')) : party.organizationName">
                             <default-field><text-line size="30"/></default-field></field>
                         <field name="middleName"><default-field><text-line size="20"/></default-field></field>
-                        <field name="lastName" from="party.organizationName.contains(' ') ? party.organizationName.substring(party.organizationName.lastIndexOf(' ') + 1) : ''">
+                        <field name="lastName" from="party.organizationName.includes(' ') ? party.organizationName.substring(party.organizationName.lastIndexOf(' ') + 1) : ''">
                             <default-field><text-line size="30"/></default-field></field>
                         <field name="birthDate"><default-field><date-time type="date"/></default-field></field>
                         <field name="submitButton"><default-field title="Convert To Person"><submit confirmation="Are you sure?"/></default-field></field>
@@ -243,7 +243,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <form-single name="ConvertToOrganizationForm" map="party" transition="convertPartyToOrganization">
                         <field name="partyId"><default-field><hidden/></default-field></field>
                         <field name="organizationName"><default-field>
-                            <text-line size="60" default-value="${party.firstName?:''}${party.middleName ? ' ' + party.middleName : ''}${party.lastName ? ' ' + party.lastName : ''}"/></default-field></field>
+                            <text-line size="60" default-value="${party.firstName||''}${party.middleName ? ' ' + party.middleName : ''}${party.lastName ? ' ' + party.lastName : ''}"/></default-field></field>
                         <field name="submitButton"><default-field title="Convert To Organization"><submit confirmation="Are you sure?"/></default-field></field>
                     </form-single>
                 </container-dialog>
@@ -253,19 +253,19 @@ along with this software (see the LICENSE.md file). If not, see
 
             <section name="HasDuplicatesSection"><actions>
                 <if condition="party.hasDuplicates != 'Y'"><service-call name="mantle.party.DuplicateServices.find#PartyHasDuplicates"
-                        in-map="[partyId:partyId]" out-map="context"/></if>
+                        in-map="{partyId:partyId}" out-map="context"/></if>
                 <entity-find entity-name="mantle.party.Party" list="mergedFromList">
                     <econdition field-name="mergedToPartyId" from="partyId"/></entity-find>
             </actions><widgets>
                 <label text="Duplicates found (by ${party.hasDuplicates == 'Y' ? 'address/name, phone/name, ' : ''}identification, email, or birth date and name)"
                         type="div" style="text-danger" condition="party.hasDuplicates == 'Y' || hasDuplicates"/>
                 <container><link url="." text="This party was merged into ${party.mergedToPartyId}" link-type="anchor"
-                        parameter-map="[partyId:party.mergedToPartyId]" condition="party.mergedToPartyId"/></container>
+                        parameter-map="{partyId:party.mergedToPartyId}" condition="party.mergedToPartyId"/></container>
                 <container>
-                    <label text="This party has data merged from parties: " condition="mergedFromList"/>
+                    <label text="This party has data merged from parties: " condition="(mergedFromList?.length > 0)"/>
                     <section-iterate name="MergedFromList" list="mergedFromList" entry="mergedFrom"><widgets>
                         <link url="." text="${mergedFrom.partyId} " link-type="anchor"
-                                parameter-map="[partyId:mergedFrom.partyId]"/>
+                                parameter-map="{partyId:mergedFrom.partyId}"/>
                     </widgets></section-iterate>
                 </container>
             </widgets></section>
@@ -524,14 +524,14 @@ along with this software (see the LICENSE.md file). If not, see
 
             <section name="UserSecuritySection" condition="userAccount"><actions>
                 <set field="localeStringList" from="[]"/>
-                <iterate list="Locale.getAvailableLocales()" entry="lcl"><script>localeStringList.add([locale:lcl.toString(), name:lcl.getDisplayName(ec.user.locale)])</script></iterate>
+                <iterate list="ec.l10n.getAvailableLocales()" entry="lcl"><script>localeStringList.push(lcl)</script></iterate>
                 <order-map-list list="localeStringList"><order-by field-name="name"/></order-map-list>
             </actions><widgets>
                 <container-box><box-header title="User Account"/><box-toolbar>
-                    <link url="systemUserAccount" text="Account Detail" parameter-map="[userId:userAccount.userId]"/>
-                    <link url="enableUserAccount" text="Enable Account" parameter-map="[userId:userAccount.userId]" condition="userAccount.disabled == 'Y'"/>
-                    <link url="disableUserAccount" text="Disable Account" parameter-map="[userId:userAccount.userId]" condition="userAccount.disabled != 'Y'"/>
-                    <link url="resetPassword" text="Reset Password" parameter-map="[userId:userAccount.userId]" condition="userAccount.emailAddress"
+                    <link url="systemUserAccount" text="Account Detail" parameter-map="{userId:userAccount.userId}"/>
+                    <link url="enableUserAccount" text="Enable Account" parameter-map="{userId:userAccount.userId}" condition="userAccount.disabled == 'Y'"/>
+                    <link url="disableUserAccount" text="Disable Account" parameter-map="{userId:userAccount.userId}" condition="userAccount.disabled != 'Y'"/>
+                    <link url="resetPassword" text="Reset Password" parameter-map="{userId:userAccount.userId}" condition="userAccount.emailAddress"
                             confirmation="Generate reset password and send by email to ${userAccount.emailAddress}?"/>
                 </box-toolbar><box-body>
                     <form-single name="UpdateUserAccount" map="userAccount" transition="updateUserAccount">
@@ -544,7 +544,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <drop-down allow-empty="true"><list-options list="localeStringList" key="${locale}" text="${name}"/></drop-down>
                         </default-field></field>
                         <field name="timeZone"><default-field>
-                            <drop-down allow-empty="true"><list-options list="new TreeSet(TimeZone.getAvailableIDs().collect())"/></drop-down>
+                            <drop-down allow-empty="true"><list-options list="ec.l10n.getAvailableTimeZones()"/></drop-down>
                         </default-field></field>
 
                         <field name="requirePasswordChange"><default-field>
@@ -651,7 +651,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="toPartyId"><default-field title="Organization">
                             <link url="." text="PartyNameTemplate" entity-name="mantle.party.PartyDetail"
-                                    parameter-map="[partyId:toPartyId]" link-type="anchor"/>
+                                    parameter-map="{partyId:toPartyId}" link-type="anchor"/>
                         </default-field></field>
 
                         <field name="fromDate"><default-field><display/></default-field></field>
@@ -667,9 +667,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <date-filter/><econdition field-name="fromPartyId" from="partyId"/>
                     <econdition field-name="relationshipTypeEnumId" value="PrtContact"/>
                 </entity-find>
-                <set field="isSalesContact" from="roleTypeIdList.contains('Contact') || accountRelList"/>
+                <set field="isSalesContact" from="roleTypeIdList.includes('Contact') || accountRelList?.length"/>
 
-                <set field="isSalesAccount" from="roleTypeIdList.contains('Account') || (roleTypeIdList.contains('Customer') &amp;&amp; party.partyTypeEnumId == 'PtyOrganization')"/>
+                <set field="isSalesAccount" from="roleTypeIdList.includes('Account') || (roleTypeIdList.includes('Customer') &amp;&amp; party.partyTypeEnumId == 'PtyOrganization')"/>
             </actions><widgets>
                 <section name="AccountRelListSection" condition="isSalesContact"><widgets>
                     <container-box><box-header title="Contact of Sales Accounts"/><box-toolbar>
@@ -677,7 +677,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <form-single name="AddSalesAccount" transition="addContact">
                                 <field name="partyId"><default-field><hidden/></default-field></field>
                                 <field name="accountPartyId"><default-field title="Sales Account"><drop-down>
-                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="[roleTypeId:'Account']"/>
+                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="{roleTypeId:'Account'}"/>
                                 </drop-down></default-field></field>
                                 <field name="fromRoleTypeId"><default-field title="Role">
                                     <drop-down allow-empty="true"><entity-options key="${roleTypeId}" text="${description}">
@@ -694,9 +694,9 @@ along with this software (see the LICENSE.md file). If not, see
                                 <display-entity entity-name="mantle.party.RoleType"/></default-field></field>
                             <field name="toPartyId"><default-field>
                                 <link url="." text="PartyNameTemplate" text-map="accountRel" link-type="anchor"
-                                        parameter-map="[partyId:accountRel.toPartyId]"/></default-field></field>
+                                        parameter-map="{partyId:accountRel.toPartyId}"/></default-field></field>
                             <field name="removeButton" align="right"><default-field title="">
-                                <link url="removeContact" icon="fa fa-trash" parameter-map="[partyRelationshipId:accountRel.partyRelationshipId]"
+                                <link url="removeContact" icon="fa fa-trash" parameter-map="{partyRelationshipId:accountRel.partyRelationshipId}"
                                         confirmation="Are you sure you want to remove this contact from the account?"/></default-field></field>
                         </form-list>
                     </box-body></container-box>
@@ -712,7 +712,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <container-dialog id="AddContactAssignDialog" button-text="Add Contact">
                             <form-single name="AddContactAssignForm" transition="addContact">
                                 <field name="partyId" from="contactPartyId"><default-field title="Contact"><drop-down>
-                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="[roleTypeId:null]"/>
+                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="{roleTypeId:null}"/>
                                 </drop-down></default-field></field>
                                 <field name="fromRoleTypeId"><default-field title="Role">
                                     <drop-down allow-empty="true"><entity-options key="${roleTypeId}" text="${description}">
@@ -747,11 +747,11 @@ along with this software (see the LICENSE.md file). If not, see
                     </box-toolbar><box-body>
                         <form-list name="ContactRelList" list="contactRelList" list-entry="contactRel" skip-form="true" skip-header="true">
                             <field name="fromPartyId"><default-field><link url="." text="PartyNameTemplate" text-map="contactRel"
-                                    link-type="anchor" parameter-map="[partyId:contactRel.fromPartyId]"/></default-field></field>
+                                    link-type="anchor" parameter-map="{partyId:contactRel.fromPartyId}"/></default-field></field>
                             <field name="fromRoleTypeId" from="contactRel.fromRoleTypeId"><default-field title="Role">
                                 <display-entity entity-name="mantle.party.RoleType"/></default-field></field>
                             <field name="removeButton" align="right"><default-field>
-                                <link url="removeContact" icon="fa fa-trash" parameter-map="[partyRelationshipId:contactRel.partyRelationshipId]"
+                                <link url="removeContact" icon="fa fa-trash" parameter-map="{partyRelationshipId:contactRel.partyRelationshipId}"
                                         confirmation="Are you sure you want to remove this contact?"/></default-field>
                             </field>
                         </form-list>
@@ -775,7 +775,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <field name="fromDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
 
                                 <field name="toPartyId"><default-field title="Parent Account"><drop-down>
-                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="[roleTypeId:'Account']"/>
+                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="{roleTypeId:'Account'}"/>
                                 </drop-down></default-field></field>
 
                                 <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
@@ -784,9 +784,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </box-toolbar><box-body>
                         <form-list name="ParentAccountRelList" list="parentAccountRelList" list-entry="accountRel" skip-form="true" skip-header="true">
                             <field name="toPartyId"><default-field><link url="." text="PartyNameTemplate" text-map="accountRel"
-                                    link-type="anchor" parameter-map="[partyId:accountRel.toPartyId]"/></default-field></field>
+                                    link-type="anchor" parameter-map="{partyId:accountRel.toPartyId}"/></default-field></field>
                             <field name="removeButton" align="right"><default-field title="">
-                                <link url="removeContact" icon="fa fa-trash" parameter-map="[partyRelationshipId:accountRel.partyRelationshipId]"
+                                <link url="removeContact" icon="fa fa-trash" parameter-map="{partyRelationshipId:accountRel.partyRelationshipId}"
                                         confirmation="Are you sure you want to remove this account from the parent account?"/></default-field></field>
                         </form-list>
                     </box-body></container-box>
@@ -808,7 +808,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <field name="fromDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
 
                                 <field name="fromPartyId"><default-field title="Child Account"><drop-down>
-                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="[roleTypeId:'Account']"/>
+                                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="{roleTypeId:'Account'}"/>
                                 </drop-down></default-field></field>
 
                                 <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
@@ -817,9 +817,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </box-toolbar><box-body>
                         <form-list name="ChildAccountRelList" list="childAccountRelList" list-entry="accountRel" skip-form="true" skip-header="true">
                             <field name="fromPartyId"><default-field><link url="." text="PartyNameTemplate" text-map="accountRel" link-type="anchor"
-                                    parameter-map="[partyId:accountRel.fromPartyId]"/></default-field></field>
+                                    parameter-map="{partyId:accountRel.fromPartyId}"/></default-field></field>
                             <field name="removeButton" align="right"><default-field title="">
-                                <link url="removeContact" icon="fa fa-trash" parameter-map="[partyRelationshipId:accountRel.partyRelationshipId]"
+                                <link url="removeContact" icon="fa fa-trash" parameter-map="{partyRelationshipId:accountRel.partyRelationshipId}"
                                         confirmation="Are you sure you want to remove this child account from the parent account?"/></default-field></field>
                         </form-list>
                     </box-body></container-box>
@@ -846,7 +846,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find-one entity-name="mantle.party.PersonWithUserAccount" value-field="paua">
                             <field-map field-name="userId" from="partyNote.userId"/></entity-find-one>
                     </actions><widgets>
-                        <label text="By ${paua?.firstName?:''} ${paua?.lastName?:''} (${paua?.username ?: partyNote.userId}) at ${ec.l10n.format(partyNote.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
+                        <label text="By ${paua?.firstName||''} ${paua?.lastName||''} (${paua?.username || partyNote.userId}) at ${ec.l10n.format(partyNote.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
                         <section name="UpdateNoteSection" condition="partyNote.userId == ec.user.userId || ec.user.isInGroup('ADMIN')"><widgets>
                             <container-dialog id="UpdateNoteContainer" button-text="Edit Note">
                                 <form-single name="UpdateNoteForm" transition="updatePartyNote" map="partyNote">
@@ -865,7 +865,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- Contact Information -->
             <section name="ContactInfoSection"><actions>
                 <service-call name="mantle.party.ContactServices.get#PartyContactInfoList" out-map="contactOut"
-                        in-map="[partyId:partyId, getAll:true]"/>
+                        in-map="{partyId:partyId, getAll:true}"/>
                 <!-- Find 'Other' ContactMechs -->
                 <set field="handledContactMechTypes" from="['CmtPostalAddress', 'CmtTelecomNumber', 'CmtEmailAddress', 'CmtWebAddress']"/>
                 <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="otherPcmiList" limit="50">
@@ -878,15 +878,15 @@ along with this software (see the LICENSE.md file). If not, see
             </actions><widgets>
                 <container-box type="info"><box-header title="Phone, Email, and Other"/><box-toolbar>
                     <dynamic-dialog id="ExpiredOtherDialog" button-text="View Old" transition="ExpiredContactOther"
-                            parameter-map="[partyId:partyId]"/>
+                            parameter-map="{partyId:partyId}"/>
 
                     <button-menu text="Add New" icon="fa fa-plus">
                         <dynamic-dialog id="AddPhoneInfo" button-text="Phone" transition="UpdateContactInfo"
-                                parameter-map="[partyId:partyId, createTelecom:'true']"/>
+                                parameter-map="{partyId:partyId, createTelecom:'true'}"/>
                         <dynamic-dialog id="AddEmailInfo" button-text="Email" transition="UpdateContactInfo"
-                                parameter-map="[partyId:partyId, createEmail:'true']"/>
+                                parameter-map="{partyId:partyId, createEmail:'true'}"/>
                         <dynamic-dialog id="AddWebUrlInfo" button-text="URL" transition="UpdateContactInfo"
-                                parameter-map="[partyId:partyId, createWeb:'true']"/>
+                                parameter-map="{partyId:partyId, createWeb:'true'}"/>
                         <container-dialog id="OtherCreateDialog" button-text="Other">
                             <form-single name="OtherCreateForm" transition="createContactMechOther">
                                 <field name="partyId"><default-field><hidden/></default-field></field>
@@ -914,8 +914,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <section-iterate name="PhoneInfoSection" list="contactOut.telecomNumberList" entry="contactInfo"><widgets>
                         <container-row><row-col lg="6">
                             <dynamic-dialog id="UpdatePhoneInfo" button-text="Update" transition="UpdateContactInfo"
-                                    parameter-map="[partyId:partyId, telecomContactMechId:contactInfo.telecomContactMechId,
-                                        telecomContactMechPurposeId:contactInfo.telecomContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, telecomContactMechId:contactInfo.telecomContactMechId,
+                                        telecomContactMechPurposeId:contactInfo.telecomContactMechPurposeId}"/>
                             <container-dialog id="PhonePurposeDialog" button-text="Purpose">
                                 <form-single name="PhonePurposeForm" transition="storePartyContactMech">
                                     <field name="partyId"><default-field><hidden/></default-field></field>
@@ -940,18 +940,18 @@ along with this software (see the LICENSE.md file). If not, see
                                 </form-single>
                             </container-dialog>
                             <link url="removeContactInfo" text=" " icon="fa fa-trash" confirmation="Remove phone number?"
-                                    parameter-map="[partyId:partyId, contactMechId:contactInfo.telecomContactMechId,
-                                        contactMechPurposeId:contactInfo.telecomContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, contactMechId:contactInfo.telecomContactMechId,
+                                        contactMechPurposeId:contactInfo.telecomContactMechPurposeId}"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.telecomContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
+                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                     <section-iterate name="EmailInfoSection" list="contactOut.emailAddressList" entry="contactInfo"><widgets>
                         <container-row><row-col lg="6">
                             <dynamic-dialog id="UpdateEmailInfo" button-text="Update" transition="UpdateContactInfo"
-                                    parameter-map="[partyId:partyId, emailContactMechId:contactInfo.emailContactMechId,
-                                        emailContactMechPurposeId:contactInfo.emailContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, emailContactMechId:contactInfo.emailContactMechId,
+                                        emailContactMechPurposeId:contactInfo.emailContactMechPurposeId}"/>
                             <container-dialog id="EmailPurposeDialog" button-text="Purpose">
                                 <form-single name="EmailPurposeForm" transition="storePartyContactMech">
                                     <field name="partyId"><default-field><hidden/></default-field></field>
@@ -974,18 +974,18 @@ along with this software (see the LICENSE.md file). If not, see
                                 </form-single>
                             </container-dialog>
                             <link url="removeContactInfo" text=" " icon="fa fa-trash" confirmation="Remove email address?"
-                                    parameter-map="[partyId:partyId, contactMechId:contactInfo.emailContactMechId,
-                                        contactMechPurposeId:contactInfo.emailContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, contactMechId:contactInfo.emailContactMechId,
+                                        contactMechPurposeId:contactInfo.emailContactMechPurposeId}"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.emailContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
+                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                     <section-iterate name="WebInfoSection" list="contactOut.webAddressList" entry="contactInfo"><widgets>
                         <container-row><row-col lg="6">
                             <dynamic-dialog id="UpdateWebInfo" button-text="Update" transition="UpdateContactInfo"
-                                    parameter-map="[partyId:partyId, webContactMechId:contactInfo.webContactMechId,
-                                        webContactMechPurposeId:contactInfo.webContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, webContactMechId:contactInfo.webContactMechId,
+                                        webContactMechPurposeId:contactInfo.webContactMechPurposeId}"/>
                             <container-dialog id="WebPurposeDialog" button-text="Purpose">
                                 <form-single name="WebPurposeForm" transition="storePartyContactMech">
                                     <field name="partyId"><default-field><hidden/></default-field></field>
@@ -1008,11 +1008,11 @@ along with this software (see the LICENSE.md file). If not, see
                                 </form-single>
                             </container-dialog>
                             <link url="removeContactInfo" text=" " icon="fa fa-trash" confirmation="Remove Web URL?"
-                                    parameter-map="[partyId:partyId, contactMechId:contactInfo.webContactMechId,
-                                        contactMechPurposeId:contactInfo.webContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, contactMechId:contactInfo.webContactMechId,
+                                        contactMechPurposeId:contactInfo.webContactMechPurposeId}"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.webContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
+                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                     <section-iterate name="OtherInfoSection" list="otherPcmiList" entry="otherPcmi"><actions>
@@ -1058,8 +1058,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 </form-single>
                             </container-dialog>
                             <link url="removeContactInfo" text=" " icon="fa fa-trash" confirmation="Remove Contact Info?"
-                                    parameter-map="[partyId:partyId, contactMechId:otherPcmi.contactMechId,
-                                        contactMechPurposeId:otherPcmi.contactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, contactMechId:otherPcmi.contactMechId,
+                                        contactMechPurposeId:otherPcmi.contactMechPurposeId}"/>
                         </row-col><row-col lg="6">
                             <label text="${contactMechTypeEnum.description} - ${contactMechPurpose.description}" type="strong"/>
                             <container><label text="${otherPcmi.infoString}" type="i"/></container>
@@ -1069,15 +1069,15 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <container-box type="info"><box-header title="Postal Addresses"/><box-toolbar>
                     <dynamic-dialog id="ExpiredPostalDialog" button-text="Old Addresses" transition="ExpiredPostal"
-                            width="840" parameter-map="[partyId:partyId]"/>
+                            width="840" parameter-map="{partyId:partyId}"/>
                     <dynamic-dialog id="AddAddressInfo" button-text="Add Address" transition="UpdateContactInfo"
-                            width="840" parameter-map="[partyId:partyId, createPostal:'true']"/>
+                            width="840" parameter-map="{partyId:partyId, createPostal:'true'}"/>
                 </box-toolbar><box-body>
                     <section-iterate name="PostalInfoSection" list="contactOut.postalAddressList" entry="contactInfo"><widgets>
                         <container-row><row-col lg="6">
                             <dynamic-dialog id="UpdatePostalInfo" button-text="Update" transition="UpdateContactInfo" width="840"
-                                    parameter-map="[partyId:partyId, postalContactMechId:contactInfo.postalContactMechId,
-                                        postalContactMechPurposeId:contactInfo.postalContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, postalContactMechId:contactInfo.postalContactMechId,
+                                        postalContactMechPurposeId:contactInfo.postalContactMechPurposeId}"/>
                             <container-dialog id="PostalPurposeDialog" button-text="Purpose">
                                 <form-single name="PostalPurposeForm" transition="storePartyContactMech">
                                     <field name="partyId"><default-field><hidden/></default-field></field>
@@ -1100,26 +1100,26 @@ along with this software (see the LICENSE.md file). If not, see
                                 </form-single>
                             </container-dialog>
                             <link url="removeContactInfo" text=" " icon="fa fa-trash" confirmation="Remove Address?"
-                                    parameter-map="[partyId:partyId, contactMechId:contactInfo.postalContactMechId,
-                                        contactMechPurposeId:contactInfo.postalContactMechPurposeId]"/>
+                                    parameter-map="{partyId:partyId, contactMechId:contactInfo.postalContactMechId,
+                                        contactMechPurposeId:contactInfo.postalContactMechPurposeId}"/>
                             <container>
-                                <label text="Trust: ${contactInfo.postalTrustLevelEnum?.description ?: 'New'}" type="strong"/>
-                                <link url="validateAddress" text="Validate" parameter-map="[partyId:partyId, contactMechId:contactInfo.postalContactMechId]"
+                                <label text="Trust: ${contactInfo.postalTrustLevelEnum?.description || 'New'}" type="strong"/>
+                                <link url="validateAddress" text="Validate" parameter-map="{partyId:partyId, contactMechId:contactInfo.postalContactMechId}"
                                         condition="!contactInfo.postalContactMech.trustLevelEnumId || contactInfo.postalContactMech.trustLevelEnumId == 'CmtlNew'"/>
-                                <link url="updateContactMechMutable" text="Grey" parameter-map="[contactMechId:contactInfo.postalContactMechId, trustLevelEnumId:'CmtlGreylisted']"
-                                        condition="!(contactInfo.postalContactMech.trustLevelEnumId in ['CmtlGreylisted', 'CmtlBlacklisted'])"
+                                <link url="updateContactMechMutable" text="Grey" parameter-map="{contactMechId:contactInfo.postalContactMechId, trustLevelEnumId:'CmtlGreylisted'}"
+                                        condition="!(['CmtlGreylisted', 'CmtlBlacklisted'].includes(contactInfo.postalContactMech.trustLevelEnumId))"
                                         confirmation="Really greylist this address?" btn-type="warning"/>
-                                <link url="updateContactMechMutable" text="Black" parameter-map="[contactMechId:contactInfo.postalContactMechId, trustLevelEnumId:'CmtlBlacklisted']"
+                                <link url="updateContactMechMutable" text="Black" parameter-map="{contactMechId:contactInfo.postalContactMechId, trustLevelEnumId:'CmtlBlacklisted'}"
                                         condition="contactInfo.postalContactMech.trustLevelEnumId != 'CmtlBlacklisted'"
                                         confirmation="Really blacklist this address?" btn-type="danger"/>
-                                <link url="updateContactMechMutable" text="Unlist" parameter-map="[contactMechId:contactInfo.postalContactMechId, trustLevelEnumId:'CmtlNew']"
-                                        condition="contactInfo.postalContactMech.trustLevelEnumId in ['CmtlGreylisted', 'CmtlBlacklisted']"
+                                <link url="updateContactMechMutable" text="Unlist" parameter-map="{contactMechId:contactInfo.postalContactMechId, trustLevelEnumId:'CmtlNew'}"
+                                        condition="['CmtlGreylisted', 'CmtlBlacklisted'].includes(contactInfo.postalContactMech.trustLevelEnumId)"
                                         confirmation="Set trust level back to New?" btn-type="danger"/>
                             </container>
-                            <label text="${contactInfo.postalContactMech.validateMessage?:''}" type="div"/>
+                            <label text="${contactInfo.postalContactMech.validateMessage||''}" type="div"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.postalContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
+                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                 </box-body></container-box>
@@ -1128,29 +1128,29 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- Payment Methods -->
             <section name="PaymentMethodSection"><actions>
                 <service-call name="mantle.account.PaymentMethodServices.get#PartyPaymentMethodInfoList"
-                        in-map="[partyId:partyId]" out-map="ppmiOut"/>
+                        in-map="{partyId:partyId}" out-map="ppmiOut"/>
             </actions><widgets>
                 <container-box type="success"><box-header title="Payment Methods"/><box-toolbar>
                     <dynamic-dialog id="CreateCreditCardDialog" button-text="Create Credit Card"
                             transition="UpdatePaymentMethodInfo" width="800"
-                            parameter-map="[partyId:partyId, paymentMethodTypeEnumId:'PmtCreditCard']"/>
+                            parameter-map="{partyId:partyId, paymentMethodTypeEnumId:'PmtCreditCard'}"/>
                     <dynamic-dialog id="CreateBankAccountDialog" button-text="Create Bank Account"
                             transition="UpdatePaymentMethodInfo" width="800"
-                            parameter-map="[partyId:partyId, paymentMethodTypeEnumId:'PmtBankAccount']"/>
+                            parameter-map="{partyId:partyId, paymentMethodTypeEnumId:'PmtBankAccount'}"/>
                 </box-toolbar><box-body>
                     <container style="float-box" type="ul">
                         <section-iterate name="BillingInfoSection" list="ppmiOut.methodInfoList" entry="methodInfo"><widgets>
                             <container type="li">
-                                <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/PaymentMethodInfo.html.gstring"/></render-mode>
+                                <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/PaymentMethodInfo.html.fancy"/></render-mode>
                                 <label text="CIM ID: ${methodInfo.paymentMethod.gatewayCimId}" type="div" condition="methodInfo.paymentMethod.gatewayCimId"/>
                                 <label text="Gateway: ${methodInfo.paymentMethod.gatewayConfig?.description}" type="div" condition="methodInfo.paymentMethod?.paymentGatewayConfigId"/>
                                 <dynamic-dialog id="UpdatePaymentMethodDialog" button-text="Update"
                                         transition="UpdatePaymentMethodInfo" width="800"
-                                        parameter-map="[partyId:partyId, paymentMethodId:methodInfo.paymentMethodId]"/>
+                                        parameter-map="{partyId:partyId, paymentMethodId:methodInfo.paymentMethodId}"/>
                                 <link url="removePaymentMethod" text=" " icon="fa fa-trash"
-                                        parameter-map="[paymentMethodId:methodInfo.paymentMethodId]"
+                                        parameter-map="{paymentMethodId:methodInfo.paymentMethodId}"
                                         confirmation="Really delete Payment Method ${methodInfo.paymentMethodId}?"/>
-                                <link url="editPaymentMethod" text="Detail" parameter-map="[partyId:partyId, paymentMethodId:methodInfo.paymentMethodId]"/>
+                                <link url="editPaymentMethod" text="Detail" parameter-map="{partyId:partyId, paymentMethodId:methodInfo.paymentMethodId}"/>
                             </container>
                         </widgets></section-iterate>
                     </container>
@@ -1161,9 +1161,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
             </actions><widgets>
                 <container-box type="success"><box-header title="Financial Accounts"/><box-toolbar>
-                    <link url="findFinancialAccount" text="Find Accounts" parameter-map="[ownerPartyId:partyId]"/>
+                    <link url="findFinancialAccount" text="Find Accounts" parameter-map="{ownerPartyId:partyId}"/>
                     <link url="findFinancialAccount" text="Create Account"
-                            parameter-map="[ownerPartyId:partyId, _openDialog:'NewFinancialAccountDialog']"/>
+                            parameter-map="{ownerPartyId:partyId, _openDialog:'NewFinancialAccountDialog'}"/>
                 </box-toolbar><box-body>
                     <form-list name="FinancialAccountList" list="financialAccountList" skip-form="true">
                         <field name="finAccountName"><default-field title="Account">
@@ -1172,7 +1172,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <display-entity entity-name="mantle.account.financial.FinancialAccountType"/></default-field></field>
                         <field name="organizationPartyId"><default-field title="Organization">
                             <link url="." entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" link-type="anchor"
-                                    parameter-map="[partyId:organizationPartyId]"/>
+                                    parameter-map="{partyId:organizationPartyId}"/>
                         </default-field></field>
                         <field name="statusId"><default-field title="Status">
                             <display-entity entity-name="moqui.basic.StatusItem" also-hidden="false"/></default-field></field>
@@ -1211,9 +1211,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <field-map field-name="enumId" from="content.partyContentTypeEnumId"/></entity-find-one>
                     </actions><widgets>
                         <container>
-                            <container><label text="${contentTypeEnum?.description?:'No Type'}" type="strong"/></container>
+                            <container><label text="${contentTypeEnum?.description||'No Type'}" type="strong"/></container>
                             <link url="downloadContent" condition="content.contentLocation"
-                                  parameter-map="[partyContentId:content.partyContentId]"
+                                  parameter-map="{partyContentId:content.partyContentId}"
                                   text="Download ${content.contentLocation.substring(content.contentLocation.lastIndexOf('/')+1)}"/>
                             <container-dialog id="UpdateContentContainer" button-text="Edit Content">
                                 <form-single name="UpdateContentForm" transition="updateContent" map="content">
@@ -1229,8 +1229,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                                 </form-single>
                             </container-dialog>
-                            <container><label condition="paua" text="By ${ec.resource.expand('UsernameTemplate','',paua+[userId:content.userId])} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"/></container>
-                            <label text="${content.description ?: 'No Description'}" type="p"/>
+                            <container><label condition="paua" text="By ${ec.resource.expand('UsernameTemplate','',Object.assign({}, paua, {userId:content.userId}))} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"/></container>
+                            <label text="${content.description || 'No Description'}" type="p"/>
                         </container>
                     </widgets></section-iterate>
                 </box-body></container-box>

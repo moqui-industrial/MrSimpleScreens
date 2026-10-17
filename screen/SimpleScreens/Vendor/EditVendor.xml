@@ -28,7 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="initPartyAccountingConfiguration">
         <service-call name="mantle.ledger.LedgerServices.init#PartyAccountingConfiguration"
-                in-map="[sourcePartyId:'DefaultSettings', organizationPartyId:partyId]"/>
+                in-map="{sourcePartyId:'DefaultSettings', organizationPartyId:partyId}"/>
         <default-response url="."/>
     </transition>
     <transition name="acctgPreference"><default-response url="../Accounting/AcctgPreference"/></transition>
@@ -37,14 +37,14 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="setVendorRep">
         <actions>
             <entity-find entity-name="mantle.party.PartyRelationship" list="existingRepRelList">
-                <date-filter/><econdition-object field="[relationshipTypeEnumId:'PrtRepresentative', toPartyId:partyId]"/></entity-find>
+                <date-filter/><econdition-object field="{relationshipTypeEnumId:'PrtRepresentative', toPartyId:partyId}"/></entity-find>
             <iterate list="existingRepRelList" entry="existingRepRel">
                 <set field="existingRepRel.thruDate" from="ec.user.nowTimestamp"/>
                 <entity-update value-field="existingRepRel"/>
             </iterate>
             <service-call name="create#mantle.party.PartyRelationship"
-                    in-map="[relationshipTypeEnumId:'PrtRepresentative', fromPartyId:repPartyId, fromRoleTypeId:'Manager',
-                        toPartyId:partyId, toRoleTypeId:'Vendor', fromDate:ec.user.nowTimestamp]"/>
+                    in-map="{relationshipTypeEnumId:'PrtRepresentative', fromPartyId:repPartyId, fromRoleTypeId:'Manager',
+                        toPartyId:partyId, toRoleTypeId:'Vendor', fromDate:ec.user.nowTimestamp}"/>
         </actions>
         <default-response url="."/>
     </transition>
@@ -59,9 +59,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="^lastName"/><order-by field-name="^firstName"/><order-by field-name="^username"/>
             </entity-find>
             <script>
-                def outList = []
-                for (def pau in pauList)
-                    outList.add([value:pau.partyId, label:"${pau.firstName} ${pau.lastName} (${pau.username})".toString()])
+                const outList = []
+                for (const pau of pauList)
+                    outList.push({value:pau.partyId, label:`${pau.firstName} ${pau.lastName} (${pau.username})`.toString()})
                 ec.web.sendJsonResponse(outList)
             </script>
         </actions>
@@ -72,13 +72,13 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail"/>
 
         <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="paymentContactInfo"
-                in-map="[partyId:partyId, postalContactMechPurposeId:'PostalPayment',
-                    telecomContactMechPurposeId:'PhonePayment', emailContactMechPurposeId:'EmailPayment']"/>
-        <set field="paymentInfoFlat" from="flattenNestedMap(paymentContactInfo)"/>
+                in-map="{partyId:partyId, postalContactMechPurposeId:'PostalPayment',
+                    telecomContactMechPurposeId:'PhonePayment', emailContactMechPurposeId:'EmailPayment'}"/>
+        <set field="paymentInfoFlat" from="CollectionUtilities.flattenNestedMap(paymentContactInfo)"/>
         <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="billingContactInfo"
-                in-map="[partyId:partyId, postalContactMechPurposeId:'PostalBilling',
-                    telecomContactMechPurposeId:'PhoneBilling', emailContactMechPurposeId:'EmailBilling']"/>
-        <set field="billingInfoFlat" from="flattenNestedMap(billingContactInfo)"/>
+                in-map="{partyId:partyId, postalContactMechPurposeId:'PostalBilling',
+                    telecomContactMechPurposeId:'PhoneBilling', emailContactMechPurposeId:'EmailBilling'}"/>
+        <set field="billingInfoFlat" from="CollectionUtilities.flattenNestedMap(billingContactInfo)"/>
 
         <entity-find entity-name="mantle.party.PartyRole" list="partyRoleList">
             <econdition field-name="partyId"/><order-by field-name="roleTypeId"/>
@@ -91,11 +91,11 @@ along with this software (see the LICENSE.md file). If not, see
             <field-map field-name="organizationPartyId" from="partyId"/></entity-find-one>
 
         <entity-find entity-name="mantle.party.PartyRelationship" list="repRelationshipList">
-            <econdition-object field="[relationshipTypeEnumId:'PrtRepresentative', toPartyId:partyId]"/>
+            <econdition-object field="{relationshipTypeEnumId:'PrtRepresentative', toPartyId:partyId}"/>
             <order-by field-name="-fromDate"/>
         </entity-find>
         <entity-find-one entity-name="mantle.party.Person" value-field="repPerson">
-            <field-map field-name="partyId" from="repRelationshipList?.getAt(0)?.fromPartyId"/></entity-find-one>
+            <field-map field-name="partyId" from="repRelationshipList?.[0]?.fromPartyId"/></entity-find-one>
     </actions>
     <widgets>
         <container-panel id="VendorInfoContainer">
@@ -108,14 +108,14 @@ along with this software (see the LICENSE.md file). If not, see
                 </container-dialog>
                 <section name="PaymentContactInfo">
                     <actions><set field="contactInfo" from="paymentContactInfo"/></actions>
-                    <widgets><render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode></widgets>
+                    <widgets><render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode></widgets>
                 </section>
 
                 <form-single name="SetVendorRepForm" transition="setVendorRep">
                     <field name="partyId"><default-field><hidden/></default-field></field>
                     <field name="currentRep"><default-field title="Current Rep">
                         <link text="${repPerson ? repPerson.firstName + ' ' + repPerson.lastName : ''}" url="editUser"
-                                parameter-map="[partyId:repPerson?.partyId]" link-type="anchor"/>
+                                parameter-map="{partyId:repPerson?.partyId}" link-type="anchor"/>
                     </default-field></field>
                     <field name="repPartyId"><default-field title="New Rep User">
                         <drop-down><dynamic-options transition="getPersonList" server-search="true" min-length="2"/></drop-down>
@@ -131,7 +131,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </container-dialog>
                 <section name="BillingContactInfo">
                     <actions><set field="contactInfo" from="billingContactInfo"/></actions>
-                    <widgets><render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode></widgets>
+                    <widgets><render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode></widgets>
                 </section>
             </panel-left>
             <panel-center>

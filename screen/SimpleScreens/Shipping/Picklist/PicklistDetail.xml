@@ -15,7 +15,7 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Picklist" default-menu-index="1">
 
-    <parameter name="workEffortId" from="workEffortId ?: workEffortId_0" required="true"/>
+    <parameter name="workEffortId" from="workEffortId || workEffortId_0" required="true"/>
     <parameter name="workEffortId_0"/>
 
     <transition name="editParty"><default-response url="//${appRoot}/Party/EditParty"/></transition>
@@ -28,7 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="addShipment"><default-response url="../AddShipment"/></transition>
     <transition name="removeShipment">
         <parameter name="shipmentId"/>
-        <service-call name="update#mantle.shipment.Shipment" in-map="[shipmentId:shipmentId, shipWorkEffortId:null, binLocationNumber:null]"/>
+        <service-call name="update#mantle.shipment.Shipment" in-map="{shipmentId:shipmentId, shipWorkEffortId:null, binLocationNumber:null}"/>
         <default-response url="."/>
     </transition>
 
@@ -99,7 +99,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="workEffortId"><default-field title="ID"><display/></default-field></field>
                     <field name="workEffortName"><default-field title="Name"><text-line size="40"/></default-field></field>
                     <field name="facilityId"><default-field title="Facility"><drop-down>
-                        <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="[facilityTypeEnumId:'FcTpWarehouse,FcTpDock']"/>
+                        <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="{facilityTypeEnumId:'FcTpWarehouse,FcTpDock'}"/>
                     </drop-down></default-field></field>
                     <field name="ownerPartyId"><default-field title="Owner Org"><drop-down allow-empty="true">
                         <entity-options key="${partyId}" text="PartyNameTemplate">
@@ -133,17 +133,17 @@ along with this software (see the LICENSE.md file). If not, see
                 </form-single>
             </row-col>
             <row-col lg="6">
-                <container-box><box-header title="Status: ${workEffort.status?.description ?: statusId}"/><box-toolbar>
-                    <link url="updateShipmentLoad" text="Approve" parameter-map="[statusId:'WeApproved']"
+                <container-box><box-header title="Status: ${workEffort.status?.description || statusId}"/><box-toolbar>
+                    <link url="updateShipmentLoad" text="Approve" parameter-map="{statusId:'WeApproved'}"
                             condition="shipmentCount &amp;&amp; statusId == 'WeInPlanning'" btn-type="success"/>
-                    <link url="updateShipmentLoad" text="Begin (In Progress)" parameter-map="[statusId:'WeInProgress']"
-                            condition="shipmentCount &amp;&amp; statusId in ['WeInPlanning', 'WeApproved']"/>
+                    <link url="updateShipmentLoad" text="Begin (In Progress)" parameter-map="{statusId:'WeInProgress'}"
+                            condition="shipmentCount &amp;&amp; ['WeInPlanning', 'WeApproved'].includes(statusId)"/>
 
                     <link url="completeShipmentLoadShip" text="Force Complete" btn-type="warning"
-                            condition="shipmentCount &amp;&amp; !(statusId in ['WeInPlanning', 'WeComplete', 'WeClosed', 'WeCancelled'])"
+                            condition="shipmentCount &amp;&amp; !(['WeInPlanning', 'WeComplete', 'WeClosed', 'WeCancelled'].includes(statusId))"
                             confirmation="Remove all Shipments in the Input and Scheduled statuses and set Picklist status to Complete (or Cancelled if no remaining Shipments or all remaining are Cancelled)?"/>
                     <link url="closeShipmentLoadShip" text="Force Close" btn-type="danger"
-                            condition="!(statusId in ['WeClosed', 'WeCancelled'])"
+                            condition="!(['WeClosed', 'WeCancelled'].includes(statusId))"
                             confirmation="Remove all Shipments in the Input, Scheduled, Picked, and Packed statuses and set Picklist status to Closed (or Cancelled if no remaining Shipments or all remaining are Cancelled)?"/>
 
                     <link url="setStatusFromShipments" text="Auto Set" confirmation="Auto set status from Shipment statuses?"/>
@@ -178,7 +178,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="shipmentId"/><select-field field-name="orderId"/></entity-find>
                     <!-- Orders -->
                     <entity-find entity-name="mantle.order.OrderHeader" list="orderHeaderList">
-                        <econdition field-name="orderId" operator="in" from="sisList*.orderId"/>
+                        <econdition field-name="orderId" operator="in" from="sisList.map(it => it.orderId)"/>
                         <select-field field-name="orderId,salesChannelEnumId"/>
                     </entity-find>
                     <!-- Shipment Quantities - single value, could be optimized with sub-select -->
@@ -186,16 +186,16 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="shipmentId"/>
                         <select-field field-name="quantity,quantityNotHandled"/>
                     </entity-find>
-                    <set field="quantityTotal" from="sisSummaryList.first()?.quantity ?: 0.0"/>
-                    <set field="quantityNotHandled" from="sisSummaryList.first()?.quantityNotHandled ?: 0.0"/>
+                    <set field="quantityTotal" from="sisSummaryList[0]?.quantity ?? 0"/>
+                    <set field="quantityNotHandled" from="sisSummaryList[0]?.quantityNotHandled ?? 0"/>
                     <!-- Pick vs other location reservations - single value, could be optimized with sub-select -->
                     <entity-find entity-name="mantle.product.issuance.AssetAndReservationSummary" list="resPickLocList">
                         <econdition field-name="shipmentId"/>
                         <econdition field-name="locationTypeEnumId" value="FltPick"/>
                         <select-field field-name="quantity"/>
                     </entity-find>
-                    <set field="resPickLocQuantity" from="resPickLocList.first()?.quantity ?: 0.0"/>
-                    <set field="_rowSubmit" from="(resPickLocQuantity == quantityTotal) ? 'true' : 'false'"/>
+                    <set field="resPickLocQuantity" from="resPickLocList[0]?.quantity ?? 0"/>
+                    <set field="_rowSubmit" from="(toDecimal(resPickLocQuantity ?? 0).compare(quantityTotal ?? 0) == 0) ? 'true' : 'false'"/>
                 </row-actions>
 
                 <field name="shipmentId"><default-field><hidden/></default-field></field>
@@ -205,7 +205,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <text-line size="4"/></default-field></field>
 
                 <field name="shipmentMethodSequenceNum"><default-field title="Ship Method">
-                    <display text="${shipmentMethodSequenceNum != null ? shipmentMethodSequenceNum + ' - ' : ''}${shipMethEnum?.description ?: ''}"/>
+                    <display text="${shipmentMethodSequenceNum != null ? shipmentMethodSequenceNum + ' - ' : ''}${shipMethEnum?.description || ''}"/>
                 </default-field></field>
                 <field name="shipmentLink"><default-field title="Shipment">
                     <link url="shipmentDetail" text="${shipmentId}" link-type="anchor"/></default-field></field>
@@ -219,15 +219,15 @@ along with this software (see the LICENSE.md file). If not, see
                             style="${originFacilityId == workEffort.facilityId ? 'text-success' : 'text-danger'}"/></default-field></field>
                 <field name="toPartyId"><default-field title="To Party">
                     <link url="editCustomer" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                            link-type="anchor" parameter-map="[partyId:toPartyId]"/>
-                    <label text=" - ${custPcaaList*.description.join(', ')}" condition="custPcaaList"/>
+                            link-type="anchor" parameter-map="{partyId:toPartyId}"/>
+                    <label text=" - ${custPcaaList.map(it => it.description).join(', ')}" condition="(custPcaaList?.length > 0)"/>
                 </default-field></field>
 
                 <field name="orderIds"><default-field title="Orders">
                     <section-iterate name="OrderSisList" list="orderHeaderList" entry="orderHeader"><widgets>
                         <link url="orderDetail" text="${orderHeader.orderId}" link-type="anchor" condition="orderHeader.orderId"
-                                parameter-map="[orderId:orderHeader.orderId]"/>
-                        <label text=" - ${orderHeader.salesChannel?.description?:''}" condition="orderHeader.salesChannelEnumId"/>
+                                parameter-map="{orderId:orderHeader.orderId}"/>
+                        <label text=" - ${orderHeader.salesChannel?.description||''}" condition="orderHeader.salesChannelEnumId"/>
                     </widgets></section-iterate>
                 </default-field></field>
 
@@ -238,7 +238,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="quantityTotal" align="center">
                     <default-field title="Quantity Total"><display/></default-field></field>
                 <field name="resPickLocQuantity" align="center">
-                    <default-field title="Pick Loc Qty"><display style="text-strong ${(resPickLocQuantity == quantityTotal) ? 'text-success' : 'text-danger'}"/></default-field></field>
+                    <default-field title="Pick Loc Qty"><display style="text-strong ${(toDecimal(resPickLocQuantity ?? 0).compare(quantityTotal ?? 0) == 0) ? 'text-success' : 'text-danger'}"/></default-field></field>
 
                 <field name="packButton"><default-field title=""><link url="packShipment" text="Pack"/></default-field></field>
                 <field name="removeButton"><default-field title="">
@@ -269,7 +269,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="partyId"><default-field title="Person"><drop-down>
                             <dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                                    parameter-map="[roleTypeId:'Employee,Worker']"/>
+                                    parameter-map="{roleTypeId:'Employee,Worker'}"/>
                         </drop-down></default-field></field>
                         <field name="roleTypeId"><default-field><hidden default-value="_NA_"/></default-field></field>
                         <field name="statusId" from="null"><default-field title="Status">
@@ -291,7 +291,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <field name="name"><header-field/><default-field>
                         <link url="editParty" text="PartyNameTemplate" link-type="anchor"/></default-field></field>
-                    <field name="username"><default-field><link url="editParty" text="${username?:'--'}" link-type="anchor"/></default-field></field>
+                    <field name="username"><default-field><link url="editParty" text="${username||'--'}" link-type="anchor"/></default-field></field>
 
                     <field name="roleTypeId"><default-field><hidden/></default-field></field>
                     <field name="statusId"><default-field title="Status">
@@ -311,7 +311,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="workEffortId"><default-field><hidden/></default-field></field>
                         <field name="assetId"><default-field title="Truck / Equipment">
                             <drop-down><dynamic-options transition="getAssetList" server-search="true" min-length="0"
-                                    parameter-map="[assetTypeEnumId:'AstTpEquipment']"/></drop-down>
+                                    parameter-map="{assetTypeEnumId:'AstTpEquipment'}"/></drop-down>
                         </default-field></field>
                         <field name="statusId" from="null"><default-field>
                             <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#statusDropDown">
@@ -325,7 +325,7 @@ along with this software (see the LICENSE.md file). If not, see
             <box-body>
                 <section-iterate name="AssetListSection" list="assetList" entry="assetAssign">
                     <actions>
-                        <script>context.putAll(assetAssign)</script>
+                        <script>Object.assign(context, assetAssign)</script>
                         <set field="changedEntityName" from="null"/><!-- so StatusHistorySection doesn't pick up the Asset status history -->
                         <set field="statusChangeTransition" value="updateAssetAssign"/>
                         <entity-find entity-name="moqui.entity.EntityAuditLog" list="statusHistoryList">
@@ -342,8 +342,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <box-toolbar>
                                 <link url="equipmentDetail" text="Edit Equipment"/>
                                 <link url="updateAssetAssign" text="Remove from Load"
-                                        parameter-map="[workEffortId:workEffortId, assetId:assetId, fromDate:fromDate,
-                                            thruDate:ec.user.nowTimestamp]"/>
+                                        parameter-map="{workEffortId:workEffortId, assetId:assetId, fromDate:fromDate,
+                                            thruDate:ec.user.nowTimestamp}"/>
                             </box-toolbar>
                             <box-body>
                                 <container-row>

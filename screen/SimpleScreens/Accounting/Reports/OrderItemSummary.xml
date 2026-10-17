@@ -22,9 +22,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
 
     <actions>
-        <set field="orderType" from="orderType ?: 'Sales'"/>
-        <if condition="'sales'.equalsIgnoreCase(orderType)"><then><set field="vendorRoleTypeId" value="OrgInternal"/></then>
-            <else-if condition="'purchase'.equalsIgnoreCase(orderType)"><set field="customerRoleTypeId" value="OrgInternal"/></else-if></if>
+        <set field="orderType" from="orderType || 'Sales'"/>
+        <if condition="orderType?.toLowerCase() === 'sales'"><then><set field="vendorRoleTypeId" value="OrgInternal"/></then>
+            <else-if condition="orderType?.toLowerCase() === 'purchase'"><set field="customerRoleTypeId" value="OrgInternal"/></else-if></if>
     </actions>
     <widgets>
         <form-list name="OrderItemSummary" list="summaryList" skip-form="true" header-dialog="true"
@@ -45,18 +45,18 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="vendorPartyId">
                 <header-field title="Vendor">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                            parameter-map="[roleTypeId:'Supplier,Vendor,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Supplier,Vendor,OrgInternal'}"/></drop-down>
                 </header-field>
                 <default-field><link url="editParty" text="PartyNameTemplate" entity-name="mantle.party.PartyDetail"
-                        link-type="anchor" parameter-map="[partyId:vendorPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:vendorPartyId}"/></default-field>
             </field>
             <field name="customerPartyId">
                 <header-field title="Customer">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Customer,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Customer,OrgInternal'}"/></drop-down>
                 </header-field>
                 <default-field><link url="editParty" text="PartyNameTemplate" entity-name="mantle.party.PartyDetail"
-                        link-type="anchor" parameter-map="[partyId:customerPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:customerPartyId}"/></default-field>
             </field>
 
             <field name="statusId">

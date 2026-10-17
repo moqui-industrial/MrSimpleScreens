@@ -28,14 +28,14 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="ContactInfoSection">
             <actions>
                 <service-call name="mantle.party.ContactServices.get#PartyContactInfoList" out-map="contactOut"
-                        in-map="[partyId:partyId, getAll:true]"/>
+                        in-map="{partyId:partyId, getAll:true}"/>
             </actions>
             <widgets>
                 <container-box>
                     <box-header title="Email Addresses"/>
                     <box-toolbar>
                         <dynamic-dialog id="AddEmailInfo" button-text="Add Email" transition="updateContactInfo"
-                                parameter-map="[partyId:partyId, createEmail:'true']"/>
+                                parameter-map="{partyId:partyId, createEmail:'true'}"/>
                     </box-toolbar>
                     <box-body>
                         <container style="float-box" type="ul">
@@ -43,14 +43,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 <widgets>
                                     <container type="li">
                                         <label text="${contactInfo.emailContactMechPurpose.description}" type="p"/>
-                                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
+                                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                                         <dynamic-dialog id="UpdateEmailInfo" button-text="Update"
                                                 transition="updateContactInfo"
-                                                parameter-map="[partyId:partyId, emailContactMechId:contactInfo.emailContactMechId,
-                                                            emailContactMechPurposeId:contactInfo.emailContactMechPurposeId]"/>
+                                                parameter-map="{partyId:partyId, emailContactMechId:contactInfo.emailContactMechId,
+                                                            emailContactMechPurposeId:contactInfo.emailContactMechPurposeId}"/>
                                         <link url="removeContactInfo" text="Remove"
-                                                parameter-map="[partyId:partyId, contactMechId:contactInfo.emailContactMechId,
-                                                            contactMechPurposeId:contactInfo.emailContactMechPurposeId]"/>
+                                                parameter-map="{partyId:partyId, contactMechId:contactInfo.emailContactMechId,
+                                                            contactMechPurposeId:contactInfo.emailContactMechPurposeId}"/>
                                     </container>
                                 </widgets>
                             </section-iterate>
@@ -62,7 +62,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <box-header title="Phone Numbers"/>
                     <box-toolbar>
                         <dynamic-dialog id="AddPhoneInfo" button-text="Add Phone" transition="updateContactInfo"
-                                parameter-map="[partyId:partyId, createTelecom:'true']"/>
+                                parameter-map="{partyId:partyId, createTelecom:'true'}"/>
                     </box-toolbar>
                     <box-body>
                         <container style="float-box" type="ul">
@@ -70,14 +70,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 <widgets>
                                     <container type="li">
                                         <label text="${contactInfo.telecomContactMechPurpose.description}" type="p"/>
-                                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
+                                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                                         <dynamic-dialog id="UpdatePhoneInfo" button-text="Update"
                                                 transition="updateContactInfo"
-                                                parameter-map="[partyId:partyId, telecomContactMechId:contactInfo.telecomContactMechId,
-                                                            telecomContactMechPurposeId:contactInfo.telecomContactMechPurposeId]"/>
+                                                parameter-map="{partyId:partyId, telecomContactMechId:contactInfo.telecomContactMechId,
+                                                            telecomContactMechPurposeId:contactInfo.telecomContactMechPurposeId}"/>
                                         <link url="removeContactInfo" text="Remove"
-                                                parameter-map="[partyId:partyId, contactMechId:contactInfo.telecomContactMechId,
-                                                            contactMechPurposeId:contactInfo.telecomContactMechPurposeId]"/>
+                                                parameter-map="{partyId:partyId, contactMechId:contactInfo.telecomContactMechId,
+                                                            contactMechPurposeId:contactInfo.telecomContactMechPurposeId}"/>
                                     </container>
                                 </widgets>
                             </section-iterate>
@@ -89,7 +89,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <box-header title="Mailing Addresses"/>
                     <box-toolbar>
                         <dynamic-dialog id="AddAddressInfo" button-text="Add Address" transition="updateContactInfo"
-                                width="800" parameter-map="[partyId:partyId, createPostal:'true', createTelecom:'true']"/>
+                                width="800" parameter-map="{partyId:partyId, createPostal:'true', createTelecom:'true'}"/>
                     </box-toolbar>
                     <box-body>
                         <container style="float-box" type="ul">
@@ -97,14 +97,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 <widgets>
                                     <container type="li">
                                         <label text="${contactInfo.postalContactMechPurpose.description}" type="p"/>
-                                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
+                                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                                         <dynamic-dialog id="UpdatePostalInfo" button-text="Update Address"
                                                 transition="updateContactInfo" width="800"
-                                                parameter-map="[partyId:partyId, postalContactMechId:contactInfo.postalContactMechId,
-                                                            postalContactMechPurposeId:contactInfo.postalContactMechPurposeId]"/>
+                                                parameter-map="{partyId:partyId, postalContactMechId:contactInfo.postalContactMechId,
+                                                            postalContactMechPurposeId:contactInfo.postalContactMechPurposeId}"/>
                                         <link url="removeContactInfo" text="Remove"
-                                                parameter-map="[partyId:partyId, contactMechId:contactInfo.postalContactMechId,
-                                                            contactMechPurposeId:contactInfo.postalContactMechPurposeId]"/>
+                                                parameter-map="{partyId:partyId, contactMechId:contactInfo.postalContactMechId,
+                                                            contactMechPurposeId:contactInfo.postalContactMechPurposeId}"/>
                                     </container>
                                 </widgets>
                             </section-iterate>

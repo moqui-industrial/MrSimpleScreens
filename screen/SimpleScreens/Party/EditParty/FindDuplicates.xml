@@ -22,14 +22,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <set field="toPartyId" from="partyId"/>
-        <service-call name="mantle.party.DuplicateServices.find#PartyDuplicates" in-map="[partyId:partyId]" out-map="context"/>
+        <service-call name="mantle.party.DuplicateServices.find#PartyDuplicates" in-map="{partyId:partyId}" out-map="context"/>
         <script>
             dupInfoList = []
-            for (List matchList in matchingInfoByPartyId.values()) {
-                for (matchInfo in matchList) {
-                    if (matchInfo instanceof org.moqui.entity.EntityValue) { dupInfoList.add(matchInfo.getMap()) }
-                    else { dupInfoList.add(matchInfo) }
-                }
+            for (const matchList of Object.values(matchingInfoByPartyId)) {
+                for (const matchInfo of matchList) dupInfoList.push(Object.assign({}, matchInfo))
             }
         </script>
     </actions>
@@ -51,7 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="countryGeoId"><default-field title="Country"><display/></default-field></field>
 
             <field name="mergeLink"><default-field title=""><link url="mergeParties" text="Merge From ${partyId}"
-                    parameter-map="[partyId:toPartyId, toPartyId:toPartyId, fromPartyId:partyId]"
+                    parameter-map="{partyId:toPartyId, toPartyId:toPartyId, fromPartyId:partyId}"
                     confirmation="Really merge ${partyId} into this party?"/></default-field></field>
 
             <form-list-column><field-ref name="partyId"/></form-list-column>

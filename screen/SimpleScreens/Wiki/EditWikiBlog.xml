@@ -48,7 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <container-row><row-col md="8">
             <link url="../WikiBlogs" text="Back to Find Blog Post"/>
-            <link url="wiki" text="View/Edit Wiki Page" condition="wikiPage" parameter-map="[wikiSpaceId:wikiPage.wikiSpaceId, wikiPageId:wikiPage.wikiPageId]"/>
+            <link url="wiki" text="View/Edit Wiki Page" condition="wikiPage" parameter-map="{wikiSpaceId:wikiPage.wikiSpaceId, wikiPageId:wikiPage.wikiPageId}"/>
             <link url="${ec.resource.expand(wikiSpace.publicBlogUrl, null, null, false)}" text="Public Link"
                     url-type="plain" link-type="anchor" target-window="_blank" condition="wikiSpace?.publicBlogUrl"/>
 
@@ -77,10 +77,10 @@ along with this software (see the LICENSE.md file). If not, see
         </row-col><row-col md="4">
             <section name="ShowSmallImage" condition="wikiBlog.smallImageLocation"><widgets>
                 <image url="downloadSmallImage" url-type="transition" width="200" style="img-thumbnail"
-                        parameter-map="[wikiBlogId:wikiBlog.wikiBlogId]"/>
+                        parameter-map="{wikiBlogId:wikiBlog.wikiBlogId}"/>
             </widgets></section>
 
-            <section name="CategoriesSection" condition="wikiPageCategories"><actions>
+            <section name="CategoriesSection" condition="(wikiPageCategories?.length > 0)"><actions>
                 <entity-find entity-name="moqui.resource.wiki.WikiBlogCategory" list="membershipList">
                     <econdition field-name="wikiBlogId"/></entity-find>
             </actions><widgets>

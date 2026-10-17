@@ -1,0 +1,31 @@
+<#-- A ledger statement table: ledgerTable is made by LedgerReport.js (title, headers, rows, charts). -->
+<div<#if ledgerTable.qvt> class="q-table__container q-table__card q-table--horizontal-separator q-table--dense q-table--flat"</#if>>
+<table class="${ledgerTable.qvt ? 'q-table' : 'table table-striped table-hover table-condensed'}">
+    <thead>
+        <tr>
+            <th class="text-left">${ledgerTable.title}<#if !ledgerTable.noDate> <small>(${ledgerTable.asOf})</small></#if></th>
+            <#list ledgerTable.headers as header><th<#if header.cls> class="${header.cls}"</#if>>${header.text}</th></#list>
+        </tr>
+    </thead>
+    <tbody>
+    <#list ledgerTable.rows as row>
+        <tr<#if row.rowClass> class="${row.rowClass}"</#if><#if row.rowStyle> style="${row.rowStyle}"</#if>>
+            <td<#if row.indent != null> style="padding-left: ${row.indent}em;"</#if>><#if row.strong><strong>${row.label}</strong><#else>${row.label}</#if><#if row.note> ${row.note}</#if></td>
+            <#list row.cells as cell><td class="${cell.cls ?? 'text-right text-mono'}"><#if cell.italic><i>${cell.text}</i><#elseif cell.href><a href="${cell.href}">${cell.text}</a><#elseif row.strong><strong>${cell.text}</strong><#else>${cell.text}</#if><#if cell.pad>&nbsp;</#if></td></#list>
+        </tr>
+    </#list>
+    </tbody>
+</table>
+</div>
+<#if ledgerTable.charts.length>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" type="text/javascript"></script>
+    <div class="row" style="margin-top:12px;">
+    <#list ledgerTable.charts as chart>
+        <div class="col" style="max-width:400px;">
+            <div class="text-center"><strong>${chart.title}</strong></div>
+            <canvas width="380" id="${chart.id}" style="max-width:360px;"></canvas>
+            <script>new Chart(document.getElementById("${chart.id}"), ${raw(chart.config)});</script>
+        </div>
+    </#list>
+    </div>
+</#if>

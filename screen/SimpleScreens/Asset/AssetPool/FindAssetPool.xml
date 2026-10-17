@@ -88,7 +88,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="partyList"><default-field title="Party">
                 <section-iterate name="PartyListSection" list="poolPartyList" entry="poolParty"><widgets><container>
                     <link url="editParty" text="PartyNameTemplate" text-map="poolParty"
-                            link-type="anchor" parameter-map="[partyId:poolParty.partyId]"/>
+                            link-type="anchor" parameter-map="{partyId:poolParty.partyId}"/>
                     <label text=" (${poolParty.roleDescription})" condition="poolParty.roleDescription"/>
                 </container></widgets></section-iterate>
             </default-field></field>
@@ -98,7 +98,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="storeList"><default-field title="Store">
                 <section-iterate name="StoreListSection" list="poolStoreList" entry="poolStore"><widgets><container>
                     <link url="editProductStore" text="${poolStore.storeName}"
-                            link-type="anchor" parameter-map="[productStoreId:poolStore.productStoreId]"/>
+                            link-type="anchor" parameter-map="{productStoreId:poolStore.productStoreId}"/>
                 </container></widgets></section-iterate>
             </default-field></field>
 

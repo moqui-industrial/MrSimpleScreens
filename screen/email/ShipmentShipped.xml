@@ -16,17 +16,17 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- see the mantle.shipment.ShipmentServices.send#ShipmentStoreEmail service for email parameter prep and call to send this email -->
     <parameter name="shipmentId"/>
     <actions>
-        <service-call name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo" in-map="[shipmentId:shipmentId]" out-map="context"/>
+        <service-call name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>
 
-        <if condition="sri.renderMode == 'html'">
+        <if condition="sri.getRenderMode() == 'html'">
             <set field="preHeaderContent" from="ec.l10n.localize('Your items are on their way!')"/>
             <set field="bodyContentLocation" value="component://SimpleScreens/screen/email/ShipmentShippedBody.html.ftl"/>
         </if>
     </actions>
     <widgets>
         <render-mode>
-            <text type="html" location="component://SimpleScreens/screen/email/EmailLayout.html.ftl"/>
-            <text type="text" location="component://SimpleScreens/screen/email/ShipmentShipped.text.ftl"/>
+            <text type="html" location="component://SimpleScreens/screen/email/EmailLayout.html.fancy"/>
+            <text type="text" location="component://SimpleScreens/screen/email/ShipmentShipped.text.fancy"/>
         </render-mode>
     </widgets>
 </screen>

@@ -23,7 +23,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="initPartyAccountingConfiguration">
         <service-call name="mantle.ledger.LedgerServices.init#PartyAccountingConfiguration"
-                in-map="context + [organizationPartyId:partyId]"/>
+                in-map="Object.assign({}, context, {organizationPartyId:partyId})"/>
         <default-response url="."/>
     </transition>
 
@@ -122,7 +122,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </actions><widgets>
                     <label text="Parent organization ${existingPapParty.organizationName} [${existingPapParty.pseudoId}] has accounting settings."/>
                     <link url="editAcctgPreferences" text="Edit ${existingPapParty.organizationName} [${existingPapParty.pseudoId}] Accounting Settings"
-                            parameter-map="[partyId:existingPapParty.partyId]" link-type="anchor"/>
+                            parameter-map="{partyId:existingPapParty.partyId}" link-type="anchor"/>
                 </widgets></section>
 
                 <section name="CloneAcctgSettingsSection"><actions>
@@ -131,7 +131,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <iterate list="allPapList" entry="allPap">
                         <entity-find-one entity-name="mantle.party.PartyDetail" value-field="allPapParty">
                             <field-map field-name="partyId" from="allPap.organizationPartyId"/></entity-find-one>
-                        <script>papPartyList.add(allPapParty)</script>
+                        <script>papPartyList.push(allPapParty)</script>
                     </iterate>
                 </actions><widgets>
                     <form-single name="CloneAcctgSettingsForm" transition="initPartyAccountingConfiguration">

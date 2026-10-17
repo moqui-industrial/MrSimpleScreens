@@ -24,12 +24,12 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
 
     <actions>
-        <set field="pageSize" from="pageSize ?: '100'"/>
+        <set field="pageSize" from="pageSize || '100'"/>
 
         <set field="orderStatusList" from="['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']"/>
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
             <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-        <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+        <set field="productItemTypes" from="productItemTypeEgms.map(it => it.enumId)"/>
     </actions>
     <widgets>
         <form-list name="SalesAnalysis" list="summaryList" skip-form="true" header-dialog="true" select-columns="true"
@@ -49,15 +49,15 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="vendorPartyId">
                 <header-field title="Vendor" show-order-by="true"><drop-down allow-empty="true" allow-multiple="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'OrgInternal']"/></drop-down></header-field>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'OrgInternal'}"/></drop-down></header-field>
                 <default-field><link url="editParty" text="PartyNameTemplate" link-type="anchor" condition="vendorPartyId"
-                        entity-name="mantle.party.PartyDetail" parameter-map="[partyId:vendorPartyId]"/></default-field>
+                        entity-name="mantle.party.PartyDetail" parameter-map="{partyId:vendorPartyId}"/></default-field>
             </field>
             <field name="customerPartyId">
                 <header-field title="Customer" show-order-by="true"><drop-down allow-empty="true" allow-multiple="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Customer']"/></drop-down></header-field>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Customer'}"/></drop-down></header-field>
                 <default-field><link url="editParty" text="PartyNameTemplate" link-type="anchor" condition="vendorPartyId"
-                        entity-name="mantle.party.PartyDetail" parameter-map="[partyId:customerPartyId]"/></default-field>
+                        entity-name="mantle.party.PartyDetail" parameter-map="{partyId:customerPartyId}"/></default-field>
             </field>
             <field name="productStoreId">
                 <header-field title="Store" show-order-by="true"><drop-down allow-empty="true" allow-multiple="true">
@@ -83,7 +83,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="minUnitAmount" align="right" show-total="min"><default-field title="Min"><display format="#,##0.00"/></default-field></field>
             <field name="maxUnitAmount" align="right" show-total="max"><default-field title="Max"><display format="#,##0.00"/></default-field></field>
-            <field name="averageAmount" from="totalSales &amp;&amp; quantity ? totalSales/quantity : 0.0" align="right" show-total="avg">
+            <field name="averageAmount" from="toNumber(totalSales) &amp;&amp; toNumber(quantity) ? toDecimal(totalSales).divide(quantity) : toDecimal(0)" align="right" show-total="avg">
                 <default-field title="Avg"><display format="#,##0.00"/></default-field></field>
 
             <field name="quantity" align="right" show-total="sum"><header-field show-order-by="true"/>
@@ -97,10 +97,10 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="totalCost" align="right" show-total="sum"><header-field show-order-by="true"/>
                 <default-field><display format="#,##0.00"/></default-field></field>
 
-            <field name="marginAmount" from="(totalIssued ?: 0.0) - (totalCost ?: 0.0)" align="right" show-total="true">
+            <field name="marginAmount" from="toDecimal(totalIssued ?? 0).subtract(totalCost ?? 0)" align="right" show-total="true">
                 <default-field title="Margin Amount"><display format="#,##0.00"/></default-field></field>
             <field name="marginPercent" align="right"><default-field title="Margin Percent">
-                <display text="${ec.l10n.format(totalIssued ? ((((totalIssued ?: 0.0) - (totalCost ?: 0.0)).divide(totalIssued, 10, BigDecimal.ROUND_HALF_EVEN))*100.0) : 0.0, '0.00')}"/></default-field></field>
+                <display text="${ec.l10n.format(!toDecimal(totalIssued ?? 0).isZero() ? toDecimal(totalIssued).subtract(totalCost ?? 0).divide(totalIssued, 10, 'HALF_EVEN').multiply(100) : 0, '0.00')}"/></default-field></field>
 
             <field name="find"><header-field title="Find"><submit/></header-field></field>
 

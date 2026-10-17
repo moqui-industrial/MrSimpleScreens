@@ -24,8 +24,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
 
     <actions>
-        <if condition="'incoming'.equalsIgnoreCase(paymentType)"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
-            <else-if condition="'outgoing'.equalsIgnoreCase(paymentType)"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
+        <if condition="paymentType?.toLowerCase() === 'incoming'"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
+            <else-if condition="paymentType?.toLowerCase() === 'outgoing'"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
     </actions>
     <widgets>
         <container-dialog id="NewInPaymentDialog" button-text="New Incoming Payment">
@@ -119,14 +119,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="From"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                        link-type="anchor" parameter-map="[partyId:fromPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:fromPartyId}"/></default-field>
             </field>
             <field name="toPartyId">
                 <header-field title="To"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field>
                     <link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                            link-type="anchor" parameter-map="[partyId:toPartyId]"/>
+                            link-type="anchor" parameter-map="{partyId:toPartyId}"/>
                 </default-field>
             </field>
 

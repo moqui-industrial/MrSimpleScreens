@@ -30,18 +30,18 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <if condition="!dateRange_period &amp;&amp; !dateRange_from">
-            <set field="dateRange_period" from="dateRange_period ?: 'week'"/>
-            <set field="dateRange_poffset" from="dateRange_poffset ?: '-1'"/>
+            <set field="dateRange_period" from="dateRange_period || 'week'"/>
+            <set field="dateRange_poffset" from="dateRange_poffset || '-1'"/>
         </if>
         <set field="rangeList" from="ec.user.getPeriodRange('dateRange', context)"/>
         <set field="dateRangeFrom" from="rangeList[0]"/>
-        <set field="dateRangeThru" from="rangeList[1] ?: ec.user.nowTimestamp"/>
+        <set field="dateRangeThru" from="rangeList[1] || ec.user.nowTimestamp"/>
 
         <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="outgoingTypeOut"
-                in-map="[parentEnumId:'ShpTpOutgoing']"/>
+                in-map="{parentEnumId:'ShpTpOutgoing'}"/>
         <set field="outShipmentTypeSet" from="outgoingTypeOut.enumIdSet"/>
         <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="incomingTypeOut"
-                in-map="[parentEnumId:'ShpTpIncoming']"/>
+                in-map="{parentEnumId:'ShpTpIncoming'}"/>
         <set field="inShipmentTypeSet" from="incomingTypeOut.enumIdSet"/>
 
         <if condition="!statusId"><set field="statusId" value="ShipPacked,ShipShipped,ShipDelivered"/></if>
@@ -87,19 +87,19 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="fromOrToPartyId"><header-field title="From or To Party">
                 <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                        parameter-map="[roleTypeId:'OrgInternal']"/></drop-down>
+                        parameter-map="{roleTypeId:'OrgInternal'}"/></drop-down>
             </header-field></field>
             <field name="fromPartyId">
                 <header-field title="From Party"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" link-type="anchor"
-                        parameter-map="[partyId:fromPartyId]" condition="fromPartyId"/></default-field>
+                        parameter-map="{partyId:fromPartyId}" condition="fromPartyId"/></default-field>
             </field>
             <field name="toPartyId">
                 <header-field title="To Party"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" link-type="anchor"
-                        parameter-map="[partyId:toPartyId]" condition="toPartyId"/></default-field>
+                        parameter-map="{partyId:toPartyId}" condition="toPartyId"/></default-field>
             </field>
             <field name="originOrDestFacilityId">
                 <header-field title="Origin or Dest Facility"><drop-down allow-empty="true">
@@ -160,7 +160,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field><link url="orderDetail" text="${orderId}" link-type="anchor" condition="orderId"/></default-field></field>
             <field name="orderDisplayId"><default-field title="Order Display ID">
                 <link url="orderDetail" text="${orderDisplayId}" link-type="anchor" condition="orderId"/>
-                <label text="${orderDisplayId?:''}" condition="!orderId"/>
+                <label text="${orderDisplayId||''}" condition="!orderId"/>
             </default-field></field>
             <field name="orderPlacedDate"><default-field title="Order Placed"><display/></default-field></field>
             <field name="orderPartSeqId"><header-field title="Order Part"/><default-field><display/></default-field></field>
@@ -221,10 +221,10 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="shippingChargeTotal" align="right"><default-field title="Order Shipping Charge Total"><display format="#,##0.00"/></default-field></field>
             <field name="shippingDiscountTotal" align="right"><default-field title="Order Shipping Discount Total"><display format="#,##0.00"/></default-field></field>
             <!-- TODO: somehow auto select shippingChargeTotal, quantityTotal, orderProductQuantity if this is displayed -->
-            <field name="shippingCharge" align="right" show-total="sum" from="orderProductQuantity ? (shippingChargeTotal?:0.0) * ((quantityTotal?:0.0) / orderProductQuantity) : 0.0">
+            <field name="shippingCharge" align="right" show-total="sum" from="toNumber(orderProductQuantity) ? toDecimal(shippingChargeTotal ?? 0).multiply(toDecimal(quantityTotal ?? 0).divide(orderProductQuantity)) : toDecimal(0)">
                 <default-field title="Shipping Charge Prorated"><display format="#,##0.00"/></default-field></field>
             <!-- TODO: somehow auto select shippingDiscountTotal, quantityTotal, orderProductQuantity if this is displayed -->
-            <field name="shippingDiscount" align="right" show-total="sum" from="orderProductQuantity ? (shippingDiscountTotal?:0.0) * ((quantityTotal?:0.0) / orderProductQuantity): 0.0">
+            <field name="shippingDiscount" align="right" show-total="sum" from="toNumber(orderProductQuantity) ? toDecimal(shippingDiscountTotal ?? 0).multiply(toDecimal(quantityTotal ?? 0).divide(orderProductQuantity)) : toDecimal(0)">
                 <default-field title="Shipping Discount Prorated"><display format="#,##0.00"/></default-field></field>
 
             <field name="find"><header-field title="Find"><submit/></header-field></field>

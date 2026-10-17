@@ -90,7 +90,7 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
 
     <actions>
-        <service-call name="mantle.account.InvoiceServices.get#InvoiceDisplayInfo" in-map="[invoiceId:invoiceId]" out-map="context"/>
+        <service-call name="mantle.account.InvoiceServices.get#InvoiceDisplayInfo" in-map="{invoiceId:invoiceId}" out-map="context"/>
         <if condition="invoice == null"><return error="true" message="Invoice ${invoiceId} not found"/></if>
         <!-- set statusId for StatusChangeSection -->
         <set field="statusId" from="invoice?.statusId"/>
@@ -109,7 +109,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <container-row><row-col lg="6">
             <container>
-                <section name="AdjustSection" condition="statusId in ['InvoiceFinalized', 'InvoiceSent', 'InvoiceAcked', 'InvoiceApproved']"><widgets>
+                <section name="AdjustSection" condition="['InvoiceFinalized', 'InvoiceSent', 'InvoiceAcked', 'InvoiceApproved'].includes(statusId)"><widgets>
                     <container-dialog id="AdjustDialog" button-text="Adjust Invoice">
                         <form-single name="AdjustInvoice" transition="adjustInvoice">
                             <field name="invoiceId"><default-field><hidden/></default-field></field>
@@ -126,7 +126,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <text-line size="10"/></default-field></field>
                             <field name="parentInvoiceItemSeqId"><default-field title="Adjust Item">
                                 <drop-down allow-empty="true"><entity-options key="${invoiceItemSeqId}"
-                                        text="${invoiceItemSeqId} ${itemTypeDescription?:''} ${description?:''}">
+                                        text="${invoiceItemSeqId} ${itemTypeDescription||''} ${description||''}">
                                     <entity-find entity-name="mantle.account.invoice.InvoiceItemAndType">
                                         <econdition field-name="invoiceId"/></entity-find>
                                 </entity-options></drop-down>
@@ -137,7 +137,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                             <field name="typeGlAccount"><default-field title="Default GL Account">
                                 <display dynamic-transition="getItemTypeGlAccount" also-hidden="false" depends-optional="true"
-                                        parameter-map="[organizationPartyId:organizationPartyId, direction:(isPayableInvoice ? 'I' : 'O')]">
+                                        parameter-map="{organizationPartyId:organizationPartyId, direction:(isPayableInvoice ? 'I' : 'O')}">
                                     <depends-on field="itemTypeEnumId"/><depends-on field="productId"/></display>
                             </default-field></field>
                             <field name="overrideGlAccountId"><default-field title="Override GL Account"><drop-down allow-empty="true">
@@ -167,22 +167,22 @@ along with this software (see the LICENSE.md file). If not, see
                 </widgets></section-iterate>
                 -->
 
-                <link url="updateStatus" text="Uncancel" parameter-map="[invoiceId:invoiceId, statusId:'InvoiceInProcess']"
+                <link url="updateStatus" text="Uncancel" parameter-map="{invoiceId:invoiceId, statusId:'InvoiceInProcess'}"
                         condition="statusId == 'InvoiceCancelled' &amp;&amp; !isPayableInvoice" confirmation="Go back to In Process status?"/>
-                <link url="updateStatus" text="Uncancel" parameter-map="[invoiceId:invoiceId, statusId:'InvoiceReceived']"
+                <link url="updateStatus" text="Uncancel" parameter-map="{invoiceId:invoiceId, statusId:'InvoiceReceived'}"
                         condition="statusId == 'InvoiceCancelled' &amp;&amp; isPayableInvoice" confirmation="Go back to Received status?"/>
 
                 <link url="cancelInvoiceAndPayments" text="Cancel Invoice and Payments" btn-type="warning"
                         confirmation="Cancel this invoice and all payments applied to it?" condition="statusId != 'InvoiceCancelled'"/>
 
-                <link url="reverseInvoice" text="Reverse Invoice" btn-type="warning" condition="invoice.invoiceTotal &lt; 0.0"/>
+                <link url="reverseInvoice" text="Reverse Invoice" btn-type="warning" condition="toDecimal(invoice.invoiceTotal ?? 0).compare(0) &lt; 0"/>
 
                 <!-- see note above about more generic SystemRemote send transition:
                 <section name="SendEdiInvoiceSection" condition="!isPayableInvoice &amp;&amp; invoice.systemMessageRemoteId"><widgets>
                     <link url="produceEdiInvoice" text="${inMessageList ? 'Resend' : 'Send'} EDI Invoice" parameter-map="[invoiceId:invoiceId]"/>
                 </widgets></section>
                 -->
-                <section name="OutMessageSection" condition="outSystemMessageList"><widgets>
+                <section name="OutMessageSection" condition="(outSystemMessageList?.length > 0)"><widgets>
                     <container-dialog id="OutMessageDialog" button-text="Invoice Message History" width="800">
                         <form-list name="OutSystemMessageList" list="outSystemMessageList" skip-form="true">
                             <field name="systemMessageId"><default-field title="Message ID"><display/></default-field></field>
@@ -216,7 +216,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <display-entity text="UsernameTemplate" entity-name="mantle.party.PersonWithUserAccount" key-field-name="userId"/></default-field></field>
                         <field name="pkSecondaryValue"><default-field title="Item"><display/></default-field></field>
                         <field name="changedFieldName"><default-field title="Field">
-                            <display text="${org.moqui.util.StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
+                            <display text="${StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
                         <field name="oldValueText"><default-field title="From">
                             <display text="${ec.entity.formatFieldString(changedEntityName, changedFieldName, oldValueText)}"/></default-field></field>
                         <field name="newValueText"><default-field title="To">
@@ -229,11 +229,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="invoiceId"><default-field><display/></default-field></field>
                 <field name="fromPartyId"><default-field title="From">
                     <link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" link-type="anchor"
-                            parameter-map="[partyId:fromPartyId]"/>
+                            parameter-map="{partyId:fromPartyId}"/>
                 </default-field></field>
                 <field name="toPartyId"><default-field title="To">
                     <link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" link-type="anchor"
-                            parameter-map="[partyId:toPartyId]"/>
+                            parameter-map="{partyId:toPartyId}"/>
                 </default-field></field>
                 <field name="invoiceTypeEnumId">
                     <conditional-field title="Type" condition="invoiceEditable">
@@ -257,7 +257,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="timePeriodId">
                     <conditional-field condition="invoice.timePeriodId" title="Time Period">
                         <link url="editTimePeriod" text="TimePeriodNameTemplate" link-type="anchor"
-                                entity-name="mantle.party.time.TimePeriod" parameter-map="[timePeriodId:invoice.timePeriodId]"/>
+                                entity-name="mantle.party.time.TimePeriod" parameter-map="{timePeriodId:invoice.timePeriodId}"/>
                     </conditional-field>
                     <default-field><ignored/></default-field>
                 </field>
@@ -266,7 +266,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="otherPartyOrderId"><default-field title="Their Order" tooltip="Other party purchase or sales order ID">
                     <text-line size="40"/></default-field></field>
                 <field name="dupWarning">
-                    <conditional-field title="" condition="dupInvoiceList">
+                    <conditional-field title="" condition="dupInvoiceList?.length > 0">
                         <label text="Found invoice(s) with same Reference Number: ${dupInvoiceList.invoiceId}" style="text-danger"/>
                     </conditional-field>
                     <default-field><ignored/></default-field>
@@ -322,9 +322,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find-one entity-name="moqui.basic.Enumeration" value-field="contentTypeEnum">
                             <field-map field-name="enumId" from="content.contentTypeEnumId"/></entity-find-one>
                     </actions><widgets><container>
-                        <container><label text="${contentTypeEnum?.description?:'No Type'}" type="strong"/></container>
+                        <container><label text="${contentTypeEnum?.description||'No Type'}" type="strong"/></container>
                         <link url="downloadContent" condition="content.contentLocation"
-                                parameter-map="[invoiceContentId:content.invoiceContentId]"
+                                parameter-map="{invoiceContentId:content.invoiceContentId}"
                                 text="Download ${content.contentLocation.substring(content.contentLocation.lastIndexOf('/')+1)}"/>
                         <container-dialog id="UpdateContentContainer" button-text="Edit Content">
                             <form-single name="UpdateContentForm" transition="updateContent" map="content">
@@ -339,20 +339,20 @@ along with this software (see the LICENSE.md file). If not, see
                                 <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                             </form-single>
                         </container-dialog>
-                        <container><label text="By ${ec.resource.expand('UsernameTemplate','',paua+[userId:content.userId])} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"
+                        <container><label text="By ${ec.resource.expand('UsernameTemplate','',Object.assign({}, paua, {userId:content.userId}))} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"
                                 condition="paua"/></container>
-                        <label text="${content.description ?: 'No Description'}" type="p"/>
+                        <label text="${content.description || 'No Description'}" type="p"/>
                     </container></widgets></section-iterate>
                 </box-body></container-box>
             </widgets></section>
 
             <section name="EmailMessageSection"><widgets>
                 <container-box><box-header title="Email Messages"/><box-toolbar>
-                    <section name="SendFinalizedEmailSection" condition="!isPayableInvoice &amp;&amp; invoice.statusId in ['InvoiceFinalized', 'InvoiceSent', 'InvoiceAcked', 'InvoicePmtRecvd']"><actions>
+                    <section name="SendFinalizedEmailSection" condition="!isPayableInvoice &amp;&amp; ['InvoiceFinalized', 'InvoiceSent', 'InvoiceAcked', 'InvoicePmtRecvd'].includes(invoice.statusId)"><actions>
                         <if condition="invoice.toPartyId">
                             <service-call name="mantle.party.ContactServices.get#PartyContactInfoList" out-map="emailInfo"
-                                    in-map="[partyId:invoice.toPartyId, emailContactMechPurposeId:'EmailBilling', alsoIncludePrimaryPurpose:true]"/>
-                            <set field="emailAddressList" from="emailInfo.emailAddressList ?: []"/>
+                                    in-map="{partyId:invoice.toPartyId, emailContactMechPurposeId:'EmailBilling', alsoIncludePrimaryPurpose:true}"/>
+                            <set field="emailAddressList" from="emailInfo.emailAddressList || []"/>
                             <!-- also find Sales Contacts and include their email addresses -->
                             <entity-find entity-name="mantle.party.PartyRelationship" list="contactRelList">
                                 <date-filter/>
@@ -361,8 +361,8 @@ along with this software (see the LICENSE.md file). If not, see
                             </entity-find>
                             <iterate list="contactRelList" entry="contactRel">
                                 <service-call name="mantle.party.ContactServices.get#PartyContactInfoList" out-map="contactEmailInfo" out-map-add-to-existing="false"
-                                        in-map="[partyId:contactRel.fromPartyId, emailContactMechPurposeId:'EmailBilling', alsoIncludePrimaryPurpose:true]"/>
-                                <if condition="contactEmailInfo.emailAddressList"><script>emailAddressList.addAll(contactEmailInfo.emailAddressList)</script></if>
+                                        in-map="{partyId:contactRel.fromPartyId, emailContactMechPurposeId:'EmailBilling', alsoIncludePrimaryPurpose:true}"/>
+                                <if condition="contactEmailInfo.emailAddressList?.length > 0"><script>emailAddressList.push(...Array.from(contactEmailInfo.emailAddressList))</script></if>
                             </iterate>
                         </if>
                     </actions><widgets>
@@ -445,7 +445,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="typeGlAccount"><default-field title="Default GL Account">
                             <display dynamic-transition="getItemTypeGlAccount" also-hidden="false" depends-optional="true"
-                                    parameter-map="[organizationPartyId:organizationPartyId, direction:(isPayableInvoice ? 'I' : 'O')]">
+                                    parameter-map="{organizationPartyId:organizationPartyId, direction:(isPayableInvoice ? 'I' : 'O')}">
                                 <depends-on field="itemTypeEnumId"/><depends-on field="productId"/></display>
                         </default-field></field>
                         <field name="overrideGlAccountId"><default-field title="Override GL Account"><drop-down allow-empty="true">
@@ -519,13 +519,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <link url="editPayment" text="${paymentId}" link-type="anchor" condition="paymentId"/></default-field></field>
                     <field name="otherInvoiceId"><default-field title="Other Invc">
                         <link url="." text="${otherInvoiceId}" link-type="anchor" condition="otherInvoiceId"
-                                parameter-map="[invoiceId:otherInvoiceId]"/>
+                                parameter-map="{invoiceId:otherInvoiceId}"/>
                     </default-field></field>
                     <field name="amountApplied" align="right"><default-field title="Amount"><display currency-unit-field="invoice.currencyUomId"/></default-field></field>
                     <field name="appliedDate"><default-field title="Applied"><display/></default-field></field>
-                    <field name="statusId" from="payment?.statusId ?: otherInvoice?.statusId"><default-field title="Status">
+                    <field name="statusId" from="payment?.statusId || otherInvoice?.statusId"><default-field title="Status">
                         <display-entity entity-name="moqui.basic.StatusItem"/></default-field></field>
-                    <field name="refNum" from="payment?.paymentRefNum ?: otherInvoice?.referenceNumber"><default-field title="Ref/Check"><display/></default-field></field>
+                    <field name="refNum" from="payment?.paymentRefNum || otherInvoice?.referenceNumber"><default-field title="Ref/Check"><display/></default-field></field>
                     <field name="unapply"><default-field title=""><link url="unapplyPaymentApplication" text="Un-apply" condition="amountApplied"
                             confirmation="This will reduce the amount paid (applied) on this invoice possibly changing it back to an un-paid status, reverse the payment application GL transaction, and free up the payment to be applied to another invoice. Un-apply payment?"/></default-field></field>
                 </form-list>
@@ -536,9 +536,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <form-list name="OrderPromisedPaymentList" list="orderPromisedPaymentList" transition="sendPromisedPayment">
                         <field name="invoiceId"><default-field><hidden/></default-field></field>
                         <field name="orderId"><default-field title="Order">
-                            <link url="orderDetail" text="${orderId?:''}" link-type="anchor"/></default-field></field>
+                            <link url="orderDetail" text="${orderId||''}" link-type="anchor"/></default-field></field>
                         <field name="paymentId"><default-field title="Payment">
-                            <display text=""/><link url="editPayment" text="${paymentId?:''}" link-type="anchor"/></default-field></field>
+                            <display text=""/><link url="editPayment" text="${paymentId||''}" link-type="anchor"/></default-field></field>
                         <field name="amount" align="right"><default-field title="Amount"><text-line size="8" format="#,##0.00"/></default-field></field>
                         <field name="paymentRefNum"><default-field title="Ref Num"><text-line size="8"/></default-field></field>
                         <field name="submitButton"><default-field title="Send &amp; Apply"><submit/></default-field></field>
@@ -551,8 +551,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="invoiceId"><default-field><hidden/></default-field></field>
                         <field name="paymentId" from="payment.paymentId"><default-field title="Payment">
                             <display text=""/><!-- so that it is rendered, and a hidden value is added -->
-                            <link url="editPayment" text="${payment.paymentId?:''}" link-type="anchor"
-                                  parameter-map="[paymentId:payment.paymentId]"/>
+                            <link url="editPayment" text="${payment.paymentId||''}" link-type="anchor"
+                                  parameter-map="{paymentId:payment.paymentId}"/>
                         </default-field></field>
                         <field name="effectiveDate" from="payment.effectiveDate"><default-field title="Date">
                             <display format="yyyy-MM-dd"/></default-field></field>
@@ -579,8 +579,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="invoiceId"><default-field><hidden/></default-field></field>
                         <field name="toInvoiceId" from="invoice.invoiceId"><default-field title="Invoice">
                             <display text=""/><!-- so that it is rendered, and a hidden value is added -->
-                            <link url="." text="${invoice.invoiceId?:''}" link-type="anchor"
-                                    parameter-map="[invoiceId:invoice.invoiceId]"/>
+                            <link url="." text="${invoice.invoiceId||''}" link-type="anchor"
+                                    parameter-map="{invoiceId:invoice.invoiceId}"/>
                         </default-field></field>
                         <field name="invoiceDate" from="invoice.invoiceDate"><default-field title="Date">
                             <display format="yyyy-MM-dd"/></default-field></field>
@@ -609,7 +609,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <order-by field-name="acctgTransId"/>
                 </entity-find>
 
-                <set field="unpostableStatus" from="invoice.statusId in ['InvoiceInProcess', 'InvoiceIncoming', 'InvoiceReceived', 'InvoiceCancelled']"/>
+                <set field="unpostableStatus" from="['InvoiceInProcess', 'InvoiceIncoming', 'InvoiceReceived', 'InvoiceCancelled'].includes(invoice.statusId)"/>
 
                 <entity-find entity-name="mantle.ledger.transaction.AcctgTransAndEntryGlaSummary" list="entrySummaryList">
                     <econditions combine="or">
@@ -618,38 +618,38 @@ along with this software (see the LICENSE.md file). If not, see
                     </econditions>
                     <select-field field-name="glAccountId,accountCode,accountName,isDebit,glAccountClassEnumId,debitCreditFlag,amount"/>
                 </entity-find>
-                <set field="glaSummaryMap" from="[:]"/>
+                <set field="glaSummaryMap" from="{}"/>
                 <iterate list="entrySummaryList" entry="entrySummary">
-                    <set field="curEntry" from="glaSummaryMap.get(entrySummary.glAccountId)"/>
+                    <set field="curEntry" from="glaSummaryMap[entrySummary.glAccountId]"/>
                     <if condition="curEntry == null">
                         <set field="curEntry" from="entrySummary.getMap()"/>
-                        <script>glaSummaryMap.put(entrySummary.glAccountId, curEntry)</script>
+                        <script>glaSummaryMap[entrySummary.glAccountId] = curEntry</script>
                     </if>
                     <if condition="entrySummary.debitCreditFlag == 'D'"><then><set field="curEntry.debits" from="entrySummary.amount"/></then>
                         <else><set field="curEntry.credits" from="entrySummary.amount"/></else></if>
-                    <set field="curEntry.cdDiff" from="entrySummary.isDebit == 'Y' ? (curEntry.debits?:0.0) - (curEntry.credits?:0.0) : (curEntry.credits?:0.0) - (curEntry.debits?:0.0)"/>
+                    <set field="curEntry.cdDiff" from="entrySummary.isDebit == 'Y' ? toDecimal(curEntry.debits ?? 0).subtract(curEntry.credits ?? 0) : toDecimal(curEntry.credits ?? 0).subtract(curEntry.debits ?? 0)"/>
                 </iterate>
                 <!-- might as well include all, don't exclude 0 net balance:
                 <set field="glaSummaryList" from="[]"/>
                 <iterate list="glaSummaryMap.values()" entry="curEntry">
                     <if condition="curEntry.cdDiff != 0.0"><script>glaSummaryList.add(curEntry)</script></if></iterate>
                 -->
-                <set field="glaSummaryList" from="new ArrayList(glaSummaryMap.values())"/>
+                <set field="glaSummaryList" from="Object.values(glaSummaryMap)"/>
                 <order-map-list list="glaSummaryList"><order-by field-name="accountCode"/></order-map-list>
 
                 <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-                <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+                <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
             </actions><widgets>
                 <container-box><box-header title="GL Transactions"/><box-toolbar>
-                    <link url="postInvoice" text="Post Invoice" condition="!acctgTransList &amp;&amp; !unpostableStatus"
+                    <link url="postInvoice" text="Post Invoice" condition="!acctgTransList?.length &amp;&amp; !unpostableStatus"
                             confirmation="This will attempt to create and post a GL transaction for this invoice, and one for each invoice adjustment item if there are any. Post now?"/>
-                    <link url="repostInvoice" text="Re-post Invoice" condition="acctgTransList &amp;&amp; !unpostableStatus"
+                    <link url="repostInvoice" text="Re-post Invoice" condition="(acctgTransList?.length > 0) &amp;&amp; !unpostableStatus"
                             confirmation="This will delete the current invoice and invoice adjustment transactions and post new ones based on the current state of the invoice. Re-post this invoice?"/>
                 </box-toolbar><box-body-nopad>
                     <form-list name="InvoiceTxList" list="acctgTransList" skip-form="true">
                         <row-actions>
                             <service-call name="mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance"
-                                    in-map="[acctgTransId:acctgTransId]" out-map="context"/>
+                                    in-map="{acctgTransId:acctgTransId}" out-map="context"/>
                         </row-actions>
 
                         <field name="acctgTransId"><default-field title="TX ID">
@@ -661,10 +661,10 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="reversedByAcctgTransId"><default-field title="Rev By">
                             <link url="editTransaction" text="${reversedByAcctgTransId}" link-type="anchor" condition="reversedByAcctgTransId"
-                                    parameter-map="[acctgTransId:reversedByAcctgTransId]"/></default-field></field>
+                                    parameter-map="{acctgTransId:reversedByAcctgTransId}"/></default-field></field>
                         <field name="reverseOfAcctgTransId"><default-field title="Rev Of">
                             <link url="editTransaction" text="${reverseOfAcctgTransId}" link-type="anchor" condition="reverseOfAcctgTransId"
-                                    parameter-map="[acctgTransId:reverseOfAcctgTransId]"/></default-field></field>
+                                    parameter-map="{acctgTransId:reverseOfAcctgTransId}"/></default-field></field>
 
                         <field name="transactionDate"><default-field title="TX Date"><display format="yyyy-MM-dd"/></default-field></field>
                         <field name="isPosted"><default-field title="Posted" container-style="${isPosted == 'Y' ? 'text-success' : 'text-danger'}"><display/></default-field></field>
@@ -679,7 +679,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <display format="#,##0.00"/></default-field></field>
                         <field name="credits" align="right" show-total="true"><default-field container-style="${(!glAccountId &amp;&amp; credits != debits) ? 'text-danger' : ''}">
                             <display format="#,##0.00"/></default-field></field>
-                        <field name="cdDiff" align="right"><default-field title="Total" container-style="${(unpaidTotal != cdDiff &amp;&amp; glAccountClassEnumId in ['ACCOUNTS_RECEIVABLE', 'ACCOUNTS_PAYABLE']) ? 'text-danger' : ''}">
+                        <field name="cdDiff" align="right"><default-field title="Total" container-style="${(toDecimal(unpaidTotal ?? 0).compare(cdDiff ?? 0) != 0 &amp;&amp; ['ACCOUNTS_RECEIVABLE', 'ACCOUNTS_PAYABLE'].includes(glAccountClassEnumId)) ? 'text-danger' : ''}">
                             <display format="#,##0.00"/></default-field></field>
                     </form-list>
                 </box-body-nopad></container-box>

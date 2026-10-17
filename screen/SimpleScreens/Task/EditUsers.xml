@@ -68,7 +68,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <drop-down>
                             <dynamic-options transition="getProjectParties" value-field="partyId" label-field="name"
                                     depends-optional="true" server-search="true" min-length="0"
-                                    parameter-map="[addOptional:'false', rootWorkEffortId:task?.rootWorkEffortId, workEffortId:null]">
+                                    parameter-map="{addOptional:'false', rootWorkEffortId:task?.rootWorkEffortId, workEffortId:null}">
                                 <depends-on field="rootWorkEffortId"/></dynamic-options>
                         </drop-down>
                     </default-field></field>
@@ -138,7 +138,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find-one entity-name="moqui.basic.StatusItem" value-field="currentStatus"/>
                 <entity-find entity-name="moqui.security.UserAccount" list="uaList">
                     <econdition field-name="partyId"/></entity-find>
-                <set field="usernames" from="uaList*.username.join(', ')"/>
+                <set field="usernames" from="uaList.map(it => it.username).join(', ')"/>
             </row-actions>
 
             <field name="workEffortId"><default-field><hidden/></default-field></field>

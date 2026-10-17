@@ -27,7 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
             <search-form-inputs default-order-by="accountCode"/></entity-find>
 
         <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <link url="glAccountTree" text="Account Tree"/>
@@ -65,7 +65,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="parentGlAccountId"><default-field title="Parent Account">
                 <link url="editGlAccount" entity-name="mantle.ledger.account.GlAccount" link-type="anchor"
-                        condition="parentGlAccountId" parameter-map="[glAccountId:parentGlAccountId]"
+                        condition="parentGlAccountId" parameter-map="{glAccountId:parentGlAccountId}"
                         text="GlAccountNameTemplate"/>
             </default-field></field>
 

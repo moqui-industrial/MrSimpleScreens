@@ -34,7 +34,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="productCategoryId"><default-field title="Category"><drop-down>
                     <dynamic-options transition="getCategoryList" server-search="true" min-length="0"/></drop-down></default-field></field>
                 <field name="storeCategoryTypeEnumId"><default-field title="Store Category Type">
-                    <drop-down><entity-options key="${enumId}" text="${description ?: ''}">
+                    <drop-down><entity-options key="${enumId}" text="${description || ''}">
                         <entity-find entity-name="moqui.basic.Enumeration">
                             <econdition field-name="enumTypeId" value="ProductStoreCategoryType"/>
                             <order-by field-name="description"/>
@@ -74,8 +74,8 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="submitButton" align="right"><default-field title="Update"><submit/></default-field></field>
             <field name="deleteButton" align="right"><default-field title="">
                 <link url="deleteStoreCategory" icon="fa fa-trash"
-                      parameter-map="[productStoreId:productStoreId, productCategoryId:productCategoryId,
-                      storeCategoryTypeEnumId:storeCategoryTypeEnumId, fromDate:fromDate]"
+                      parameter-map="{productStoreId:productStoreId, productCategoryId:productCategoryId,
+                      storeCategoryTypeEnumId:storeCategoryTypeEnumId, fromDate:fromDate}"
                       confirmation="Are you sure you want to remove this Store Category?"/>
             </default-field></field>
         </form-list>

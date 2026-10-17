@@ -39,7 +39,7 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <entity-find-one entity-name="mantle.order.return.ReturnHeader" value-field="returnHeader"/>
         <if condition="returnHeader == null"><return error="true" message="Return not found with ID ${returnId}"/></if>
-        <set field="returnChangeable" from="returnHeader.statusId in ['ReturnCreated', 'ReturnRequested', 'ReturnApproved']"/>
+        <set field="returnChangeable" from="['ReturnCreated', 'ReturnRequested', 'ReturnApproved'].includes(returnHeader.statusId)"/>
 
         <entity-find entity-name="mantle.order.return.ReturnItem" list="returnItemList">
             <econdition field-name="returnId"/>
@@ -48,13 +48,15 @@ along with this software (see the LICENSE.md file). If not, see
 
         <!-- put items with parentItemSeqId in the list after their parent -->
         <script><![CDATA[
-            returnItemWithChildrenSet = new HashSet()
-            List reverseList = returnItemList.cloneList().orderByFields(["-returnItemSeqId"])
-            for (returnItem in reverseList) {
+            returnItemWithChildrenSet = new Set()
+            returnItemList = Array.from(returnItemList)
+            const reverseList = Array.from(returnItemList).sort((a, b) => b.returnItemSeqId.localeCompare(a.returnItemSeqId))
+            for (const returnItem of reverseList) {
                 if (returnItem.parentItemSeqId) {
                     returnItemWithChildrenSet.add(returnItem.parentItemSeqId)
-                    returnItemList.move(returnItemList.indexMatching([returnItemSeqId:returnItem.returnItemSeqId]),
-                            returnItemList.indexMatching([returnItemSeqId:returnItem.parentItemSeqId])+1)
+                    const sourceIndex = returnItemList.findIndex(it => it.returnItemSeqId == returnItem.returnItemSeqId)
+                    const targetIndex = returnItemList.findIndex(it => it.returnItemSeqId == returnItem.parentItemSeqId) + 1
+                    returnItemList.splice(targetIndex, 0, returnItemList.splice(sourceIndex, 1)[0])
                 }
             }
         ]]></script>
@@ -64,9 +66,9 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="rootItemList" from="[]"/>
         <iterate list="returnItemList" entry="returnItem">
             <if condition="returnItem.responseDate == null"><set field="allResponses" from="false"/></if>
-            <if condition="returnItem.statusId in ['ReturnCreated', 'ReturnRequested', 'ReturnApproved', 'ReturnShipped']">
+            <if condition="['ReturnCreated', 'ReturnRequested', 'ReturnApproved', 'ReturnShipped'].includes(returnItem.statusId)">
                 <set field="allReceived" from="false"/></if>
-            <if condition="!returnItem.parentItemSeqId"><script>rootItemList.add(returnItem)</script></if>
+            <if condition="!returnItem.parentItemSeqId"><script>rootItemList.push(returnItem)</script></if>
         </iterate>
 
         <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="allItemSisList">
@@ -76,19 +78,19 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
             <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-        <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+        <set field="productItemTypes" from="productItemTypeEgms.map(it => it.enumId)"/>
 
         <set field="allOnShipments" from="true"/>
         <iterate list="returnItemList" entry="returnItem">
             <if condition="returnItem.productId">
                 <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
                     <field-map field-name="productId" from="returnItem.productId"/></entity-find-one>
-                <set field="isProductItemType" from="returnItem.itemTypeEnumId in productItemTypes"/>
-                <set field="isShippable" from="isProductItemType &amp;&amp; product != null ? product.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'] : false"/>
+                <set field="isProductItemType" from="productItemTypes.includes(returnItem.itemTypeEnumId)"/>
+                <set field="isShippable" from="isProductItemType &amp;&amp; product != null ? ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'].includes(product.productTypeEnumId) : false"/>
 
                 <if condition="isShippable">
-                    <set field="itemSisQuantity" from="allItemSisList.findAll({ it.returnItemSeqId == returnItem.returnItemSeqId })*.quantity.sum()"/>
-                    <if condition="itemSisQuantity &lt; returnItem.returnQuantity"><set field="allOnShipments" from="false"/></if>
+                    <set field="itemSisQuantity" from="allItemSisList.filter(it => it.returnItemSeqId == returnItem.returnItemSeqId).reduce((sum, it) => sum.add(it.quantity ?? 0), toDecimal(0))"/>
+                    <if condition="itemSisQuantity.compare(returnItem.returnQuantity) &lt; 0"><set field="allOnShipments" from="false"/></if>
                 </if>
             </if>
         </iterate>
@@ -104,8 +106,8 @@ along with this software (see the LICENSE.md file). If not, see
 
         <form-list name="ReturnItemList" list="returnItemList" transition="updateReturnItem">
             <row-actions>
-                <set field="itemChangeable" from="statusId in ['ReturnCreated', 'ReturnRequested', 'ReturnApproved']"/>
-                <set field="itemStrictChangeable" from="statusId in ['ReturnCreated', 'ReturnRequested']"/>
+                <set field="itemChangeable" from="['ReturnCreated', 'ReturnRequested', 'ReturnApproved'].includes(statusId)"/>
+                <set field="itemStrictChangeable" from="['ReturnCreated', 'ReturnRequested'].includes(statusId)"/>
 
                 <if condition="finAccountTransId">
                     <entity-find-one entity-name="mantle.account.financial.FinancialAccountTrans" value-field="finAccountTrans"/>
@@ -113,14 +115,14 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <filter-map-list list="allItemBillingList" to-list="curItemBillingList">
                     <field-map field-name="returnItemSeqId"/></filter-map-list>
-                <set field="invoiceId" from="curItemBillingList ? curItemBillingList[0].invoiceId : null"/>
+                <set field="invoiceId" from="curItemBillingList?.length ? curItemBillingList[0].invoiceId : null"/>
                 <filter-map-list list="allItemSisList" to-list="curItemSisList">
                     <field-map field-name="returnItemSeqId"/></filter-map-list>
 
                 <if condition="productId">
                     <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true"/>
-                    <set field="isProductItemType" from="itemTypeEnumId in productItemTypes"/>
-                    <set field="isShippable" from="isProductItemType &amp;&amp; product != null ? product.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'] : false"/>
+                    <set field="isProductItemType" from="productItemTypes.includes(itemTypeEnumId)"/>
+                    <set field="isShippable" from="isProductItemType &amp;&amp; product != null ? ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'].includes(product.productTypeEnumId) : false"/>
 
                     <if condition="itemStrictChangeable &amp;&amp; isProductItemType">
                         <!-- see if current Product is a variant and if so populate variantProductList -->
@@ -129,18 +131,18 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="toProductId" from="productId"/>
                             <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
                         </entity-find>
-                        <if condition="virtualAssocList">
+                        <if condition="(virtualAssocList?.length > 0)">
                             <entity-find entity-name="mantle.product.ProductAssoc" list="variantAssocList">
                                 <date-filter/>
-                                <econdition field-name="productId" operator="in" from="virtualAssocList*.productId"/>
+                                <econdition field-name="productId" operator="in" from="virtualAssocList.map(it => it.productId)"/>
                                 <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
                             </entity-find>
-                            <set field="variantProductIdSet" from="new HashSet(variantAssocList*.toProductId)"/>
-                            <set field="variantProductList" from="new ArrayList(variantProductIdSet.size())"/>
+                            <set field="variantProductIdSet" from="Array.from(new Set(variantAssocList.map(it => it.toProductId)))"/>
+                            <set field="variantProductList" from="[]"/>
                             <iterate list="variantProductIdSet" entry="variantProductId">
                                 <entity-find-one entity-name="mantle.product.Product" value-field="variantProduct" cache="true">
                                     <field-map field-name="productId" from="variantProductId"/></entity-find-one>
-                                <script>variantProductList.add(variantProduct)</script>
+                                <script>variantProductList.push(variantProduct)</script>
                             </iterate>
                             <order-map-list list="variantProductList"><order-by field-name="pseudoId"/></order-map-list>
                         </if>
@@ -151,7 +153,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="returnItemSeqId"><default-field title="Item"><display/></default-field></field>
             <field name="parentItemSeqId" align="center">
                 <conditional-field condition="itemChangeable"><drop-down allow-empty="true">
-                    <list-options list="rootItemList.findAll({it.returnItemSeqId!=returnItemSeqId})" key="${returnItemSeqId}" text="${returnItemSeqId}"/>
+                    <list-options list="rootItemList.filter(it => it.returnItemSeqId != returnItemSeqId)" key="${returnItemSeqId}" text="${returnItemSeqId}"/>
                 </drop-down></conditional-field>
                 <default-field title="Parent"><display/></default-field>
             </field>
@@ -182,7 +184,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <display-entity entity-name="mantle.product.Product" text="ProductNameTemplate"/></default-field></field>
             <field name="replacementProductId">
                 <!-- NOTE: could also allow general product search instead of only alternate variants, or perhaps if there are no alternate variants (!variantProductList) -->
-                <conditional-field condition="itemStrictChangeable &amp;&amp; variantProductList"><drop-down allow-empty="true">
+                <conditional-field condition="itemStrictChangeable &amp;&amp; variantProductList?.length"><drop-down allow-empty="true">
                     <list-options list="variantProductList" key="${productId}" text="ProductNameTemplate"/>
                 </drop-down></conditional-field>
                 <default-field title="Replacement Product">
@@ -196,7 +198,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <link url="salesOrderDetail" text="${orderId}:${orderItemSeqId}" link-type="anchor"
                       condition="orderId"/></default-field></field>
             <field name="returnQuantity">
-                <conditional-field condition="itemChangeable &amp;&amp; !responseAmount"><text-line size="4"/></conditional-field>
+                <conditional-field condition="itemChangeable &amp;&amp; !toNumber(responseAmount)"><text-line size="4"/></conditional-field>
                 <default-field><display/></default-field></field>
             <field name="inventoryStatusId">
                 <conditional-field condition="itemChangeable &amp;&amp; isShippable">
@@ -207,21 +209,21 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field title="Inventory Status"><display-entity entity-name="moqui.basic.StatusItem"/></default-field>
             </field>
             <field name="returnPrice">
-                <conditional-field condition="itemChangeable &amp;&amp; !responseAmount"><text-line size="8"/></conditional-field>
+                <conditional-field condition="itemChangeable &amp;&amp; !toNumber(responseAmount)"><text-line size="8"/></conditional-field>
                 <default-field><display currency-unit-field="returnHeader.currencyUomId"/></default-field>
             </field>
 
-            <field name="receivedQuantity" from="receivedQuantity ?: 0.0"><default-field><display/></default-field></field>
+            <field name="receivedQuantity" from="receivedQuantity ?? 0"><default-field><display/></default-field></field>
             <field name="shipments"><default-field>
                 <section-iterate name="ItemShipmentList" list="curItemSisList" entry="curItemSis"><widgets>
                     <link url="shipmentDetail" text="${curItemSis.shipmentId} (${curItemSis.quantity})" link-type="anchor"
-                          parameter-map="[shipmentId:curItemSis.shipmentId]"/>
+                          parameter-map="{shipmentId:curItemSis.shipmentId}"/>
                 </widgets></section-iterate>
             </default-field></field>
             <field name="responseDate"><default-field><display/></default-field></field>
             <field name="replacementOrderId"><default-field title="Replacement Order">
                 <link url="salesOrderDetail" text="${replacementOrderId}" link-type="anchor" condition="replacementOrderId"
-                      parameter-map="[orderId:replacementOrderId]"/></default-field></field>
+                      parameter-map="{orderId:replacementOrderId}"/></default-field></field>
 
             <field name="responseAmount"><default-field><display currency-unit-field="returnHeader.currencyUomId"/></default-field></field>
             <field name="finAccountTransId"><default-field title="Refund Credit Trans">
@@ -229,10 +231,10 @@ along with this software (see the LICENSE.md file). If not, see
                       condition="finAccountTransId"/></default-field></field>
             <field name="refundPaymentId"><default-field title="Refund Payment">
                 <link url="editPayment" text="P: ${refundPaymentId}" link-type="anchor" condition="refundPaymentId"
-                      parameter-map="[paymentId:refundPaymentId]"/></default-field></field>
+                      parameter-map="{paymentId:refundPaymentId}"/></default-field></field>
             <field name="invoiceId"><default-field title="Credit Memo Invoice">
                 <link url="editInvoice" text="I: ${invoiceId}" link-type="anchor" condition="invoiceId"
-                        parameter-map="[invoiceId:invoiceId]"/></default-field></field>
+                        parameter-map="{invoiceId:invoiceId}"/></default-field></field>
 
             <field name="submitButton">
                 <conditional-field title="Update" condition="itemChangeable"><submit/></conditional-field>
@@ -240,7 +242,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="buttons"><default-field title="">
                 <link url="deleteReturnItem" text="" btn-type="danger" icon="fa fa-trash"
-                        condition="statusId in ['ReturnCreated', 'ReturnRequested', 'ReturnCancelled']"
+                        condition="['ReturnCreated', 'ReturnRequested', 'ReturnCancelled'].includes(statusId)"
                         confirmation="Delete item ${returnItemSeqId}?"/>
             </default-field></field>
 

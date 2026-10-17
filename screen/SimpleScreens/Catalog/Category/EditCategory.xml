@@ -15,7 +15,7 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Category" default-menu-index="1">
 
-    <parameter name="productCategoryId" required="true" from="curProductCategoryId ?: productCategoryId"/>
+    <parameter name="productCategoryId" required="true" from="curProductCategoryId || productCategoryId"/>
 
     <transition name="editFeatureGroup"><default-response url="../../FeatureGroup/EditFeatureGroup"/></transition>
     <transition name="updateCategory"><service-call name="update#mantle.product.category.ProductCategory"/>
@@ -37,11 +37,11 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
 
     <transition name="createProductCategoryRollup"><service-call name="create#mantle.product.category.ProductCategoryRollup"
-            in-map="context + [productCategoryId:childProductCategoryId]"/><default-response url="."/></transition>
+            in-map="Object.assign({}, context, {productCategoryId:childProductCategoryId})"/><default-response url="."/></transition>
     <transition name="updateProductCategoryRollup"><service-call name="update#mantle.product.category.ProductCategoryRollup"
-            in-map="context + [productCategoryId:childProductCategoryId]"/><default-response url="."/></transition>
+            in-map="Object.assign({}, context, {productCategoryId:childProductCategoryId})"/><default-response url="."/></transition>
     <transition name="deleteProductCategoryRollup"><service-call name="delete#mantle.product.category.ProductCategoryRollup"
-            in-map="context + [productCategoryId:childProductCategoryId]"/><default-response url="."/></transition>
+            in-map="Object.assign({}, context, {productCategoryId:childProductCategoryId})"/><default-response url="."/></transition>
 
     <transition-include name="getCategoryList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
 
@@ -113,16 +113,16 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="sequenceNum"><default-field><text-line size="4"/></default-field></field>
                         <field name="pseudoId"><default-field title="ID"><link url="." text="${pseudoId}" link-type="anchor"
-                                parameter-map="[productCategoryId:childProductCategoryId]"/></default-field></field>
+                                parameter-map="{productCategoryId:childProductCategoryId}"/></default-field></field>
                         <field name="categoryName"><default-field><link url="." text="${categoryName}" link-type="anchor"
-                                parameter-map="[productCategoryId:childProductCategoryId]"/></default-field></field>
+                                parameter-map="{productCategoryId:childProductCategoryId}"/></default-field></field>
                         <field name="fromDate"><default-field><display/></default-field></field>
                         <field name="thruDate"><default-field><date-time/></default-field></field>
 
                         <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                         <field name="delete"><default-field title=""><link url="deleteProductCategoryRollup" text=""
                                 icon="fa fa-trash" confirmation="Delete record of child within category?"
-                                parameter-map="[childProductCategoryId:childProductCategoryId, parentProductCategoryId:parentProductCategoryId, fromDate:fromDate]"/>
+                                parameter-map="{childProductCategoryId:childProductCategoryId, parentProductCategoryId:parentProductCategoryId, fromDate:fromDate}"/>
                         </default-field></field>
                     </form-list>
                 </box-body-nopad></container-box>
@@ -131,7 +131,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="productCategoryId"><default-field><hidden/></default-field></field>
                         <field name="categoryName" from="category?.categoryName"><default-field><hidden/></default-field></field>
                         <field name="submitButton"><conditional-field title="Generate Url Slug" tooltip="Generate Url Slug from the Category's Name"
-                                                                      condition="pciList?.findAll{it.identTypeEnumId == 'PcitUrlSlug' }?.size() == 0">
+                                                                      condition="!pciList?.some(it => it.identTypeEnumId == 'PcitUrlSlug')">
                             <submit/></conditional-field></field></form-single>
                     <container-dialog id="AddCategoryIdentDialog" button-text="New Category Identification">
                         <form-single name="AddCategoryIdentForm" transition="createProductCategoryIdent">
@@ -181,9 +181,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
 
                     <field name="pseudoId"><default-field title="ID"><link url="." text="${pseudoId}" link-type="anchor"
-                            parameter-map="[productCategoryId:parentProductCategoryId]"/></default-field></field>
+                            parameter-map="{productCategoryId:parentProductCategoryId}"/></default-field></field>
                     <field name="categoryName"><default-field><link url="." text="${categoryName}" link-type="anchor"
-                            parameter-map="[productCategoryId:parentProductCategoryId]"/></default-field></field>
+                            parameter-map="{productCategoryId:parentProductCategoryId}"/></default-field></field>
                     <field name="fromDate"><default-field><display/></default-field></field>
                     <field name="thruDate"><default-field><display/></default-field></field>
                 </form-list>

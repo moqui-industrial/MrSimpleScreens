@@ -27,7 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="disabled" value="N" or-null="true"/>
             <order-by field-name="organizationName,firstName,lastName"/>
         </entity-find>
-        <set field="orgInternalIds" from="orgInternalList*.partyId"/>
+        <set field="orgInternalIds" from="orgInternalList.map(it => it.partyId)"/>
 
         <entity-find entity-name="mantle.account.invoice.InvoiceSummary" list="allRecInvList" use-clone="true">
             <econdition field-name="fromPartyId" operator="in" from="orgInternalIds"/>
@@ -66,20 +66,20 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </row-actions>
             <field name="name"><default-field title="Internal Organization">
-                <link url="editParty" text="${organizationName?:''}${firstName?:''} ${lastName?:''}" link-type="anchor"/>
+                <link url="editParty" text="${organizationName||''}${firstName||''} ${lastName||''}" link-type="anchor"/>
             </default-field></field>
             <field name="recSummary"><default-field title="Receivable">
-                <link url="findInvoice" text="${recDesc?:'None'}" link-type="anchor"
-                      parameter-map="[fromPartyId:partyId, statusId:'InvoiceFinalized,InvoiceSent,InvoiceAcked', statusId_op:'in']"/>
+                <link url="findInvoice" text="${recDesc||'None'}" link-type="anchor"
+                      parameter-map="{fromPartyId:partyId, statusId:'InvoiceFinalized,InvoiceSent,InvoiceAcked', statusId_op:'in'}"/>
             </default-field></field>
             <field name="pblSummary"><default-field title="Payable">
-                <link url="findInvoice" text="${pblDesc?:'None'}" link-type="anchor"
-                      parameter-map="[toPartyId:partyId, statusId:'InvoiceReceived,InvoiceApproved', statusId_op:'in']"/>
+                <link url="findInvoice" text="${pblDesc||'None'}" link-type="anchor"
+                      parameter-map="{toPartyId:partyId, statusId:'InvoiceReceived,InvoiceApproved', statusId_op:'in'}"/>
             </default-field></field>
             <field name="paymentMethods"><default-field title="Bank Accounts">
                 <section-iterate name="PaymentMethodList" list="paymentMethodList" entry="paymentMethod"><widgets>
-                    <container><link url="paymentMethodTrans" text="${paymentMethod.description ?: paymentMethod.paymentMethodId}${paymentMethod.ledgerBalance ? ' ' + ec.l10n.format(paymentMethod.ledgerBalance, '#,##0.00') : ''}${paymentMethod.balanceDate ? ' (' + ec.l10n.format(paymentMethod.balanceDate, 'yyyy-MM-dd') + ')' : ''}"
-                            link-type="anchor" parameter-map="[paymentMethodId:paymentMethod.paymentMethodId]"/></container>
+                    <container><link url="paymentMethodTrans" text="${paymentMethod.description || paymentMethod.paymentMethodId}${paymentMethod.ledgerBalance != null &amp;&amp; !toDecimal(paymentMethod.ledgerBalance).isZero() ? ' ' + ec.l10n.format(paymentMethod.ledgerBalance, '#,##0.00') : ''}${paymentMethod.balanceDate ? ' (' + ec.l10n.format(paymentMethod.balanceDate, 'yyyy-MM-dd') + ')' : ''}"
+                            link-type="anchor" parameter-map="{paymentMethodId:paymentMethod.paymentMethodId}"/></container>
                 </widgets></section-iterate>
             </default-field></field>
             <field name="settings"><default-field title="">

@@ -1,0 +1,52 @@
+<#-- Ported from the original FreeMarker template; HTML interpolation is escaped.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+
+Shipment ${shipmentId}
+<#list orderIdSet as orderId>
+Order ${orderId}
+</#list>
+<#if has(invoiceList)>
+Invoice <#list invoiceList as invoice>${invoice.invoiceId}<#if has(invoice?.otherPartyOrderId) || has(invoice?.referenceNumber)> - PO ${(invoice.otherPartyOrderId ?? invoice.referenceNumber)}</#if><#if invoice_has_next>, </#if></#list>
+</#if>
+<#if has(originFacility)>Shipping from ${originFacility.facilityName}</#if>
+
+<#if has(firstShipmentMethodEnum)>Ship By ${firstShipmentMethodEnum.description}</#if>
+<#if has(toContactInfo?.postalAddress)>
+    <#if has(toContactInfo?.postalAddress?.toName) || has(toContactInfo?.postalAddress?.attnName)>
+<#if has(toContactInfo?.postalAddress?.toName)>To: ${toContactInfo.postalAddress.toName}</#if><#if has(toContactInfo?.postalAddress?.attnName)>
+Attn: ${toContactInfo.postalAddress.attnName}</#if>
+    <#else>
+${(toPartyDetail?.organizationName ?? "")} ${(toPartyDetail?.firstName ?? "")} ${(toPartyDetail?.middleName ?? "")} ${(toPartyDetail?.lastName ?? "")}
+    </#if>
+${(toContactInfo?.postalAddress?.address1 ?? "")}<#if has(toContactInfo?.postalAddress?.unitNumber)> #${toContactInfo.postalAddress.unitNumber}</#if><#if has(toContactInfo?.postalAddress?.address2)>
+${toContactInfo.postalAddress.address2}</#if>
+${(toContactInfo.postalAddress.city ?? "")}, ${(toContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(toContactInfo.postalAddress.postalCode ?? "")}<#if has(toContactInfo?.postalAddress?.postalCodeExt)>-${toContactInfo.postalAddress.postalCodeExt}</#if><#if has(toContactInfo?.postalAddress?.countryGeoId)> ${toContactInfo.postalAddress.countryGeoId}</#if>
+</#if>
+<#if has(toContactInfo?.telecomNumber)>
+<#if has(toContactInfo?.telecomNumber?.countryCode)>${toContactInfo.telecomNumber.countryCode}-</#if><#if has(toContactInfo?.telecomNumber?.areaCode)>${toContactInfo.telecomNumber.areaCode}-</#if>${(toContactInfo.telecomNumber.contactNumber ?? "")}
+</#if>
+<#if has(toContactInfo?.emailAddress)>
+${toContactInfo.emailAddress}
+</#if>
+
+<#list shipmentPackageList as shipmentPackage>
+<#-- <#assign shipmentBoxType = (shipmentPackage.boxType ?? '')> -->
+    <#assign weightUom = (shipmentPackage.weightUom ?? '')>
+    <#assign shipmentPackageContentList = shipmentPackage.contents>
+    <#assign packageRouteSeg = ec.entity.find("mantle.shipment.ShipmentPackageRouteSeg").condition("shipmentId", shipmentId).condition("shipmentPackageSeqId", shipmentPackage.shipmentPackageSeqId).condition("shipmentRouteSegmentSeqId", firstRouteSegment.shipmentRouteSegmentSeqId).one()>
+Package ${shipmentPackage.shipmentPackageSeqId}<#if has(shipmentPackage?.weight)>
+Weight ${ec.l10n.format(shipmentPackage.weight, "")} ${(weightUom?.description ?? "")}</#if>
+Tracking ${(firstCarrierDetail?.organizationName ?? "")} ${(packageRouteSeg?.trackingCode ?? "N/A")}
+
+<#list shipmentPackageContentList as shipmentPackageContent>
+    <#assign product = shipmentPackageContent.product>
+Description: ${(product.productName ?? shipmentPackageContent.productId)}
+Quantity: ${shipmentPackageContent.quantity}
+</#list>
+</#list>
+<#if has(shipment?.handlingInstructions)>
+Shipping Instructions
+
+${shipment.handlingInstructions}
+</#if>

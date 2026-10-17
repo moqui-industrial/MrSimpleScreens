@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <!-- <set field="partyTypeEnumId" from="partyTypeEnumId ?: 'PtyPerson'"/> -->
-        <set field="roleTypeId" from="roleTypeId ?: 'Customer'"/>
+        <set field="roleTypeId" from="roleTypeId || 'Customer'"/>
     </actions>
     <widgets>
         <form-list name="CustomerDataList" list="findPartyList" skip-form="true" select-columns="true" saved-finds="true"

@@ -35,24 +35,24 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <set field="origProductId" from="productId"/>
         <service-call name="mantle.product.ProductServices.find#ProductByIdValue" out-map="productByIdOut"
-                in-map="[idValue:productId, shipmentId:shipmentId]"/>
-        <set field="productId" from="productByIdOut.productId ?: productId"/>
+                in-map="{idValue:productId, shipmentId:shipmentId}"/>
+        <set field="productId" from="productByIdOut.productId || productId"/>
         <entity-find-one entity-name="mantle.product.Product" value-field="product"/>
         <if condition="product == null"><return error="true" message="No Product found with ID ${origProductId}"/></if>
 
         <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem"/>
         <if condition="shipmentItem == null"><return error="true" message="Shipment ${shipmentId} item ${productId} not found"/></if>
 
-        <service-call name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo" in-map="[shipmentId:shipmentId]" out-map="context"/>
-        <service-call name="org.moqui.impl.BasicServices.find#Enumeration" in-map="[enumTypeId:'RejectionReason']" out-map="reasonOut"/>
-        <set field="facilityId" from="shipmentRouteSegmentList ? shipmentRouteSegmentList[shipmentRouteSegmentList.size()-1].destinationFacilityId : null"/>
+        <service-call name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>
+        <service-call name="org.moqui.impl.BasicServices.find#Enumeration" in-map="{enumTypeId:'RejectionReason'}" out-map="reasonOut"/>
+        <set field="facilityId" from="shipmentRouteSegmentList?.length ? shipmentRouteSegmentList[shipmentRouteSegmentList.length-1].destinationFacilityId : null"/>
 
         <!-- populate quantityAccepted from item quantity minus AssetReceipt quantityAccepted + quantityRejected -->
         <set field="quantityAccepted" from="shipmentItem.quantity"/>
         <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="assetReceiptList">
             <econdition field-name="shipmentId"/><econdition field-name="productId"/></entity-find>
         <iterate list="assetReceiptList" entry="assetReceipt">
-            <set field="quantityAccepted" from="quantityAccepted - (assetReceipt.quantityAccepted ?: 0.0) - (assetReceipt.quantityRejected ?: 0.0)"/>
+            <set field="quantityAccepted" from="toDecimal(quantityAccepted ?? 0).subtract(assetReceipt.quantityAccepted ?? 0).subtract(assetReceipt.quantityRejected ?? 0)"/>
         </iterate>
 
         <!-- get all SIS records for order and return specific data -->
@@ -62,7 +62,7 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find>
 
         <!-- look up ReturnItem.inventoryStatusId -->
-        <set field="returnShipmentItemSourceList" from="shipmentItemSourceList.findAll({ it.returnId &amp;&amp; it.returnItemSeqId })"/>
+        <set field="returnShipmentItemSourceList" from="shipmentItemSourceList.filter(it => it.returnId &amp;&amp; it.returnItemSeqId)"/>
         <iterate list="returnShipmentItemSourceList" entry="returnShipmentItemSource">
             <entity-find-one entity-name="mantle.order.return.ReturnItem" value-field="returnItem">
                 <field-map field-name="returnId" from="returnShipmentItemSource.returnId"/>
@@ -80,19 +80,19 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="roleTypeId" value="AssetOwner"/>
             <order-by field-name="partyId"/>
         </entity-find>
-        <set field="ownerPartyId" from="assetOwnerPartyList ? assetOwnerPartyList[0].partyId : null"/>
+        <set field="ownerPartyId" from="assetOwnerPartyList?.length ? assetOwnerPartyList[0].partyId : null"/>
 
         <!-- try to get the default acquireCost from order items -->
-        <set field="orderShipmentItemSourceList" from="shipmentItemSourceList.findAll({ it.orderId &amp;&amp; it.orderItemSeqId })"/>
+        <set field="orderShipmentItemSourceList" from="shipmentItemSourceList.filter(it => it.orderId &amp;&amp; it.orderItemSeqId)"/>
         <iterate list="orderShipmentItemSourceList" entry="shipmentItemSource">
-            <if condition="(!acquireCost || !ownerPartyId) &amp;&amp; shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
+            <if condition="(!toNumber(acquireCost) || !ownerPartyId) &amp;&amp; shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
                 <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
                     <field-map field-name="orderId" from="shipmentItemSource.orderId"/>
                     <field-map field-name="orderItemSeqId" from="shipmentItemSource.orderItemSeqId"/>
                 </entity-find-one>
-                <if condition="!acquireCost"><set field="acquireCost" from="orderItem?.standardCost ?: orderItem?.unitAmount"/></if>
+                <if condition="!toNumber(acquireCost)"><set field="acquireCost" from="toNumber(orderItem?.standardCost) ? orderItem.standardCost : orderItem?.unitAmount"/></if>
                 <if condition="!ownerPartyId">
-                    <set field="orderPart" from="orderItem?.'mantle.order.OrderPart'"/>
+                    <set field="orderPart" from="orderItem?.['mantle.order.OrderPart']"/>
                     <set field="ownerPartyId" from="orderPart?.customerPartyId"/>
                 </if>
             </if>
@@ -119,7 +119,7 @@ along with this software (see the LICENSE.md file). If not, see
         <iterate list="assetIssuanceList" entry="assetIssuance">
             <set field="asset" from="assetIssuance.asset"/>
             <if condition="!lotId &amp;&amp; asset?.lotId"><set field="lotId" from="asset.lotId"/></if>
-            <if condition="!acquireCost &amp;&amp; asset?.acquireCost"><set field="acquireCost" from="asset.acquireCost"/></if>
+            <if condition="!toNumber(acquireCost) &amp;&amp; toNumber(asset?.acquireCost)"><set field="acquireCost" from="asset.acquireCost"/></if>
         </iterate>
     </actions>
     <widgets>
@@ -148,7 +148,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="receivedDate" from="ec.user.nowTimestamp"><default-field title="Received Date"><date-time/></default-field></field>
 
             <field name="mfgPartyId"><default-field title="Manufacturer"><drop-down allow-empty="true">
-                <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,Manufacturer']"/>
+                <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,Manufacturer'}"/>
             </drop-down></default-field></field>
             <field name="lotId"><default-field title="Lot" tooltip="Select an existing Lot, for new enter Lot Number (and Dates) below">
                 <drop-down allow-empty="true"><dynamic-options transition="getLotList" server-search="true" min-length="0">
@@ -164,7 +164,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <label text="Default Asset Owner (${ownerPartyId}) different from Facility owner (${destinationFacility.ownerPartyId}), if not consignment inventory change now" style="text-warning"
                         condition="ownerPartyId &amp;&amp; destinationFacility?.ownerPartyId &amp;&amp; ownerPartyId != destinationFacility.ownerPartyId"/>
                 <drop-down allow-empty="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,OrgInternal']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,OrgInternal'}"/>
                 </drop-down>
             </default-field></field>
             <field name="assetPoolId"><default-field title="Pool"><drop-down allow-empty="true">

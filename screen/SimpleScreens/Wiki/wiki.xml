@@ -63,9 +63,9 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="valueUsePath"/>
         <parameter name="includeRoot"/>
         <actions>
-            <set field="pageIndex" from="pageIndex ?: 0"/>
-            <set field="pageSize" from="pageSize ?: 20"/>
-            <set field="term" from="term ?: ''"/>
+            <set field="pageIndex" from="pageIndex || 0"/>
+            <set field="pageSize" from="pageSize || 20"/>
+            <set field="term" from="term || ''"/>
             <set field="valueUsePathBool" from="valueUsePath == 'true'"/>
             <entity-find-one entity-name="moqui.resource.wiki.WikiPage" value-field="wikiPage">
                 <field-map field-name="wikiPageId" from="term"/></entity-find-one>
@@ -74,7 +74,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="wikiSpaceId"/>
                     <econdition field-name="pagePath" from="term"/>
                 </entity-find>
-                <if condition="byPathPageList"><set field="wikiPage" from="byPathPageList[0]"/></if>
+                <if condition="(byPathPageList?.length > 0)"><set field="wikiPage" from="byPathPageList[0]"/></if>
             </if>
             <if condition="wikiPage != null"><then>
                 <set field="wikiPageList" from="[wikiPage]"/>
@@ -87,11 +87,11 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </else></if>
             <script><![CDATA[
-                def outList = []
-                if (wikiPage == null && wikiPageList && includeRoot == 'true') outList.add([value:wikiSpaceId, label:'Root Page'])
-                for (wikiPage in wikiPageList) outList.add([value:(valueUsePathBool ? wikiPage.pagePath : wikiPage.wikiPageId), label:wikiPage.pagePath])
-                ec.web.sendJsonResponse([options:outList, pageSize:pageSize, count:(wikiPageListCount?:wikiPageList.size())])
-                // ec.logger.warn("term ${term} outList ${outList}")
+                const outList = []
+                if (wikiPage == null && wikiPageList?.length && includeRoot == 'true') outList.push({value:wikiSpaceId, label:'Root Page'})
+                for (const curPage of wikiPageList) outList.push({value:(valueUsePathBool ? curPage.pagePath : curPage.wikiPageId), label:curPage.pagePath})
+                ec.web.sendJsonResponse({options:outList, pageSize:pageSize, count:(wikiPageListCount || wikiPageList.length)})
+                // ec.logger.warn(`term ${term} outList ${outList}`)
             ]]></script>
         </actions>
         <default-response type="none"/>
@@ -99,24 +99,21 @@ along with this software (see the LICENSE.md file). If not, see
 
     <pre-actions>
         <!-- this gets run like all pre-actions in vuet mode for menuData but trying this redirect or even getting page info will cause errors -->
-        <if condition="sri.screenUrlInfo.fullPathNameList &amp;&amp; sri.screenUrlInfo.fullPathNameList[0] == 'menuData'"><return/></if>
+        <if condition="sri.getScreenUrlInfo().fullPathNameList[0] == 'menuData'"><return/></if>
 
-        <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <set field="extraPathNameList" from="sri.getScreenUrlInfo().extraPathNameList"/>
         <!-- <log level="warn" message="wiki pre-actions extraPathNameList ${extraPathNameList}"/> -->
         <service-call name="org.moqui.impl.WikiServices.get#WikiPageInfo" in-map="context" out-map="context"/>
 
         <!-- redirect to EditWikiPage to create instead of trying to render a page that doesn't exist -->
         <script><![CDATA[
-            import org.moqui.impl.screen.ScreenRenderImpl
-            import org.moqui.impl.screen.ScreenUrlInfo
-
-            // ec.logger.warn("========== before redirect context=${context}")
+            // ec.logger.warn(`========== before redirect context=${context}`)
             if (!pageReference?.exists) {
-                ec.logger.info("Page at ${pageReference} does not exist, forwarding to create")
-                ScreenRenderImpl sri = context.sri
-                // NOTE: have to do a little more work here because of the extra path that messes up the relative screen loc
-                ScreenUrlInfo.UrlInstance editWikiUrl = sri.buildUrl(sri.getRootScreenDef(),
-                        sri.getScreenUrlInfo().getPreTransitionPathNameList(), "../EditWikiPage")
+                ec.logger.info(`Page at ${pageReference} does not exist, forwarding to create`)
+                // NOTE: have to do a little more work here because of the extra path that messes up the relative screen loc:
+                //     ../EditWikiPage from the screen path before the extra path, written from the root
+                const preTransitionPath = sri.getScreenUrlInfo().preTransitionPathNameList
+                const editWikiUrl = sri.buildUrl('//' + preTransitionPath.slice(0, -1).concat(['EditWikiPage']).join('/'))
                 editWikiUrl.addParameter("wikiSpaceId", wikiSpaceId)
                 editWikiUrl.addParameter("parentPath", parentPath)
                 editWikiUrl.addParameter("pageName", pageName)
@@ -146,7 +143,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <container-row><row-col md="3">
             <container-box><box-header title="Page Tree"/><box-body>
-                <link text="${wikiSpace?.description?:'Space Root'}" url="${basePath}/${wikiSpace.wikiSpaceId}" link-type="anchor" url-noparam="true"/>
+                <link text="${wikiSpace?.description||'Space Root'}" url="${basePath}/${wikiSpace.wikiSpaceId}" link-type="anchor" url-noparam="true"/>
                 <!-- using fancy expanding tree instead of flat list:
                 <container id="wiki-page-list">
                     <section-iterate name="PageList" list="allChildFileFlatList" entry="childFile"><widgets>
@@ -167,7 +164,7 @@ along with this software (see the LICENSE.md file). If not, see
                             -->
                             <set field="curFileName" from="nodeList_entry.pageName"/>
                             <set field="newIdPath" from="treeNodeId == '#' ? curFileName : treeNodeId + '/' + curFileName"/>
-                            <set field="encodedPath" from="newIdPath.split('/').collect({urlEncodeIfNeeded(it)}).join('/')"/>
+                            <set field="encodedPath" from="newIdPath.split('/').map(it => StringUtilities.urlEncodeIfNeeded(it)).join('/')"/>
                             <!-- <log level="warn" message="curFileName ${curFileName} newIdPath ${newIdPath} encodedPath ${encodedPath}"/> -->
                         </actions>
 
@@ -175,13 +172,13 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <tree-sub-node node-name="WikiPageNode" list="childPageList"><actions>
                             <service-call name="org.moqui.impl.WikiServices.get#WikiPageChildren" out-map="curPageInfo"
-                                    in-map="[wikiSpaceId:wikiSpaceId, pagePath:treeNodeId]"/>
+                                    in-map="{wikiSpaceId:wikiSpaceId, pagePath:treeNodeId}"/>
                             <set field="childPageList" from="curPageInfo.childPageInfoList"/>
                         </actions></tree-sub-node>
                     </tree-node>
                     <tree-sub-node node-name="WikiPageNode" list="topPageList"><actions>
                         <service-call name="org.moqui.impl.WikiServices.get#WikiPageChildren" out-map="rootPageInfo"
-                                in-map="[wikiSpaceId:wikiSpaceId]"/>
+                                in-map="{wikiSpaceId:wikiSpaceId}"/>
                         <set field="topPageList" from="rootPageInfo.childPageInfoList"/>
                         <!-- <log level="warn" message="============ wikiSpaceId=${wikiSpaceId}; topPageList=${topPageList}"/> -->
                     </actions></tree-sub-node>
@@ -194,22 +191,22 @@ along with this software (see the LICENSE.md file). If not, see
         </row-col><row-col lg="7" md="6">
 
             <container id="wiki-breadcrumbs">
-                <link text="${wikiSpace?.description?:'Space Root'}" url="${baseLinkPath}" link-type="anchor" url-noparam="true"/>
+                <link text="${wikiSpace?.description||'Space Root'}" url="${baseLinkPath}" link-type="anchor" url-noparam="true"/>
                 <section-iterate name="breadcrumbs" list="breadcrumbMapList" entry="breadcrumbMap"><widgets>
                     <label text="/"/>
                     <link text="${breadcrumbMap.pageName}" url="${baseLinkPath}/${breadcrumbMap.encodedPagePath}" link-type="anchor" url-noparam="true"/>
                 </widgets></section-iterate>
             </container>
             <container>
-                <label text="Seq: ${wikiPage?.sequenceNum ?: 50} ID: ${wikiPageId?:''} (${wikiType})${versionName ? ' Version ' + versionName.take(12) : ''}${publishedVersionName ? ' Published ' + publishedVersionName.take(12) : ''}"/>
+                <label text="Seq: ${wikiPage?.sequenceNum || 50} ID: ${wikiPageId||''} (${wikiType})${versionName ? ' Version ' + versionName.take(12) : ''}${publishedVersionName ? ' Published ' + publishedVersionName.take(12) : ''}"/>
                 <label text="(this version published)" condition="publishedVersionName &amp;&amp; publishedVersionName == versionName" style="text-success"/>
                 <link text="Public Link" url="${ec.resource.expand(wikiSpace.publicPageUrl, null, null, false)}" url-type="plain"
                         link-type="anchor" target-window="_blank" condition="wikiSpace?.publicPageUrl"/>
             </container>
-            <container-box><box-header title="${pageName?:'[No Name]'}"/><box-toolbar>
+            <container-box><box-header title="${pageName||'[No Name]'}"/><box-toolbar>
                 <link url="setPublishedVersion" text="Publish Version ${versionName.take(12)}"
                       condition="versionName &amp;&amp; versionName != publishedVersionName"
-                      parameter-map="[wikiPageId:wikiPageId, publishedVersionName:versionName]"/>
+                      parameter-map="{wikiPageId:wikiPageId, publishedVersionName:versionName}"/>
                 <link url="editPage" text="Edit" link-type="anchor-button" icon="fa fa-pencil">
                     <parameter name="wikiSpaceId"/><parameter name="pagePath"/></link>
                 <container-dialog id="AddPageDialog" button-text="Add Page">
@@ -234,7 +231,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </drop-down></default-field></field>
                         <field name="parentPath"><default-field title="New Parent Page">
                             <drop-down><dynamic-options transition="getSpacePages" server-search="true" min-length="0"
-                                    parameter-map="[wikiSpaceId:null, wikiPageId:null, pagePath:null, currentPagePath:pagePath, parentPath:null, valueUsePath:'true', includeRoot:'true']">
+                                    parameter-map="{wikiSpaceId:null, wikiPageId:null, pagePath:null, currentPagePath:pagePath, parentPath:null, valueUsePath:'true', includeRoot:'true'}">
                                 <depends-on field="wikiSpaceId"/></dynamic-options></drop-down>
                         </default-field></field>
                         <field name="submitButton"><default-field title="Clone"><submit/></default-field></field>
@@ -245,9 +242,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="wikiSpaceId"/><parameter name="parentPath" from="pagePath"/>
                     <parameter name="isCreate" value="true"/></link>
                 -->
-                <link url="deletePage" text="" icon="fa fa-trash" condition="pagePath &amp;&amp; !childPageList" btn-type="danger"
+                <link url="deletePage" text="" icon="fa fa-trash" condition="pagePath &amp;&amp; !childPageList?.length" btn-type="danger"
                         confirmation="Are you sure you want to delete this wiki page and all attachments? This cannot be undone."
-                        parameter-map="[wikiSpaceId:wikiSpaceId, pagePath:pagePath, deleteAttachments:'true', wikiPageId:null]"/>
+                        parameter-map="{wikiSpaceId:wikiSpaceId, pagePath:pagePath, deleteAttachments:'true', wikiPageId:null}"/>
 
                 <link url="../ViewWikiPage" text="View/Print" target-window="_blank"/>
             </box-toolbar><box-body>
@@ -257,7 +254,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <condition><expression>!wikiSpace?.decoratorScreenLocation</expression></condition>
                         <actions><script>sri.baseLinkUrl(baseLinkUrl)</script></actions>
                         <widgets><render-mode><text type="html,vuet,qvt" template="true"
-                                location="${pageLocation?:''}${versionName &amp;&amp; currentVersionName != versionName ? '#' + versionName.take(12) : ''}"/></render-mode></widgets>
+                                location="${pageLocation||''}${versionName &amp;&amp; currentVersionName != versionName ? '#' + versionName.take(12) : ''}"/></render-mode></widgets>
                         <fail-widgets><include-screen location="${wikiSpace.decoratorScreenLocation}"/></fail-widgets>
                     </section>
                     <section name="ResetBaseLink"><actions><script>sri.baseLinkUrl(null)</script></actions><widgets/></section>
@@ -292,14 +289,14 @@ along with this software (see the LICENSE.md file). If not, see
                         <container style="task-comment">
                             <label text="${commEventDetail.subject}" type="strong"/>
                             <label text="from ${fromPerson ? fromPerson.firstName + ' ' + fromPerson?.lastName : 'Unknown'}" type="span"/>
-                            <label text="at ${commEventDetail.entryDate}" type="span"/>
+                            <label text="at ${ec.l10n.format(commEventDetail.entryDate, 'yyyy-MM-dd HH:mm')}" type="span"/>
                             <dynamic-dialog id="ReplyCommentContainer${uniqueExtension}" button-text="Reply" transition="wikiCommentReply">
                                 <parameter name="parentCommEventId" from="commEventDetail.communicationEventId"/></dynamic-dialog>
 
                             <label text="${commEventDetail.body}" type="pre" encode="false"/>
 
                             <section name="ChildNestedComments">
-                                <condition><expression>childCeList</expression></condition>
+                                <condition><expression>childCeList?.length</expression></condition>
                                 <actions><set field="currentCe" from="commEventDetail"/></actions>
                                 <widgets><include-screen location="component://SimpleScreens/screen/SimpleScreens/Wiki/wiki/WikiCommentNested.xml"/></widgets>
                             </section>
@@ -322,16 +319,16 @@ along with this software (see the LICENSE.md file). If not, see
             </box-toolbar><box-body>
                 <section-iterate name="AttachmentList" list="attachmentList" entry="attachment"><widgets>
                     <link url="downloadAttachment" text="${attachment.filename}" link-type="anchor"
-                            parameter-map="[wikiSpaceId:wikiSpaceId, pagePath:pagePath, filename:attachment.filename]"/>
+                            parameter-map="{wikiSpaceId:wikiSpaceId, pagePath:pagePath, filename:attachment.filename}"/>
                     <link url="deleteAttachment" text="" icon="fa fa-trash" btn-type="danger" confirmation="Delete ${attachment.filename} permanently?"
-                            parameter-map="[wikiSpaceId:wikiSpaceId, pagePath:pagePath, filename:attachment.filename]"/>
+                            parameter-map="{wikiSpaceId:wikiSpaceId, pagePath:pagePath, filename:attachment.filename}"/>
                     <container><link text="Public Link" url="${ec.resource.expand(wikiSpace.publicAttachmentUrl, null, attachment, false)}" url-type="plain"
                             link-type="anchor" target-window="_blank" condition="wikiSpace?.publicAttachmentUrl"/></container>
-                    <container><label text="${attachment.contentType} - ${ec.l10n.format(new Timestamp(attachment.lastModified), 'yyyy-MM-dd HH:mm')}"/></container>
+                    <container><label text="${attachment.contentType} - ${ec.l10n.format(attachment.lastModified, 'yyyy-MM-dd HH:mm')}"/></container>
                 </widgets></section-iterate>
             </box-body></container-box>
 
-            <section name="CategoriesSection" condition="wikiPageCategories"><actions>
+            <section name="CategoriesSection" condition="(wikiPageCategories?.length > 0)"><actions>
                 <entity-find entity-name="moqui.resource.wiki.WikiPageCategoryMember" list="membershipList">
                     <econdition field-name="wikiPageId"/></entity-find>
             </actions><widgets>
@@ -380,7 +377,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find entity-name="moqui.resource.wiki.WikiPageHistory" list="wphList">
                     <econdition field-name="wikiPageId"/><order-by field-name="-changeDateTime"/></entity-find>
             </actions><widgets>
-                <section name="ProjectSection" condition="projectWpaweList"><widgets>
+                <section name="ProjectSection" condition="projectWpaweList?.length"><widgets>
                     <container-box><box-header title="Page Projects"/><box-body>
                         <section-iterate name="ProjectItemSection" list="projectWpaweList" entry="projectWpawe"><widgets>
                             <link url="projectSummary" text="${projectWpawe.workEffortId} - ${projectWpawe.workEffortName}" link-type="anchor">
@@ -389,7 +386,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </widgets></section-iterate>
                     </box-body></container-box>
                 </widgets></section>
-                <section name="TaskSection" condition="taskWpaweList"><widgets>
+                <section name="TaskSection" condition="taskWpaweList?.length"><widgets>
                     <container-box><box-header title="Page Tasks"/><box-body>
                         <section-iterate name="TaskItemSection" list="taskWpaweList" entry="taskWpawe"><actions>
                             <entity-find-one entity-name="moqui.basic.StatusItem" value-field="taskStatusItem" cache="true">
@@ -402,11 +399,11 @@ along with this software (see the LICENSE.md file). If not, see
                             <link url="editTask" text="${taskWpawe.workEffortId} - ${taskWpawe.workEffortName}" link-type="anchor">
                                 <parameter name="workEffortId" from="taskWpawe.workEffortId"/>
                             </link>
-                            <label text="P: ${taskPurposeEnum.description} - S: ${taskStatusItem.description} - P: ${taskWpawe.priority?:''}" type="p"/>
+                            <label text="P: ${taskPurposeEnum.description} - S: ${taskStatusItem.description} - P: ${taskWpawe.priority||''}" type="p"/>
                         </widgets></section-iterate>
                     </box-body></container-box>
                 </widgets></section>
-                <section name="RequestSection" condition="wparList"><widgets>
+                <section name="RequestSection" condition="(wparList?.length > 0)"><widgets>
                     <container-box><box-header title="Page Requests"/><box-body>
                         <section-iterate name="RequestItemSection" list="wparList" entry="wpar"><actions>
                             <entity-find-one entity-name="moqui.basic.StatusItem" value-field="requestStatusItem" cache="true">
@@ -419,7 +416,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <link url="editRequest" text="${wpar.requestId} - ${wpar.requestName}" link-type="anchor">
                                 <parameter name="requestId" from="wpar.requestId"/>
                             </link>
-                            <label text="T: ${requestTypeEnum.description} - S: ${requestStatusItem.description} - P: ${wpar.priority?:''}" type="p"/>
+                            <label text="T: ${requestTypeEnum.description} - S: ${requestStatusItem.description} - P: ${wpar.priority||''}" type="p"/>
                         </widgets></section-iterate>
                     </box-body></container-box>
                 </widgets></section>
@@ -442,7 +439,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     <parameter name="versionNameLhs" from="wph.versionName"/><parameter name="versionNameRhs" from="currentVersionName"/></link>
                             </container>
                         </widgets></section>
-                        <label text="By ${paua.firstName?:''} ${paua.lastName?:''} (${paua.username?:'N/A'})" type="div" condition="paua"/>
+                        <label text="By ${paua.firstName||''} ${paua.lastName||''} (${paua.username||'N/A'})" type="div" condition="paua"/>
                         <label text="At ${ec.l10n.format(wph.changeDateTime, 'yyyy-MM-dd HH:mm')}" type="div"/>
                     </container></widgets></section-iterate>
                 </box-body></container-box>

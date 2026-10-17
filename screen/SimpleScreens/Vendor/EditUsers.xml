@@ -39,8 +39,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="^lastName"/><order-by field-name="^firstName"/><order-by field-name="^username"/>
             </entity-find>
             <script>
-                def outList = []
-                for (def pau in pauList) outList.add([value:pau.partyId, label:"${pau.firstName} ${pau.lastName} (${pau.username})".toString()])
+                const outList = []
+                for (const pau of pauList) outList.push({value:pau.partyId, label:`${pau.firstName} ${pau.lastName} (${pau.username})`.toString()})
                 ec.web.sendJsonResponse(outList)
             </script>
         </actions>
@@ -82,11 +82,11 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="partyId" from="vendorPartyId"><default-field><hidden/></default-field></field>
             <field name="partyRelationshipId"><default-field><hidden/></default-field></field>
             <field name="firstName"><header-field title="First##Name" show-order-by="case-insensitive"/><default-field>
-                <link url="editUser" text="${firstName?:''}" link-type="anchor">
+                <link url="editUser" text="${firstName||''}" link-type="anchor">
                     <parameter name="partyId" from="fromPartyId"/></link>
             </default-field></field>
             <field name="lastName"><header-field title="Last##Name" show-order-by="case-insensitive"/><default-field>
-                <link url="editUser" text="${lastName?:''}" link-type="anchor">
+                <link url="editUser" text="${lastName||''}" link-type="anchor">
                     <parameter name="partyId" from="fromPartyId"/></link>
             </default-field></field>
             <field name="organizationName"><header-field title="Org Name" show-order-by="case-insensitive"/><default-field>

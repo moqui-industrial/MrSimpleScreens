@@ -21,12 +21,12 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="getCalendarEvents">
         <service-call name="mantle.work.EventServices.get#FullCalendarData" web-send-json-response="eventList"
-                in-map="context + [urlGString:(sri.buildUrl('eventDetail').url + '?workEffortId=${workEffort.workEffortId}')]"/>
+                in-map="Object.assign({}, context, {urlGString:(sri.buildUrl('eventDetail').url + '?workEffortId=${workEffort.workEffortId}')})"/>
         <default-response type="none"/>
     </transition>
     <transition name="getCalendarTasks">
         <service-call name="mantle.work.TaskServices.get#FullCalendarData" web-send-json-response="eventList"
-                in-map="context + [urlGString:(sri.buildUrl('taskDetail').url + '?workEffortId=${workEffort.workEffortId}')]"/>
+                in-map="Object.assign({}, context, {urlGString:(sri.buildUrl('taskDetail').url + '?workEffortId=${workEffort.workEffortId}')})"/>
         <default-response type="none"/>
     </transition>
 
@@ -62,20 +62,13 @@ along with this software (see the LICENSE.md file). If not, see
             </form-single>
         </container-dialog>
 
-        <container id="calendar"/>
         <render-mode>
-            <!-- NOTE: to work as Vue template link element must be closed and don't use $(document).ready() -->
             <text type="html,vuet,qvt"><![CDATA[
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.1.0/fullcalendar.min.js" type="text/javascript"></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.1.0/locale-all.js" type="text/javascript"></script>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.1.0/fullcalendar.min.css" type="text/css"/>
-                <script>
-    $('#calendar').fullCalendar({ timezone:false, defaultView:'agendaWeek', locale:'${ec.user.locale.toString()}',
-        header: { left:'prev,next today', center:'title', right:'month,agendaWeek,agendaDay' },
-        eventSources: [ { url:"${sri.buildUrl('getCalendarEvents').url}", type:'POST', data: { moquiSessionToken:'${ec.web.sessionToken}', partyId:'${partyId}' } },
-            { url:"${sri.buildUrl('getCalendarTasks').url}", type:'POST', data:{ moquiSessionToken:'${ec.web.sessionToken}', partyId:'${partyId}' }, backgroundColor:'#5cb85c', borderColor:'#4cae4c' } ]
-    });
-                </script>
+                <mr-calendar lang="${ec.user.locale.toString().replace('_', '-')}"
+                    data-events-url="/rest/s1/mantle/workEfforts/calendar/events" data-tasks-url="/rest/s1/mantle/workEfforts/calendar/tasks"
+                    data-event-detail-url="${sri.buildUrl('eventDetail').url}" data-task-detail-url="${sri.buildUrl('taskDetail').url}"
+                    data-party-id="${WebUtilities.encodeHtml(partyId ?? '')}"></mr-calendar>
+                <script src="/ssstatic/lib/MrCalendar.js"></script>
             ]]></text>
         </render-mode>
     </widgets>

@@ -54,13 +54,13 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="assetId" from="asset?.assetId"/>
             <if condition="asset == null"><message error="true">No asset found for ID ${scanId}</message></if>
         </actions>
-        <conditional-response url="../MoveAsset" parameter-map="[assetId:assetId]">
+        <conditional-response url="../MoveAsset" parameter-map="{assetId:assetId}">
             <condition><expression>assetId</expression></condition></conditional-response>
         <default-response url="."/>
     </transition>
 
     <actions>
-        <set field="facilityId" from="facilityId ?: ec.user.getPreference('FacilityActive') ?: ec.user.getPreference('FacilityGeneralDefault')"/>
+        <set field="facilityId" from="facilityId || ec.user.getPreference('FacilityActive') || ec.user.getPreference('FacilityGeneralDefault')"/>
 
         <!-- find quantity summaries and fill in single option values -->
         <if condition="containerId">
@@ -71,7 +71,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="productId,pseudoId,productName,quantityOnHandTotal"/>
             </entity-find>
             <!-- is there a single product in the container? set productId -->
-            <if condition="!productId &amp;&amp; contAssetList.size() == 1">
+            <if condition="!productId &amp;&amp; contAssetList.length == 1">
                 <set field="productId" from="contAssetList[0].productId"/></if>
         </if>
         <if condition="facilityId &amp;&amp; locationSeqId">
@@ -82,7 +82,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="productId,pseudoId,productName,quantityOnHandTotal"/>
             </entity-find>
             <!-- is there a single product in the location? set productId -->
-            <if condition="!productId &amp;&amp; locAssetList.size() == 1">
+            <if condition="!productId &amp;&amp; locAssetList.length == 1">
                 <set field="productId" from="locAssetList[0].productId"/></if>
         </if>
         <if condition="facilityId &amp;&amp; productId">
@@ -93,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="locationSeqId,containerId,quantityOnHandTotal"/>
             </entity-find>
             <!-- is there a single location for the product? set locationSeqId -->
-            <if condition="!locationSeqId &amp;&amp; prodAssetList.size() == 1">
+            <if condition="!locationSeqId &amp;&amp; prodAssetList.length == 1">
                 <set field="locationSeqId" from="prodAssetList[0].locationSeqId"/></if>
         </if>
 
@@ -111,7 +111,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="locationSeqId,description,areaId,aisleId,sectionId,levelId,positionId"/>
             </entity-find>
             <!-- if no configured location(s) look for existing/prior Asset pick locations -->
-            <if condition="!pickLocList">
+            <if condition="!pickLocList?.length">
                 <entity-find entity-name="mantle.product.asset.AssetLocationDetail" list="pickLocList" distinct="true">
                     <econdition field-name="productId"/><econdition field-name="facilityId"/>
                     <econdition field-name="locationTypeEnumId" value="FltPick"/>
@@ -124,7 +124,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <if condition="toScanLocation &amp;&amp; facilityId">
             <service-call name="mantle.product.AssetServices.check#ScanLocation" out-map="toScanOut"
-                    in-map="[facilityId:facilityId, scanLocation:toScanLocation]"/>
+                    in-map="{facilityId:facilityId, scanLocation:toScanLocation}"/>
             <if condition="!toScanOut.locationSeqId &amp;&amp; !toScanOut.containerId">
                 <set field="createContainerId" from="toScanLocation"/>
                 <set field="toScanLocation" from="null"/>
@@ -149,7 +149,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="productId"><default-field><hidden/></default-field></field>
                     <field name="facilityId"><default-field title="Active Warehouse">
                         <drop-down><dynamic-options transition="getFacilityList" server-search="true" min-length="0"
-                                parameter-map="[facilityTypeEnumId:'FcTpWarehouse']"/></drop-down>
+                                parameter-map="{facilityTypeEnumId:'FcTpWarehouse'}"/></drop-down>
                     </default-field></field>
                     <field name="submitButton"><default-field title="Set WH"><submit/></default-field></field>
                     <field-layout><field-row-big><field-ref name="facilityId"/><field-ref name="submitButton"/></field-row-big></field-layout>
@@ -180,15 +180,15 @@ along with this software (see the LICENSE.md file). If not, see
         </row-col></container-row>
 
         <container>
-            <label text="Pick Locations " type="strong" condition="pickLocList"/>
+            <label text="Pick Locations " type="strong" condition="(pickLocList?.length > 0)"/>
             <section-iterate name="RecLocList" list="pickLocList" entry="recLoc"><widgets>
-                <label text="${locationSeqId?:''} ${description?:''} [${areaId?:' '}:${aisleId?:' '}:${sectionId?:' '}:${levelId?:' '}:${positionId?:' '}]"
+                <label text="${locationSeqId||''} ${description||''} [${areaId||' '}:${aisleId||' '}:${sectionId||' '}:${levelId||' '}:${positionId||' '}]"
                         text-map="recLoc" type="span"/>
             </widgets></section-iterate>
         </container>
 
         <link url="." text="Reset Selections" condition="containerId || locationSeqId || productId"
-                parameter-map="[containerId:null, locationSeqId:null, productId:null]"/>
+                parameter-map="{containerId:null, locationSeqId:null, productId:null}"/>
         <link url="moveContainer" text="Move Container" condition="containerId"/>
         <!--
         <link url="findAsset" text="All Container Assets" parameter-map="[containerId:containerId, productId:productId]" condition="containerId"/>
@@ -248,7 +248,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="quantityOnHandTotal"><default-field title="QOH">
                         <display format="#,##0.###"/></default-field></field>
                 </form-list>
-                <label text="No product found in container" condition="!contAssetList"/>
+                <label text="No product found in container" condition="!contAssetList?.length"/>
             </widgets><fail-widgets>
                 <section-iterate name="ContProdListSection" list="contAssetList" entry="contAsset"><widgets>
                     <link url="." text="${ec.resource.expand('ProductNameTemplate', null, contAsset)} (${ec.l10n.format(contAsset.quantityOnHandTotal, null)})"/></widgets></section-iterate>
@@ -273,7 +273,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="quantityOnHandTotal"><default-field title="QOH">
                         <display format="#,##0.###"/></default-field></field>
                 </form-list>
-                <label text="No product found in location" condition="!locAssetList"/>
+                <label text="No product found in location" condition="!locAssetList?.length"/>
             </widgets><fail-widgets>
                 <section-iterate name="LocProdListSection" list="locAssetList" entry="locAsset"><widgets>
                     <link url="." text="${ec.resource.expand('ProductNameTemplate', null, locAsset)} (${ec.l10n.format(locAsset.quantityOnHandTotal, null)})"/></widgets></section-iterate>
@@ -282,7 +282,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <section name="ProductSection" condition="product != null"><widgets>
             <section name="ProductOtherSection" condition="facilityLocation == null &amp;&amp; container == null &amp;&amp; facilityId"><widgets>
-                <label text="No locations or containers found for product" condition="!prodAssetList"/>
+                <label text="No locations or containers found for product" condition="!prodAssetList?.length"/>
                 <section-iterate name="ProdOtherListSection" list="prodAssetList" entry="prodAsset"><actions>
                     <entity-find-one entity-name="mantle.product.asset.Container" value-field="curContainer">
                         <field-map field-name="containerId" from="prodAsset.containerId"/></entity-find-one>
@@ -290,7 +290,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="facilityId"/><field-map field-name="locationSeqId" from="prodAsset.locationSeqId"/></entity-find-one>
                 </actions><widgets>
                     <link url="." text="Loc ${ec.resource.expand('FacilityLocationNameTemplate', null, curFacLoc)} - Cont ${curContainer ? ec.resource.expand('ContainerNameTemplate', null, curContainer) : 'N/A'}"
-                            parameter-map="[containerId:prodAsset.containerId, locationSeqId:prodAsset.locationSeqId]"/>
+                            parameter-map="{containerId:prodAsset.containerId, locationSeqId:prodAsset.locationSeqId}"/>
                 </widgets></section-iterate>
 
                 <!-- list assets -->
@@ -317,7 +317,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="changedEntityName" value="mantle.product.asset.Asset"/>
                 <econdition field-name="changedFieldName" operator="in" value="locationSeqId,containerId"/>
                 <econdition field-name="changedByUserId" from="ec.user.userId"/>
-                <econdition field-name="changedDate" operator="greater" from="ec.user.nowTimestamp - 5"/>
+                <econdition field-name="changedDate" operator="greater" from="String(Number(ec.user.nowTimestamp) - 5 * 86400000)"/>
                 <order-by field-name="-changedDate"/>
             </entity-find>
         </actions><widgets>
@@ -338,18 +338,18 @@ along with this software (see the LICENSE.md file). If not, see
                 </row-actions>
                 <field name="assetId" from="asset.assetId"><default-field title="Asset">
                     <link url="assetDetail" text="AssetNameTemplate" text-map="asset" link-type="anchor"
-                            parameter-map="[assetId:asset.assetId]"/>
+                            parameter-map="{assetId:asset.assetId}"/>
                 </default-field></field>
                 <field name="productId" from="asset.productId"><default-field title="Product">
                     <link url="." text="ProductNameTemplate" entity-name="mantle.product.Product" link-type="anchor"
-                            parameter-map="[productId:asset.productId, facilityId:toFacLoc?.facilityId,
-                                locationSeqId:toFacLoc?.locationSeqId, containerId:toContainer?.containerId]"/>
+                            parameter-map="{productId:asset.productId, facilityId:toFacLoc?.facilityId,
+                                locationSeqId:toFacLoc?.locationSeqId, containerId:toContainer?.containerId}"/>
                 </default-field></field>
 
                 <field name="toLocation"><default-field>
-                    <label text="FacilityLocationNameTemplate" text-map="toFacLoc?:[:]" condition="toFacLoc"/></default-field></field>
+                    <label text="FacilityLocationNameTemplate" text-map="toFacLoc||{}" condition="toFacLoc"/></default-field></field>
                 <field name="toContainer"><default-field>
-                    <label text="ContainerNameTemplate" text-map="toContainer?:[:]" condition="toContainer"/></default-field></field>
+                    <label text="ContainerNameTemplate" text-map="toContainer||{}" condition="toContainer"/></default-field></field>
 
                 <field name="changedDate"><default-field title="Date Moved"><display format="yyyy-MM-dd HH:mm"/></default-field></field>
                 <!-- can now use Asset link to MoveAgain
@@ -369,7 +369,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="changedEntityName" value="mantle.product.asset.Container"/>
                 <econdition field-name="changedFieldName" value="locationSeqId"/>
                 <econdition field-name="changedByUserId" from="ec.user.userId"/>
-                <econdition field-name="changedDate" operator="greater" from="ec.user.nowTimestamp - 5"/>
+                <econdition field-name="changedDate" operator="greater" from="String(Number(ec.user.nowTimestamp) - 5 * 86400000)"/>
                 <order-by field-name="-changedDate"/>
             </entity-find>
         </actions><widgets>
@@ -389,16 +389,16 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find-one>
                 </row-actions>
 
-                <field name="container"><default-field><display text="${container.serialNumber ?: container.containerId}"
-                        parameter-map="[containerId:container.containerId]"/></default-field></field>
+                <field name="container"><default-field><display text="${container.serialNumber || container.containerId}"
+                        parameter-map="{containerId:container.containerId}"/></default-field></field>
 
                 <field name="containerTypeEnumId" from="container.containerTypeEnumId"><default-field title="Type">
                     <display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
 
                 <field name="fromLocation"><default-field>
-                    <label text="FacilityLocationNameTemplate" text-map="fromFacLoc?:[:]" condition="fromFacLoc"/></default-field></field>
+                    <label text="FacilityLocationNameTemplate" text-map="fromFacLoc||{}" condition="fromFacLoc"/></default-field></field>
                 <field name="toLocation"><default-field>
-                    <label text="FacilityLocationNameTemplate" text-map="toFacLoc?:[:]" condition="toFacLoc"/></default-field></field>
+                    <label text="FacilityLocationNameTemplate" text-map="toFacLoc||{}" condition="toFacLoc"/></default-field></field>
 
                 <field name="changedDate"><default-field title="Date Moved"><display format="yyyy-MM-dd HH:mm"/></default-field></field>
                 <!-- not currently supported in this mini app

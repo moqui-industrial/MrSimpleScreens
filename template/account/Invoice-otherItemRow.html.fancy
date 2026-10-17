@@ -1,0 +1,33 @@
+<#-- Shared print fragment, extracted from Invoice.print.html.fancy. -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#assign cellPadding = "1pt">
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+<#assign negOne = -1>
+
+    <#assign childItemList = Array.from(invoiceItemList).filter(it => it.parentItemSeqId === invoiceItem.invoiceItemSeqId)>
+    <#assign itemTypeEnum = (invoiceItem.type ?? '')>
+    <#assign timeEntry = invoiceItem.findRelatedOne("mantle.work.time.TimeEntry", false, false)>
+    <#assign rateTypeEnum = ""><#assign workEffort = "">
+    <#if has(timeEntry)>
+        <#assign rateTypeEnum = timeEntry.findRelatedOne("RateType#moqui.basic.Enumeration", true, false)>
+        <#assign workEffort = timeEntry.findRelatedOne("mantle.work.effort.WorkEffort", false, false)>
+    </#if>
+    <tr style="font-size:8pt;border-bottom:thin solid black">
+        <td style="padding:${cellPadding}"><div style="text-align:center"><#if (itemIndex> 0)>${itemIndex}<#else> </#if></div></td>
+        <td style="padding:${cellPadding}"><div>${(itemTypeEnum?.description ?? "")}</div></td>
+        <td style="padding:${cellPadding}"><div>${ec.l10n.format(invoiceItem.itemDate, dateFormat)}</div></td>
+        <td style="padding:${cellPadding}">
+            <div>${(invoiceItem.description ?? "")}</div>
+            <#if has(timeEntry?.workEffortId)><div>Task: ${timeEntry.workEffortId} - ${(workEffort.workEffortName ?? "")}</div></#if>
+            <#if has(rateTypeEnum)><div>Rate: ${rateTypeEnum.description}</div></#if>
+            <#if has(timeEntry)><div>${ec.l10n.format(timeEntry.fromDate, "dd MMM yyyy hh:mm")} to ${ec.l10n.format(timeEntry.thruDate, "dd MMM yyyy hh:mm")}, Break ${(timeEntry.breakHours ?? "0")}h</div></#if>
+            <#if has(invoiceItem?.otherPartyProductId)><div>Your Product: ${invoiceItem.otherPartyProductId}</div></#if>
+        </td>
+        <td style="padding:${cellPadding}"><div style="text-align:center">${(invoiceItem.quantity ?? "1")}</div></td>
+        <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency((invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>
+        <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency(toDecimal(invoiceItem.quantity ?? 1).multiply(invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>
+    </tr>
+    <#if has(childItemList)><#list childItemList as childItem>
+        ${raw(ec.resource.template("component://SimpleScreens/template/account/Invoice-otherItemRow.html.fancy", {invoiceItem: childItem, invoiceItemList: invoiceItemList, itemIndex: negOne}))}
+    </#list></#if>
+

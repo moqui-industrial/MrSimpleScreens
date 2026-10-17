@@ -1,0 +1,57 @@
+<style>
+@page mrss-ShipmentLoadPick { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
+.print-ShipmentLoadPick { page:mrss-ShipmentLoadPick; font:10pt Helvetica,Arial,sans-serif; }
+.print-ShipmentLoadPick .page-header { position:relative; min-height:0.5in; }
+.print-ShipmentLoadPick .page-footer { margin-top:.2in; }
+.print-ShipmentLoadPick table { border-collapse:collapse; table-layout:fixed; }
+.print-ShipmentLoadPick thead { display:table-header-group; }
+.print-ShipmentLoadPick tbody tr { break-inside:avoid; }
+</style><style>
+@page mrss-ShipmentPack { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
+.print-ShipmentPack { page:mrss-ShipmentPack; font:10pt Helvetica,Arial,sans-serif; }
+.print-ShipmentPack .page-header { position:relative; min-height:0.6in; }
+.print-ShipmentPack .page-footer { margin-top:.2in; }
+.print-ShipmentPack table { border-collapse:collapse; table-layout:fixed; }
+.print-ShipmentPack thead { display:table-header-group; }
+.print-ShipmentPack tbody tr { break-inside:avoid; }
+</style><style>
+@page mrss-ShipmentLoadPickAndPack { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
+.print-ShipmentLoadPickAndPack { page:mrss-ShipmentLoadPickAndPack; font:10pt Helvetica,Arial,sans-serif; }
+.print-ShipmentLoadPickAndPack .page-header { position:relative; min-height:0.5in; }
+.print-ShipmentLoadPickAndPack .page-footer { margin-top:.2in; }
+.print-ShipmentLoadPickAndPack table { border-collapse:collapse; table-layout:fixed; }
+.print-ShipmentLoadPickAndPack thead { display:table-header-group; }
+.print-ShipmentLoadPickAndPack tbody tr { break-inside:avoid; }
+</style>
+<#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<#-- See the mantle.shipment.ShipmentServices.get#ShipmentPickPackInfo service for data preparation -->
+
+<#assign cellPadding = "1pt">
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+<#assign dateTimeFormat = (dateTimeFormat ?? "yyyy-MM-dd HH:mm")>
+
+${raw(ec.resource.template("component://SimpleScreens/template/shipment/ShipmentLoadPick-shipmentLoadPickPageSequence.html.fancy", {}))}
+
+    <#list shipmentPickPackInfoList as shipmentPickPackInfo>
+        <#-- only print if Input or Scheduled, if already Picked/Packed/etc or is Rejected or Cancelled don't include -->
+        <#assign curStatusId = shipmentPickPackInfo.shipment.statusId>
+        <#if curStatusId == "ShipInput" || curStatusId == "ShipScheduled">
+            ${raw(ec.resource.template("component://SimpleScreens/template/shipment/ShipmentPack-shipmentPackPageSequence.html.fancy", {shipmentInfo: shipmentPickPackInfo}))}
+        </#if>
+    </#list>

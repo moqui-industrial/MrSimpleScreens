@@ -16,7 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-include="false" standalone="true">
 
     <parameter name="timeEntryId"/>
-    <parameter name="partyId" from="partyId ?: ec.user.userAccount?.partyId"/>
+    <parameter name="partyId" from="partyId || ec.user.userAccount?.partyId"/>
     <parameter name="clockInMode"/>
 
     <transition name="recordTimeEntry"><service-call name="mantle.work.TimeServices.store#TimeEntry" in-map="context"/>
@@ -35,7 +35,7 @@ along with this software (see the LICENSE.md file). If not, see
         </if>
 
         <service-call name="mantle.humanres.PositionServices.get#PartyEmployersAndPositionClasses"
-                in-map="[partyId:partyId]" out-map="context"/>
+                in-map="{partyId:partyId}" out-map="context"/>
 
         <set field="entryEditable" from="timeEntry?.invoiceId == null &amp;&amp; timeEntry?.vendorInvoiceId == null"/>
         <set field="hasRatePermission" from="clockInMode ? false : ec.user.hasPermission('TIME_ENTRY_RATE')"/>
@@ -53,7 +53,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="workEffortId">
                 <conditional-field title="Task" condition="entryEditable">
                     <drop-down allow-empty="true"><dynamic-options transition="getTaskList" min-length="0" server-search="true"
-                            parameter-map="[assignedPartyId:partyId]"/></drop-down>
+                            parameter-map="{assignedPartyId:partyId}"/></drop-down>
                 </conditional-field>
                 <default-field title="Task"><display-entity entity-name="mantle.work.effort.WorkEffort" text="WorkEffortNameTemplate"/></default-field>
             </field>
@@ -119,7 +119,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- Rates Fields -->
             <field name="hasModifiedRates">
-                <conditional-field title="Rates Modified" condition="hasRatePermission"><display text="${hasModifiedRates ?: 'N'}"/></conditional-field>
+                <conditional-field title="Rates Modified" condition="hasRatePermission"><display text="${hasModifiedRates || 'N'}"/></conditional-field>
             </field>
 
             <field name="clientHourRate">

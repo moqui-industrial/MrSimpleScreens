@@ -86,7 +86,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
         </then><else>
             <!-- DataDocument (ElasticSearch) search plus DB query -->
-            <set field="searchInputs" from="new HashMap(ec.web.parameters)"/>
+            <set field="searchInputs" from="Object.assign({}, ec.web.parameters)"/>
             <if condition="rootWorkEffortId">
                 <set field="queryString" value="${queryString} AND project:${rootWorkEffortId}"/>
                 <set field="searchInputs.rootWorkEffortId" value=""/>
@@ -118,7 +118,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
 
             <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
-                    in-map="context + [indexName:'mantle', documentType:'MantleTask']"/>
+                    in-map="Object.assign({}, context, {indexName:'mantle', documentType:'MantleTask'})"/>
 
             <set field="workEffortIdList" from="documentList._id"/>
             <entity-find entity-name="mantle.work.effort.PartyTaskSummary" list="taskList">
@@ -133,7 +133,7 @@ along with this software (see the LICENSE.md file). If not, see
         </else></if>
 
         <entity-find entity-name="mantle.party.PartyDetail" list="ownerPartyList">
-            <econdition field-name="partyId" operator="in" from="taskList*.ownerPartyId"/>
+            <econdition field-name="partyId" operator="in" from="taskList.map(it => it.ownerPartyId)"/>
             <select-field field-name="partyId,firstName,lastName,organizationName"/>
         </entity-find>
     </actions>
@@ -172,7 +172,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="assignToPartyId"><default-field title="Assign To">
                         <drop-down no-current-selected-key="${ec.user.userAccount.partyId}" allow-empty="true">
                             <dynamic-options transition="getProjectParties" value-field="partyId" label-field="name"
-                                    depends-optional="true" server-search="true" min-length="0" parameter-map="[addOptional:'false']">
+                                    depends-optional="true" server-search="true" min-length="0" parameter-map="{addOptional:'false'}">
                                 <depends-on field="rootWorkEffortId"/></dynamic-options>
                         </drop-down>
                     </default-field></field>
@@ -216,7 +216,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="firstName,lastName,organizationName"/>
                     <order-by field-name="firstName,lastName,organizationName"/>
                 </entity-find>
-                <set field="ownerParty" from="ownerPartyList.find{ it.partyId == ownerPartyId }"/>
+                <set field="ownerParty" from="ownerPartyList.find(it => it.partyId == ownerPartyId)"/>
             </row-actions>
 
             <row-selection id-field="workEffortId">
@@ -357,7 +357,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <dynamic-options transition="getProjectMilestones" value-field="workEffortId" label-field="milestoneLabel">
                         <depends-on field="rootWorkEffortId"/></dynamic-options>
                 </drop-down></header-field>
-                <default-field><link text="${milestoneWorkEffortId?:''}" url="milestoneSummary" link-type="anchor" condition="milestoneWorkEffortId"/></default-field>
+                <default-field><link text="${milestoneWorkEffortId||''}" url="milestoneSummary" link-type="anchor" condition="milestoneWorkEffortId"/></default-field>
             </field>
             <field name="purposeEnumId">
                 <header-field title="Purpose" show-order-by="true">
@@ -385,7 +385,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="partyId"><header-field title="Assigned To">
                 <drop-down allow-multiple="true">
                     <dynamic-options transition="getProjectParties" value-field="partyId" label-field="name"
-                            depends-optional="true" server-search="true" min-length="0" parameter-map="[addOptional:'false']">
+                            depends-optional="true" server-search="true" min-length="0" parameter-map="{addOptional:'false'}">
                         <depends-on field="rootWorkEffortId"/></dynamic-options>
                 </drop-down>
             </header-field></field>
@@ -397,7 +397,7 @@ along with this software (see the LICENSE.md file). If not, see
             </header-field></field>
             <field name="assigned"><default-field>
                 <section-iterate name="AssignedSection" list="weapdList" entry="weapd"><widgets>
-                    <label text="${weapd.firstName?:''} ${weapd.lastName?:''} ${weapd.organizationName?:''}" type="div"/>
+                    <label text="${weapd.firstName||''} ${weapd.lastName||''} ${weapd.organizationName||''}" type="div"/>
                 </widgets></section-iterate>
             </default-field>
 
@@ -422,10 +422,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field><display format="0.00"/></default-field></field>
             <field name="ownerPartyId">
                 <header-field><drop-down allow-empty="true" allow-multiple="true">
-                    <list-options list="ownerPartyList" key="${partyId}" text="${firstName?:''} ${lastName?:''} ${organizationName?:''} (${partyId})"/>
+                    <list-options list="ownerPartyList" key="${partyId}" text="${firstName||''} ${lastName||''} ${organizationName||''} (${partyId})"/>
                 </drop-down></header-field>
                 <conditional-field condition="ownerParty != null">
-                    <label text="${ownerParty.firstName?:''} ${ownerParty.lastName?:''} ${ownerParty.organizationName?:''}" tooltip="${ownerPartyId}" type="div"/></conditional-field>
+                    <label text="${ownerParty.firstName||''} ${ownerParty.lastName||''} ${ownerParty.organizationName||''}" tooltip="${ownerPartyId}" type="div"/></conditional-field>
             </field>
 
             <field name="searchButton"><header-field title="Find Tasks"><submit/></header-field></field>

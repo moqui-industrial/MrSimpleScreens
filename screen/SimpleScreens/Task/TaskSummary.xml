@@ -45,7 +45,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project">
                 <field-map field-name="workEffortId" from="task.rootWorkEffortId"/>
             </entity-find-one>
-            <set field="statusFlowId" from="(task.statusFlowId ?: project?.statusFlowId) ?: 'Default'"/>
+            <set field="statusFlowId" from="(task.statusFlowId || project?.statusFlowId) || 'Default'"/>
 
             <!-- get current status from description in currentValue parameter -->
             <entity-find-one entity-name="StatusItem" value-field="currentStatus">
@@ -61,14 +61,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="statusId" operator="in" from="currentStatusList.pkValue"/>
                     <econdition field-name="statusTypeId" value="WorkEffort"/>
                 </entity-find>
-                <if condition="statusItemList">
+                <if condition="(statusItemList?.length > 0)">
                     <set field="currentStatus" from="statusItemList.first"/></if>
             </if>
             <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="svctdList" cache="true">
                 <econdition field-name="statusFlowId" from="statusFlowId"/>
                 <econdition field-name="statusId" from="currentStatus?.statusId"/>
             </entity-find>
-            <set field="optionsMap" from="[:]"/>
+            <set field="optionsMap" from="{}"/>
             <iterate list="svctdList" entry="svctd">
                 <set field="optionsMap[svctd.toStatusId]" value="${svctd.transitionName} (${svctd.description})"/>
             </iterate>
@@ -92,7 +92,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="enumTypeId" value="WorkEffortResolution"/>
                 <order-by field-name="description"/>
             </entity-find>
-            <set field="optionsMap" from="[:]"/>
+            <set field="optionsMap" from="{}"/>
             <iterate list="enumList" entry="enumItem">
                 <set field="optionsMap[enumItem.enumId]" value="${enumItem.description}"/>
             </iterate>
@@ -145,7 +145,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="toWorkEffortId" from="task?.workEffortId"/>
             <econdition field-name="workEffortAssocTypeEnumId" value="WeatMilestone"/>
         </entity-find>
-        <set field="milestoneAssoc" from="milestoneAssocList?.getAt(0)"/>
+        <set field="milestoneAssoc" from="milestoneAssocList?.[0]"/>
         <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="milestone">
             <field-map field-name="workEffortId" from="milestoneAssoc?.workEffortId"/></entity-find-one>
 
@@ -154,11 +154,11 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="fromDate"/><order-by field-name="lastUpdatedStamp"/>
         </entity-find>
         <entity-find entity-name="mantle.work.time.TimeEntry" list="openTimeEntryList">
-            <econdition field-name="partyId" from="partyId ?: ec.user.userAccount?.partyId"/>
+            <econdition field-name="partyId" from="partyId || ec.user.userAccount?.partyId"/>
             <econdition field-name="thruDate" operator="is-null"/>
             <order-by field-name="-fromDate"/>
         </entity-find>
-        <set field="openTimeEntry" from="openTimeEntryList ? openTimeEntryList[0] : null"/>
+        <set field="openTimeEntry" from="openTimeEntryList?.length ? openTimeEntryList[0] : null"/>
 
         <!-- Comments -->
         <entity-find entity-name="mantle.work.effort.WorkEffortCommEventDetail" list="commEventDetailList">
@@ -234,7 +234,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="workEffortId" from="parentTask.workEffortId"/></link>
                 </widgets></section>
 
-                <container><label text="Priority: " type="strong"/><label text="${task.priority ?: ''}"/></container>
+                <container><label text="Priority: " type="strong"/><label text="${task.priority || ''}"/></container>
                 <container><label text="Purpose: " type="strong"/><label text="${purposeEnum.description}"/></container>
                 <container><label text="Status: " type="strong"/>
                     <editable id="TaskStatus" text="${currentStatus.description}" transition="updateTaskStatus"
@@ -244,7 +244,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </editable>
                 </container>
                 <container><label text="Resolution: " type="strong"/>
-                    <editable id="TaskResolution" text="${resolutionEnum?.description?:''}" transition="updateTaskResolution"
+                    <editable id="TaskResolution" text="${resolutionEnum?.description||''}" transition="updateTaskResolution"
                             parameter-name="resolutionEnumId" widget-type="select">
                         <parameter name="workEffortId" from="task.workEffortId"/>
                         <editable-load transition="getTaskResolutions"/>
@@ -271,9 +271,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </actions>
                     <widgets>
                         <container style="shaded-area">
-                            <container><link url="editParty" link-type="anchor" parameter-map="[partyId:weapd.partyId]"
-                                    text="${weapd.firstName?:''} ${weapd.lastName?:''} ${weapd.organizationName?:''}"/></container>
-                            <label text="${roleType?.description?:'N/A'} - ${statusItem?.description?:'N/A'}" type="div"/>
+                            <container><link url="editParty" link-type="anchor" parameter-map="{partyId:weapd.partyId}"
+                                    text="${weapd.firstName||''} ${weapd.lastName||''} ${weapd.organizationName||''}"/></container>
+                            <label text="${roleType?.description||'N/A'} - ${statusItem?.description||'N/A'}" type="div"/>
                             <!--
                             <section name="AssignNotificationSection"><condition><expression>weapd.partyTypeEnumId=="PtyPerson"</expression></condition>
                                 <widgets><label text="Notifications? ${weapd.receiveNotifications?:'N'}" type="p"/></widgets>
@@ -300,10 +300,10 @@ along with this software (see the LICENSE.md file). If not, see
         </row-col><row-col md="6">
 
             <container>
-                <editable id="TaskName" text="${task.workEffortName?:''}" transition="updateTaskField"
+                <editable id="TaskName" text="${task.workEffortName||''}" transition="updateTaskField"
                         parameter-name="workEffortName" type="h4"/>
             </container>
-            <editable id="TaskDescription" text="${task.description?:''}" transition="updateTaskField" type="pre"
+            <editable id="TaskDescription" text="${task.description||''}" transition="updateTaskField" type="pre"
                     parameter-name="description"/>
 
             <container-box><box-header title="Comments"/><box-toolbar>
@@ -334,8 +334,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="parentCommEventId" from="commEventDetail.communicationEventId"/></dynamic-dialog>
                         <dynamic-dialog id="EditCommentContainer${uniqueExtension}" button-text="Edit" transition="TaskCommentUpdate">
                             <parameter name="communicationEventId" from="commEventDetail.communicationEventId"/></dynamic-dialog>
-                        <link text="Delete" url="deleteComment" parameter-map="[workEffortId:workEffortId,
-                                    communicationEventId:commEventDetail.communicationEventId]"
+                        <link text="Delete" url="deleteComment" parameter-map="{workEffortId:workEffortId,
+                                    communicationEventId:commEventDetail.communicationEventId}"
                                 confirmation="Delete comment ${commEventDetail.subject}?"/>
 
                         <label text="${commEventDetail.body}" type="pre" encode="false"/>
@@ -403,7 +403,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <link text="${childTask.workEffortId} - ${childTask.workEffortName}" url="taskSummary" link-type="anchor">
                                 <parameter name="workEffortId" from="childTask.workEffortId"/>
                             </link>
-                            <label text="${childTask.statusDescription ?: ''} - ${childTask.priority ? 'P ' + childTask.priority + ' - ' : '' }${childResolution.description} - ${childPurpose.description}" type="div"/>
+                            <label text="${childTask.statusDescription || ''} - ${childTask.priority ? 'P ' + childTask.priority + ' - ' : '' }${childResolution.description} - ${childPurpose.description}" type="div"/>
                         </container>
                     </widgets>
                 </section-iterate>
@@ -462,7 +462,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <widgets><container>
                         <!-- NOTE: cannot use sparse paths along with extra path elements for screens like wiki.xml that allow extra paths, limit of current sparse path resolution approach -->
                         <link text="${wpawe.wikiSpaceId}" url="/apps/${appRoot}/Wiki/wiki/${wpawe.wikiSpaceId}" link-type="anchor"/>
-                        <link text="/${wpawe.pagePath}" url="/apps/${appRoot}/Wiki/wiki/${wpawe.wikiSpaceId}/${wpawe.pagePath?:''}" link-type="anchor"/>
+                        <link text="/${wpawe.pagePath}" url="/apps/${appRoot}/Wiki/wiki/${wpawe.wikiSpaceId}/${wpawe.pagePath||''}" link-type="anchor"/>
                     </container></widgets>
                 </section-iterate>
             </box-body></container-box>
@@ -488,9 +488,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="enumId" from="content.contentTypeEnumId"/></entity-find-one>
                 </actions><widgets>
                     <container>
-                        <container><label text="${contentTypeEnum?.description?:'No Type'}" type="strong"/></container>
+                        <container><label text="${contentTypeEnum?.description||'No Type'}" type="strong"/></container>
                         <link url="downloadContent" condition="content.contentLocation"
-                              parameter-map="[workEffortContentId:content.workEffortContentId]"
+                              parameter-map="{workEffortContentId:content.workEffortContentId}"
                               text="Download ${content.contentLocation.substring(content.contentLocation.lastIndexOf('/')+1)}"/>
                         <container-dialog id="UpdateContentContainer" button-text="Edit Content">
                             <form-single name="UpdateContentForm" transition="updateContent" map="content">
@@ -505,8 +505,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                             </form-single>
                         </container-dialog>
-                        <container><label condition="paua" text="By ${ec.resource.expand('UsernameTemplate','',paua+[userId:content.userId])} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"/></container>
-                        <label text="${content.description ?: 'No Description'}" type="p"/>
+                        <container><label condition="paua" text="By ${ec.resource.expand('UsernameTemplate','',Object.assign({}, paua, {userId:content.userId}))} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"/></container>
+                        <label text="${content.description || 'No Description'}" type="p"/>
                     </container>
                 </widgets></section-iterate>
             </box-body></container-box>

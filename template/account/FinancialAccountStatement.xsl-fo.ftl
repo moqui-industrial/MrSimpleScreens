@@ -13,77 +13,52 @@ along with this software (see the LICENSE.md file). If not, see
 
 <#-- See the mantle.account.FinancialAccountServices.get#StatementPrintInfo service for data preparation -->
 
-<#assign cellPadding = "1pt">
-<#assign tableFontSize = tableFontSize!"9pt">
-<#assign dateTimeFormat = dateTimeFormat!"dd MMM yyyy HH:mm">
-<#assign dateFormat = dateFormat!"dd MMM yyyy">
-
-<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" font-family="Helvetica, sans-serif" font-size="10pt">
-    <fo:layout-master-set>
-        <fo:simple-page-master master-name="letter-portrait" page-width="8.5in" page-height="11in"
-                               margin-top="0.5in" margin-bottom="0.5in" margin-left="0.5in" margin-right="0.5in">
-            <fo:region-body margin-top="0.4in" margin-bottom="0.6in"/>
-            <fo:region-before extent="1in"/>
-            <fo:region-after extent="0.5in"/>
-        </fo:simple-page-master>
-    </fo:layout-master-set>
-
-    <fo:page-sequence master-reference="letter-portrait" id="mainSequence">
-        <fo:static-content flow-name="xsl-region-after" font-size="8pt">
-            <fo:block border-top="thin solid black">
-                <fo:block text-align="center">Account ${financialAccount.finAccountCode!financialAccount.finAccountId} -- <#if fromDate?exists>${ec.l10n.format(fromDate, dateFormat)} to <#else>All through </#if><#if thruDate?exists>${ec.l10n.format(thruDate, dateFormat)}<#else>${ec.l10n.format(ec.user.nowTimestamp, dateFormat)}</#if> -- Page <fo:page-number/></fo:block>
-            </fo:block>
-        </fo:static-content>
-
-        <fo:flow flow-name="xsl-region-body">
-
-            <fo:block font-size="14pt" text-align="center" margin-bottom="0">${Static["org.moqui.util.StringUtilities"].encodeForXmlAttribute(organizationDetail.organizationName!"", false)}</fo:block>
-            <fo:block font-size="13pt" text-align="center" margin-bottom="0.1in">Account Statement</fo:block>
-
-            <fo:table table-layout="fixed" width="7.5in"><fo:table-body><fo:table-row font-size="10pt">
-                <fo:table-cell padding="0.05in" width="3in">
-                    <fo:block text-align="left">${Static["org.moqui.util.StringUtilities"].encodeForXmlAttribute(ownerDetail.organizationName!"", false)}${ownerDetail.firstName!""} ${ownerDetail.lastName!""}</fo:block>
-                </fo:table-cell>
-                <fo:table-cell padding="0.05in" width="2in">
-                    <fo:block text-align="left" font-weight="bold">Account</fo:block>
-                    <fo:block text-align="left">${financialAccount.finAccountCode!financialAccount.finAccountId}</fo:block>
-                    <fo:block text-align="left" font-weight="bold">From</fo:block>
-                    <fo:block text-align="left"><#if fromDate?exists>${ec.l10n.format(fromDate, dateFormat)}<#else>N/A</#if></fo:block>
-                    <fo:block text-align="left" font-weight="bold">Through</fo:block>
-                    <fo:block text-align="left"><#if thruDate?exists>${ec.l10n.format(thruDate, dateFormat)}<#else>${ec.l10n.format(ec.user.nowTimestamp, dateFormat)}</#if></fo:block>
-                </fo:table-cell>
-                <fo:table-cell padding="0.05in" width="2in">
-                    <fo:block text-align="left" font-weight="bold">Begining Balance</fo:block>
-                    <fo:block text-align="left">${ec.l10n.formatCurrency(beginningBalance, financialAccount.currencyUomId)}</fo:block>
-                    <fo:block text-align="left" font-weight="bold">Ending Balance</fo:block>
-                    <fo:block text-align="left">${ec.l10n.formatCurrency(endingBalance, financialAccount.currencyUomId)}</fo:block>
-                </fo:table-cell>
-            </fo:table-row></fo:table-body></fo:table>
-
-            <#if financialAccountTransList?has_content>
-            <fo:table table-layout="fixed" width="100%">
-                <fo:table-header font-size="9pt" font-weight="bold" border-bottom="solid black">
-                    <fo:table-cell width="0.6in" padding="${cellPadding}"><fo:block text-align="left">TX</fo:block></fo:table-cell>
-                    <fo:table-cell width="0.8in" padding="${cellPadding}"><fo:block text-align="left">Date</fo:block></fo:table-cell>
-                    <fo:table-cell width="1.0in" padding="${cellPadding}"><fo:block text-align="left">Reason</fo:block></fo:table-cell>
-                    <fo:table-cell width="2.2in" padding="${cellPadding}"><fo:block text-align="left">Comments</fo:block></fo:table-cell>
-                    <fo:table-cell width="1.0in" padding="${cellPadding}"><fo:block text-align="right">Amount</fo:block></fo:table-cell>
-                    <fo:table-cell width="1.4in" padding="${cellPadding}"><fo:block text-align="right">Balance</fo:block></fo:table-cell>
-                </fo:table-header>
-                <fo:table-body>
-                    <#list financialAccountTransList as trans>
-                        <fo:table-row font-size="${tableFontSize}" border-bottom="thin solid black">
-                            <fo:table-cell padding="${cellPadding}"><fo:block text-align="left">${trans.finAccountTransId}</fo:block></fo:table-cell>
-                            <fo:table-cell padding="${cellPadding}"><fo:block text-align="left">${ec.l10n.format(trans.transactionDate, dateFormat)}</fo:block></fo:table-cell>
-                            <fo:table-cell padding="${cellPadding}"><fo:block text-align="left">${trans["FinancialAccountTransReason#moqui.basic.Enumeration"].description}</fo:block></fo:table-cell>
-                            <fo:table-cell padding="${cellPadding}"><fo:block text-align="left">${trans.comments!""}</fo:block></fo:table-cell>
-                            <fo:table-cell padding="${cellPadding}"><fo:block text-align="right" font-family="Courier, monospace">${ec.l10n.formatCurrency(trans.amount, financialAccount.currencyUomId)}<#if (trans.amount >= 0)>&#8199;</#if></fo:block></fo:table-cell>
-                            <fo:table-cell padding="${cellPadding}"><fo:block text-align="right" font-family="Courier, monospace">${ec.l10n.formatCurrency(trans.postBalance, financialAccount.currencyUomId)}<#if (trans.postBalance >= 0)>&#8199;</#if></fo:block></fo:table-cell>
-                        </fo:table-row>
-                    </#list>
-                </fo:table-body>
-            </fo:table>
-            </#if>
-        </fo:flow>
-    </fo:page-sequence>
-</fo:root>
+<#assign tableFontSize = tableFontSize ?? "9pt">
+<#assign dateFormat = dateFormat ?? "dd MMM yyyy">
+<#assign accountCode = financialAccount.finAccountCode ?? financialAccount.finAccountId>
+<style>
+    @page { size: letter portrait; margin: .9in .5in 1.1in; }
+    .account-statement { font: 10pt Helvetica, sans-serif; }
+    .account-statement h1, .account-statement h2 { text-align: center; margin: 0 0 .1in; }
+    .account-statement h1 { font-size: 14pt; }
+    .account-statement h2 { font-size: 13pt; }
+    .account-statement table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .account-statement td, .account-statement th { padding: 1pt; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    .account-statement .summary td { padding: .05in; }
+    .account-statement .transactions thead { display: table-header-group; font-size: 9pt; }
+    .account-statement .transactions tr { border-bottom: thin solid black; break-inside: avoid; }
+    .account-statement .money { text-align: right; font-family: Courier, monospace; }
+    .account-statement footer { border-top: thin solid black; text-align: center; font-size: 8pt; margin-top: .2in; }
+    @media print { .account-statement footer { position: fixed; bottom: -.7in; left: 0; right: 0; } }
+</style>
+<section class="account-statement">
+    <h1>${WebUtilities.encodeHtml(organizationDetail?.organizationName ?? "")}</h1>
+    <h2>Account Statement</h2>
+    <table class="summary"><colgroup><col style="width: 43%"/><col style="width: 28.5%"/><col style="width: 28.5%"/></colgroup><tbody><tr>
+        <td>${WebUtilities.encodeHtml(ownerDetail?.organizationName ?? "")}${WebUtilities.encodeHtml(ownerDetail?.firstName ?? "")} ${WebUtilities.encodeHtml(ownerDetail?.lastName ?? "")}</td>
+        <td><strong>Account</strong><div>${WebUtilities.encodeHtml(accountCode)}</div>
+            <strong>From</strong><div><#if fromDate != null>${WebUtilities.encodeHtml(ec.l10n.format(fromDate, dateFormat))}<#else>N/A</#if></div>
+            <strong>Through</strong><div>${WebUtilities.encodeHtml(ec.l10n.format(thruDate ?? ec.user.nowTimestamp, dateFormat))}</div></td>
+        <td><strong>Beginning Balance</strong><div>${WebUtilities.encodeHtml(ec.l10n.formatCurrency(beginningBalance, financialAccount.currencyUomId))}</div>
+            <strong>Ending Balance</strong><div>${WebUtilities.encodeHtml(ec.l10n.formatCurrency(endingBalance, financialAccount.currencyUomId))}</div></td>
+    </tr></tbody></table>
+    <#if (financialAccountTransList?.length > 0)>
+    <table class="transactions">
+        <colgroup><col style="width: 8.6%"/><col style="width: 11.4%"/><col style="width: 14.3%"/><col style="width: 31.4%"/><col style="width: 14.3%"/><col style="width: 20%"/></colgroup>
+        <thead><tr><th>TX</th><th>Date</th><th>Reason</th><th>Comments</th><th class="money">Amount</th><th class="money">Balance</th></tr></thead>
+        <tbody>
+        <#list financialAccountTransList as trans>
+            <tr style="font-size: ${WebUtilities.encodeHtml(tableFontSize)}">
+                <td>${WebUtilities.encodeHtml(trans.finAccountTransId)}</td>
+                <td>${WebUtilities.encodeHtml(ec.l10n.format(trans.transactionDate, dateFormat))}</td>
+                <td>${WebUtilities.encodeHtml(trans["FinancialAccountTransReason#moqui.basic.Enumeration"]?.description ?? "")}</td>
+                <td>${WebUtilities.encodeHtml(trans.comments ?? "")}</td>
+                <td class="money">${WebUtilities.encodeHtml(ec.l10n.formatCurrency(trans.amount, financialAccount.currencyUomId))}<#if (toDecimal(trans.amount ?? 0).compare(0) >= 0)>&#8199;</#if></td>
+                <td class="money">${WebUtilities.encodeHtml(ec.l10n.formatCurrency(trans.postBalance, financialAccount.currencyUomId))}<#if (toDecimal(trans.postBalance ?? 0).compare(0) >= 0)>&#8199;</#if></td>
+            </tr>
+        </#list>
+        </tbody>
+    </table>
+    </#if>
+    <footer>Account ${WebUtilities.encodeHtml(accountCode)} -- <#if fromDate != null>${WebUtilities.encodeHtml(ec.l10n.format(fromDate, dateFormat))} to <#else>All through </#if>${WebUtilities.encodeHtml(ec.l10n.format(thruDate ?? ec.user.nowTimestamp, dateFormat))}</footer>
+</section>

@@ -37,7 +37,7 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <service-call name="mantle.work.ManufacturingServices.get#ProductionRunDisplayInfo" in-map="context" out-map="context"/>
         <service-call name="mantle.work.ManufacturingServices.get#ProductionRunProduceConsumeDetail" out-map="context"
-                in-map="[workEffortId:workEffortId, excludeWithMatchingConsume:true]"/>
+                in-map="{workEffortId:workEffortId, excludeWithMatchingConsume:true}"/>
     </actions>
     <widgets>
         <container-box><box-header title="Products to Produce"/><box-toolbar>
@@ -64,9 +64,9 @@ along with this software (see the LICENSE.md file). If not, see
             <form-list name="ProduceList" transition="updateRunProduct" list="produceList">
                 <row-actions>
                     <filter-map-list list="receiptSummaryList" to-list="currentReceiptList"><field-map field-name="productId"/></filter-map-list>
-                    <set field="currentReceiptSummary" from="currentReceiptList?.getAt(0)"/>
+                    <set field="currentReceiptSummary" from="currentReceiptList?.[0]"/>
                     <set field="currentReceiptQuantity" from="currentReceiptSummary?.quantityAccepted"/>
-                    <set field="estReceiptRemaining" from="(estimatedQuantity ?: 0) - (currentReceiptQuantity ?: 0)"/>
+                    <set field="estReceiptRemaining" from="toDecimal(estimatedQuantity ?? 0).subtract(currentReceiptQuantity ?? 0)"/>
                 </row-actions>
 
                 <field name="workEffortId"><default-field><hidden/></default-field></field>
@@ -75,9 +75,9 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <field name="pseudoId"><default-field title="Product"><link url="editProduct" link-type="anchor" text="${pseudoId}"/></default-field></field>
                 <field name="productName"><default-field title=""><display/></default-field></field>
-                <field name="availableToPromiseTotal" from="currentSummary?.availableToPromiseTotal ?: 0" align="right">
+                <field name="availableToPromiseTotal" from="currentSummary?.availableToPromiseTotal ?? 0" align="right">
                     <default-field title="WH ATP"><display/></default-field></field>
-                <field name="quantityOnHandTotal" from="currentSummary?.quantityOnHandTotal ?: 0" align="right">
+                <field name="quantityOnHandTotal" from="currentSummary?.quantityOnHandTotal ?? 0" align="right">
                     <default-field title="WH QOH"><display/></default-field></field>
 
                 <field name="estimatedQuantity" align="right"><default-field title="Est. Quantity"><text-line size="6"/></default-field></field>
@@ -85,15 +85,15 @@ along with this software (see the LICENSE.md file). If not, see
                     <display-entity entity-name="moqui.basic.Uom" text="ProductAmountNameTemplate"/></default-field></field>
 
                 <field name="currentAssets" align="right">
-                    <default-field title="Produced"><label text="${ec.l10n.format(currentReceiptSummary?.quantityAccepted, null) ?: 'None'}"
-                            style="${(currentReceiptQuantity ?: 0) == estimatedQuantity ? 'text-success' : 'text-danger'}"/></default-field></field>
+                    <default-field title="Produced"><label text="${ec.l10n.format(currentReceiptSummary?.quantityAccepted, null) || 'None'}"
+                            style="${toDecimal(currentReceiptQuantity ?? 0).compare(estimatedQuantity ?? 0) == 0 ? 'text-success' : 'text-danger'}"/></default-field></field>
                 <field name="submitButton" align="right"><default-field><submit text="Update"/>
                     <link url="updateRunProduct" icon="fa fa-trash"
-                            parameter-map="[workEffortId:workEffortId, productId:productId, fromDate:fromDate, thruDate:ec.user.nowTimestamp]"/>
+                            parameter-map="{workEffortId:workEffortId, productId:productId, fromDate:fromDate, thruDate:ec.user.nowTimestamp}"/>
                 </default-field></field>
                 <field name="assetDialog" align="right"><default-field title="">
                     <dynamic-dialog id="ProduceAssetDialog" button-text="Produce" transition="ProduceAsset"
-                            parameter-map="[productId:productId, inventoryFacilityId:inventoryFacilityId, quantity:estReceiptRemaining]"/>
+                            parameter-map="{productId:productId, inventoryFacilityId:inventoryFacilityId, quantity:estReceiptRemaining}"/>
                 </default-field></field>
             </form-list>
         </box-body-nopad></container-box>
@@ -119,19 +119,19 @@ along with this software (see the LICENSE.md file). If not, see
         </box-toolbar><box-body>
             <section-iterate name="ProduceBomDetailSection" list="produceBomDetailList" entry="produceBomDetail">
                 <widgets>
-                    <label text="Product to Produce: ${ec.resource.expand('ProductNameTemplate','',produceBomDetail.workEffortProductDetail)} - ${ec.l10n.format(produceBomDetail.estimatedQuantity, null)} (${produceBomDetail.workEffortProductDetail.amountUomDescription ?: ''})" type="strong"/>
+                    <label text="Product to Produce: ${ec.resource.expand('ProductNameTemplate','',produceBomDetail.workEffortProductDetail)} - ${ec.l10n.format(produceBomDetail.estimatedQuantity, null)} (${produceBomDetail.workEffortProductDetail.amountUomDescription || ''})" type="strong"/>
                     <section-iterate name="BomDetailSection" list="produceBomDetail.bomDetailList" entry="bomDetail"><widgets><container>
-                        <label text="${ec.l10n.format(-bomDetail.quantityRemaining, null)} too many of " style="text-warning"
-                               condition="bomDetail.quantityRemaining &lt; 0"/>
+                        <label text="${ec.l10n.format(toDecimal(bomDetail.quantityRemaining ?? 0).negate(), null)} too many of " style="text-warning"
+                               condition="toDecimal(bomDetail.quantityRemaining ?? 0).compare(0) &lt; 0"/>
                         <section-iterate name="BomProductSection" list="bomDetail.productIdSet" entry="bomProductId"><actions>
                             <entity-find-one entity-name="mantle.product.Product" value-field="bomProduct">
                                 <field-map field-name="productId" from="bomProductId"/></entity-find-one>
                         </actions><widgets>
-                            <link url="addRunProduct" link-type="hidden-form-link" condition="bomDetail.quantityRemaining &gt; 0"
+                            <link url="addRunProduct" link-type="hidden-form-link" condition="toDecimal(bomDetail.quantityRemaining ?? 0).compare(0) &gt; 0"
                                   text="Add Consume ${bomDetail.quantityRemaining} ${ec.resource.expand('ProductNameTemplate','',bomProduct)}"
-                                  parameter-map="[workEffortId:workEffortId, typeEnumId:'WeptConsume', productId:bomProductId, estimatedQuantity:bomDetail.quantityRemaining]"/>
-                            <label text="ProductNameTemplate" text-map="bomProduct" style="text-warning" condition="bomDetail.quantityRemaining &lt; 0"/>
-                            <label text=" or " condition="bomProductId_has_next &amp;&amp; bomDetail.quantityRemaining != 0"/>
+                                  parameter-map="{workEffortId:workEffortId, typeEnumId:'WeptConsume', productId:bomProductId, estimatedQuantity:bomDetail.quantityRemaining}"/>
+                            <label text="ProductNameTemplate" text-map="bomProduct" style="text-warning" condition="toDecimal(bomDetail.quantityRemaining ?? 0).compare(0) &lt; 0"/>
+                            <label text=" or " condition="bomProductId_has_next &amp;&amp; !toDecimal(bomDetail.quantityRemaining ?? 0).isZero()"/>
                         </widgets>
                         </section-iterate>
                     </container></widgets></section-iterate>
@@ -151,33 +151,33 @@ along with this software (see the LICENSE.md file). If not, see
             <form-list name="ConsumeList" transition="updateRunProduct" list="consumeList" extends="ProduceList">
                 <row-actions>
                     <filter-map-list list="assetSummaryList" to-list="currentSummaryList"><field-map field-name="productId"/></filter-map-list>
-                    <set field="currentSummary" from="currentSummaryList?.getAt(0)"/>
+                    <set field="currentSummary" from="currentSummaryList?.[0]"/>
                     <filter-map-list list="issuanceSummaryList" to-list="currentIssuanceList"><field-map field-name="productId"/></filter-map-list>
-                    <set field="currentIssuanceSummary" from="currentIssuanceList?.getAt(0)"/>
+                    <set field="currentIssuanceSummary" from="currentIssuanceList?.[0]"/>
                     <set field="currentIssuanceQuantity" from="currentIssuanceSummary?.quantity"/>
-                    <set field="estIssueRemaining" from="(estimatedQuantity ?: 0) - (currentIssuanceQuantity ?: 0)"/>
+                    <set field="estIssueRemaining" from="toDecimal(estimatedQuantity ?? 0).subtract(currentIssuanceQuantity ?? 0)"/>
 
                     <entity-find-one entity-name="mantle.product.Product" value-field="consumeProduct"/>
                 </row-actions>
 
                 <field name="currentAssets" align="right"><default-field title="Consumed">
-                    <label text="${ec.l10n.format(currentIssuanceQuantity, null) ?: 'None'}"
-                            style="${(currentIssuanceQuantity ?: 0) == estimatedQuantity ? 'text-success' : 'text-danger'}"/>
+                    <label text="${ec.l10n.format(currentIssuanceQuantity, null) || 'None'}"
+                            style="${toDecimal(currentIssuanceQuantity ?? 0).compare(estimatedQuantity ?? 0) == 0 ? 'text-success' : 'text-danger'}"/>
                 </default-field></field>
                 <field name="submitButton" align="right"><default-field><submit text="Update"/>
                     <link url="updateRunProduct" icon="fa fa-trash"
-                        parameter-map="[workEffortId:workEffortId, productId:productId, fromDate:fromDate, thruDate:ec.user.nowTimestamp]"/>
+                        parameter-map="{workEffortId:workEffortId, productId:productId, fromDate:fromDate, thruDate:ec.user.nowTimestamp}"/>
                 </default-field></field>
                 <field name="assetDialog" align="right">
-                    <conditional-field condition="consumeProduct.assetClassEnumId in ['AsClsInventoryRaw', 'AsClsInventorySub']">
+                    <conditional-field condition="['AsClsInventoryRaw', 'AsClsInventorySub'].includes(consumeProduct.assetClassEnumId)">
                         <dynamic-dialog id="ConsumeProductDialog" button-text="Consume Any" transition="ConsumeProduct" width="900"
-                                parameter-map="[productId:productId, inventoryFacilityId:inventoryFacilityId, quantity:estIssueRemaining]"/>
+                                parameter-map="{productId:productId, inventoryFacilityId:inventoryFacilityId, quantity:estIssueRemaining}"/>
                         <dynamic-dialog id="ConsumeAssetDialog" button-text="Consume" transition="ConsumeAsset" width="900"
-                                parameter-map="[productId:productId, facilityId:inventoryFacilityId, quantity:estIssueRemaining]"/>
+                                parameter-map="{productId:productId, facilityId:inventoryFacilityId, quantity:estIssueRemaining}"/>
                     </conditional-field>
                     <default-field title="">
                         <dynamic-dialog id="ConsumeAssetDialog" button-text="Consume" transition="ConsumeAsset" width="900"
-                                parameter-map="[productId:productId, facilityId:inventoryFacilityId, quantity:estIssueRemaining]"/>
+                                parameter-map="{productId:productId, facilityId:inventoryFacilityId, quantity:estIssueRemaining}"/>
                     </default-field>
                 </field>
             </form-list>

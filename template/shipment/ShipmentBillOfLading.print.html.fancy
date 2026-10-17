@@ -1,0 +1,179 @@
+<style>
+@page mrss-ShipmentBillOfLading { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
+.print-ShipmentBillOfLading { page:mrss-ShipmentBillOfLading; font:10pt Helvetica,Arial,sans-serif; }
+.print-ShipmentBillOfLading .page-header { position:relative; min-height:1.2in; }
+.print-ShipmentBillOfLading .page-footer { margin-top:.2in; }
+.print-ShipmentBillOfLading table { border-collapse:collapse; table-layout:fixed; }
+.print-ShipmentBillOfLading thead { display:table-header-group; }
+.print-ShipmentBillOfLading tbody tr { break-inside:avoid; }
+</style>
+<section class="print-ShipmentBillOfLading">
+<#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<#-- See the mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo service for data preparation -->
+
+<#assign cellPadding = "1pt">
+<#if (shipmentRouteSegmentList?.[0]?.actualStartDate != null)>
+  <#assign actualShipDate = ec.l10n.format(shipmentRouteSegmentList[0].actualStartDate, "dd MMM yyyy")>
+<#elseif (shipment.estimatedShipDate != null)>
+  <#assign actualShipDate = ec.l10n.format(shipment.estimatedShipDate, "dd MMM yyyy")>
+<#else>
+  <#assign actualShipDate = "Not yet shipped">
+</#if>
+<div class="page-header">
+            <div style="font-size:14pt;text-align:center;margin-bottom:0.1in">Bill of Lading #${shipmentId}</div>
+            <table style="margin-bottom:0.1in;width:7.5in">
+                <tbody><tr>
+                    <td style="padding:3pt;width:3.75in">
+                        <div style="font-weight:bold">Shipper</div>
+                        <div>${(fromPartyDetail.organizationName ?? "")}${(fromPartyDetail?.firstName ?? "")} ${(fromPartyDetail?.lastName ?? "")}</div>
+                        <div style="font-weight:bold">Consignee</div>
+                        <div>${(toPartyDetail.organizationName ?? "")}${(toPartyDetail?.firstName ?? "")} ${(toPartyDetail?.lastName ?? "")}</div>
+                    </td>
+                    <td style="padding:3pt;width:2in">
+                        <div style="font-weight:bold">Date</div>
+                        <div>${actualShipDate}</div>
+                    </td>
+                    <td style="padding:3pt;width:1.75in">
+                        <div style="text-align:right">
+                            ${raw(ec.resource.code128Svg(shipmentId, {height: '0.4in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
+                        </div>
+                    </td>
+                </tr></tbody>
+            </table>
+        </div>
+        
+
+
+        <div class="page-body">
+            <div style="border-top:thin solid black">
+                <#-- TODO: show vendor's contact info (customer service or billing address, phone, email)? -->
+                <div style="text-align:center">Bill of Lading #${shipmentId} -- ${actualShipDate}</div>
+            </div>
+        <#--
+            <#list orderPartInfoList as orderPartInfo>
+                <#assign orderPart = orderPartInfo.orderPart>
+                <#if orderPartInfo.isCustomerInternalOrg><#assign contactInfo = orderPartInfo.facilityContactInfo>
+                    <#else><#assign contactInfo = orderPartInfo></#if>
+
+                <table style="margin-bottom:0.1in;width:7.5in">
+                    <tbody><tr>
+                        <td style="padding:3pt;width:2in">
+                            <div style="font-weight:bold">Order Part #</div>
+                            <div>${orderPart.orderPartSeqId}</div>
+                            <div style="font-weight:bold">Part Total</div>
+                            <div>${ec.l10n.formatCurrency(orderPart.partTotal, orderHeader.currencyUomId)}</div>
+                            <#if has(orderPart?.otherPartyOrderId)>
+                                <div style="font-weight:bold"><#if orderPartInfo.isVendorInternalOrg>Customer<#else>Vendor</#if> Order #</div>
+                                <div>${orderPart.otherPartyOrderId}</div>
+                            </#if>
+                        </td>
+                        <td style="padding:3pt;width:2in">
+                            <#if has(orderPartInfo?.shipmentMethodEnum)>
+                                <div style="font-weight:bold">Ship By</div>
+                                <div>${orderPartInfo.shipmentMethodEnum.description}</div>
+                            </#if>
+                            <div style="font-weight:bold">Ship Before</div>
+                            <div>${ec.l10n.format(orderPart.shipBeforeDate, "")}</div>
+                            <div style="font-weight:bold">Delivery Date</div>
+                            <div>${ec.l10n.format(orderPart.estimatedDeliveryDate, "")}</div>
+                        </td>
+                        <td style="padding:3pt;font-size:10pt;width:3.5in">
+                            <div style="font-weight:bold">Ship To</div>
+                            <div>${(orderPartInfo.customerDetail.organizationName ?? "")} ${(orderPartInfo?.customerDetail?.firstName ?? "")} ${(orderPartInfo?.customerDetail?.lastName ?? "")}</div>
+                            <#if has(contactInfo?.postalAddress)>
+                                <div>${(contactInfo?.postalAddress?.address1 ?? "")}<#if has(contactInfo?.postalAddress?.unitNumber)> #${contactInfo.postalAddress.unitNumber}</#if></div>
+                                <#if has(contactInfo?.postalAddress?.address2)><div>${contactInfo.postalAddress.address2}</div></#if>
+                                <div>${(contactInfo.postalAddress.city ?? "")}, ${(contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(contactInfo.postalAddress.postalCode ?? "")}<#if has(contactInfo?.postalAddress?.postalCodeExt)>-${contactInfo.postalAddress.postalCodeExt}</#if><#if has(contactInfo?.postalAddress?.countryGeoId)> ${contactInfo.postalAddress.countryGeoId}</#if></div>
+                            </#if>
+                            <#if has(contactInfo?.telecomNumber)>
+                                <div><#if has(contactInfo?.telecomNumber?.countryCode)>${contactInfo.telecomNumber.countryCode}-</#if><#if has(contactInfo?.telecomNumber?.areaCode)>${contactInfo.telecomNumber.areaCode}-</#if>${(contactInfo.telecomNumber.contactNumber ?? "")}</div>
+                            </#if>
+                            <#if has(contactInfo?.emailAddress)>
+                                <div>${contactInfo.emailAddress}</div>
+                            </#if>
+                            <#--
+                            <#if has(orderPartInfo?.facility)>
+                                <div>${ec.resource.expand("FacilityNameTemplate", "", orderPartInfo.facility)}</div>
+                            </#if>
+                            --><#--
+                        </td>
+                    </tr></tbody>
+                </table>
+
+                <table style="width:100%">
+                    <thead style="font-size:9pt;border-bottom:solid black"><tr>
+                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Item</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div>Type</div></td>
+                        <td style="width:0.8in;padding:${cellPadding}"><div>By Date</div></td>
+                        <td style="width:2.8in;padding:${cellPadding}"><div>Description</div></td>
+                        <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">Qty</div></td>
+                        <td style="width:0.9in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">Total</div></td>
+                    </tr></thead>
+                    <tbody>
+                        <#list orderPartInfo.partOrderItemList as orderItem>
+                            <#assign itemTypeEnum = orderItem.findRelatedOne("ItemType#moqui.basic.Enumeration", true, false)>
+                            <#assign orderItemTotalOut = ec.service.sync().name("mantle.order.OrderServices.get#OrderItemTotal").parameter("orderItem", orderItem).call()>
+                            <tr style="font-size:8pt;border-bottom:thin solid black">
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${orderItem.orderItemSeqId}</div></td>
+                                <td style="padding:${cellPadding}"><div>${(itemTypeEnum?.description ?? "")}</div></td>
+                                <td style="padding:${cellPadding}"><div>${ec.l10n.format(orderItem.requiredByDate, "dd MMM yyyy")}</div></td>
+                                <td style="padding:${cellPadding}">
+                                    <div>${(orderItem.itemDescription ?? "")}</div>
+                                    <#if has(orderItem?.productId)>
+                                        <#assign product = ec.entity.find("mantle.product.Product").condition("productId", orderItem.productId).useCache(true).one()>
+                                        <div>${ec.resource.expand("ProductNameTemplate", "", product)}</div>
+                                    </#if>
+                                </td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(orderItem.quantity ?? "1")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency((orderItem.unitAmount ?? 0), orderHeader.currencyUomId, 3)}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency(orderItemTotalOut.itemTotal, orderHeader.currencyUomId, 3)}</div></td>
+                            </tr>
+                        </#list>
+                        <tr style="font-size:9pt;border-top:solid black">
+                            <td style="padding:${cellPadding}"><div></div></td>
+                            <td style="padding:${cellPadding}"><div></div></td>
+                            <td style="padding:${cellPadding}"><div></div></td>
+                            <td style="padding:${cellPadding}"><div></div></td>
+                            <td style="padding:${cellPadding}"><div></div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right">Part Total</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency(orderPart.partTotal, orderHeader.currencyUomId)}</div></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <#if has(orderPartInfo?.orderPart?.shippingInstructions)>
+                    <div style="margin-top:0.2in;font-weight:bold">Shipping Instructions</div>
+                    <div>${orderPartInfo.orderPart.shippingInstructions}</div>
+                </#if>
+                <#if has(orderPartInfo?.orderPart?.giftMessage)>
+                    <div style="margin-top:0.2in;font-weight:bold">Gift Message</div>
+                    <div>${orderPartInfo.orderPart.giftMessage}</div>
+                </#if>
+
+            </#list>
+        -->
+        </div>
+    
+<div class="page-footer" style="font-size:8pt">
+            <div style="border-top:thin solid black">
+                <#-- TODO: show vendor's contact info (customer service or billing address, phone, email)? -->
+                <div style="text-align:center">Bill of Lading #${shipmentId} -- ${actualShipDate}</div>
+            </div>
+        </div>
+</section>

@@ -74,16 +74,15 @@ along with this software (see the LICENSE.md file). If not, see
                 <actions>
                     <set field="defaultSD" from="ec.service.getServiceDefinition('mantle.product.PromotionServices.apply#Promotion')"/>
                     <set field="sd" from="ec.service.getServiceDefinition(promoService.serviceName)"/>
-                    <set field="paramList" from="new ArrayList()"/>
+                    <set field="paramList" from="[]"/>
                     <script>
-                        def defaultParameterNames = defaultSD.getInParameterNames();
-                        def inParameterNames = sd.getInParameterNames();
-                        for (def name in inParameterNames) {
-                            if(!defaultParameterNames.contains(name)) {
-                                def param = sd.getInParameter(name)
-                                def description = param.first("description")?.text ?: ""
-                                def type = param.attribute("type")
-                                paramList.add([parameterName:name, parameterDescription:description, parameterType:type])
+                        const defaultParameterNames = defaultSD.inParameterNames
+                        for (const name of sd.inParameterNames) {
+                            if (!defaultParameterNames.includes(name)) {
+                                const param = sd.getInParameter(name)
+                                const description = param.first("description")?.text || ""
+                                const type = param.attribute("type")
+                                paramList.push({parameterName:name, parameterDescription:description, parameterType:type})
                             }
                         }
                     </script>
@@ -101,7 +100,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <hidden-parameters><parameter name="productStoreId"/><parameter name="storePromotionId"/></hidden-parameters>
 
                             <field name="parameterName"><default-field title="Name">
-                                <display text="${org.moqui.util.StringUtilities.camelCaseToPretty(parameterName)}"/></default-field></field>
+                                <display text="${StringUtilities.camelCaseToPretty(parameterName)}"/></default-field></field>
                             <field name="parameterDescription"><default-field title="Description">
                                 <display /></default-field></field>
                             <field name="parameterValue">
@@ -111,7 +110,7 @@ along with this software (see the LICENSE.md file). If not, see
                             </field>
                             <field name="deleteButton" align="right"><default-field title="">
                                 <link url="deletePromoParam" icon="fa fa-trash"
-                                      parameter-map="[storePromotionId:storePromotionId, parameterName:parameterName]"
+                                      parameter-map="{storePromotionId:storePromotionId, parameterName:parameterName}"
                                       confirmation="Are you sure you want to remove this Promo Param?"/>
                             </default-field></field>
                             <field name="submitButton" align="right"><default-field title="Update"><submit/></default-field></field>
@@ -154,7 +153,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <field name="delete"><default-field title=""><link url="deletePromoProduct" text=""
                             icon="fa fa-trash" confirmation="Remove product from promotion?"
-                            parameter-map="[productId:productId]"/>
+                            parameter-map="{productId:productId}"/>
                     </default-field></field>
                 </form-list>
             </box-body></container-box>
@@ -168,7 +167,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="storePromotionId" from="storePromotionId"/>
                         <select-field field-name="promoTimesUsed"/>
                     </entity-find>
-                    <set field="promoTimesUsed" from="promoSummaryList?.getAt(0)?.promoTimesUsed ?: 0"/>
+                    <set field="promoTimesUsed" from="promoSummaryList?.[0]?.promoTimesUsed ?: 0"/>
                 </actions>
                 <widgets>
                     <container-box>

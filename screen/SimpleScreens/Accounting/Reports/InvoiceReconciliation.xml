@@ -24,31 +24,33 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getTimePeriodList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
 
     <actions>
-        <set field="invoiceType" from="invoiceType ?: 'Receivable'"/>
+        <set field="invoiceType" from="invoiceType || 'Receivable'"/>
         <set field="statusIdList" from="invoiceType == 'Payable' ? ['InvoiceApproved','InvoicePmtSent','InvoiceBilledThrough'] : ['InvoiceFinalized','InvoiceSent','InvoiceAcked','InvoicePmtRecvd','InvoiceWriteOff']"/>
-        <if condition="'payable'.equalsIgnoreCase(invoiceType)"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
+        <if condition="invoiceType?.toLowerCase() === 'payable'"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
             <else><set field="fromRoleTypeId" value="OrgInternal"/></else></if>
         <set field="glAccountClassEnumId" from="invoiceType == 'Payable' ? 'ACCOUNTS_PAYABLE' : 'ACCOUNTS_RECEIVABLE'"/>
 
         <if condition="timePeriodId"><then>
-            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="[timePeriodId:timePeriodId]" out-map="periodInfo"/>
+            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="{timePeriodId:timePeriodId}" out-map="periodInfo"/>
             <set field="asOfDate" from="periodInfo.thruTimestamp"/>
-            <set field="organizationPartyId" from="organizationPartyId ?: periodInfo.timePeriod.partyId"/>
+            <set field="organizationPartyId" from="organizationPartyId || periodInfo.timePeriod.partyId"/>
         </then><else>
             <set field="asOfDate" from="ec.user.nowTimestamp"/>
         </else></if>
 
-        <script>
-            // look back 12 months
-            Calendar asOfCal = ec.user.getNowCalendar()
-            asOfCal.setTimeInMillis(asOfDate.time)
-            Calendar lookBackCal = (Calendar) asOfCal.clone()
-            lookBackCal.add(Calendar.MONTH, -12)
-            lookBackDate = new Timestamp(lookBackCal.getTimeInMillis())
-            Calendar shortLookBackCal = (Calendar) asOfCal.clone()
-            shortLookBackCal.add(Calendar.MONTH, -1)
-            shortLookBackDate = new Timestamp(shortLookBackCal.getTimeInMillis())
-        </script>
+        <script><![CDATA[
+            // look back 12 months; months are stepped in UTC, the day clamped to the month's last as Calendar does
+            const minusMonths = (millis, months) => {
+                const d = new Date(Number(millis))
+                const day = d.getUTCDate()
+                d.setUTCDate(1)
+                d.setUTCMonth(d.getUTCMonth() - months)
+                d.setUTCDate(Math.min(day, new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate()))
+                return String(d.getTime())
+            }
+            lookBackDate = minusMonths(asOfDate, 12)
+            shortLookBackDate = minusMonths(asOfDate, 1)
+        ]]></script>
 
         <!-- not currently used, looking by glAccountClassEnumId to be more thorough:
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="txTypeMemberList">
@@ -57,7 +59,7 @@ along with this software (see the LICENSE.md file). If not, see
         -->
 
         <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <form-single name="ReportOptions" transition=".">
@@ -78,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
             </default-field></field>
             <field name="timePeriodId"><default-field title="Time Period">
                 <drop-down><dynamic-options transition="getTimePeriodList" server-search="true" min-length="0"
-                        parameter-map="[timePeriodTypeId:'FiscalMonth', pastOnly:'true']">
+                        parameter-map="{timePeriodTypeId:'FiscalMonth', pastOnly:'true'}">
                     <depends-on field="organizationPartyId" parameter="partyId"/>
                 </dynamic-options></drop-down>
             </default-field></field>
@@ -89,8 +91,8 @@ along with this software (see the LICENSE.md file). If not, see
         </form-single>
         <container>
             <link url="${sri.getScreenUrlInstance().getScreenOnlyPath()}" url-type="plain" text="XLS Export" condition="organizationPartyId"
-                  parameter-map="ec.web.requestParameters + [saveFilename:('InvoiceReconciliation_' + organizationPartyId + '.xlsx'),
-                    renderMode:'xlsx', pageNoLimit:'true', lastStandalone:'true']"/>
+                  parameter-map="Object.assign({}, ec.web.requestParameters, {saveFilename:('InvoiceReconciliation_' + organizationPartyId + '.xlsx'),
+                    renderMode:'xlsx', pageNoLimit:'true', lastStandalone:'true'})"/>
             <label text="As of Date ${ec.l10n.format(asOfDate, '')} Look Back Date ${ec.l10n.format(lookBackDate, '')}" type="span"/>
         </container>
 
@@ -131,9 +133,9 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <select-field field-name="invoiceId,itemsTotal,amountApplied,toAmountApplied,totalAmountApplied"/>
             </entity-find>
-            <set field="itemsTotalSum" from="invoiceAgingList.sum({ it.itemsTotal ?: 0.0 }) ?: 0.0"/>
-            <set field="amountAppliedSum" from="(invoiceAgingList.sum({ it.amountApplied ?: 0.0 }) ?: 0.0) + (invoiceAgingList.sum({ it.toAmountApplied ?: 0.0 }) ?: 0.0)"/>
-            <set field="invoiceUnpaid" from="itemsTotalSum - amountAppliedSum"/>
+            <set field="itemsTotalSum" from="invoiceAgingList.reduce((sum, it) => sum.add(it.itemsTotal ?? 0), toDecimal(0))"/>
+            <set field="amountAppliedSum" from="invoiceAgingList.reduce((sum, it) => sum.add(it.amountApplied ?? 0).add(it.toAmountApplied ?? 0), toDecimal(0))"/>
+            <set field="invoiceUnpaid" from="itemsTotalSum.subtract(amountAppliedSum)"/>
 
             <entity-find entity-name="mantle.ledger.report.GlAccountOrgTimePeriodDetail" list="glSummaryList" use-clone="true">
                 <econdition field-name="organizationPartyId"/><econdition field-name="timePeriodId"/>
@@ -141,11 +143,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="endingBalance" operator="not-equals" from="0.0"/>
                 <select-field field-name="accountCode,accountName,endingBalance"/>
             </entity-find>
-            <set field="glEndingTotal" from="glSummaryList*.endingBalance.sum() ?: 0.0"/>
+            <set field="glEndingTotal" from="glSummaryList.reduce((sum, it) => sum.add(it.endingBalance ?? 0), toDecimal(0))"/>
         </actions><widgets>
             <container-row><row-col sm="6">
                 <container-row>
-                    <row-col sm="4" style="text-right"><label text="${ec.l10n.format(invoiceUnpaid - glEndingTotal, '#,##0.00')}" type="h4"/></row-col>
+                    <row-col sm="4" style="text-right"><label text="${ec.l10n.format(invoiceUnpaid.subtract(glEndingTotal), '#,##0.00')}" type="h4"/></row-col>
                     <row-col sm="8"><label text="Aging - GL Difference" type="h4"/></row-col>
                     <row-col sm="4" style="text-right"><label text="${ec.l10n.format(invoiceUnpaid, '#,##0.00')}" type="h4"/></row-col>
                     <row-col sm="8"><label text="${invoiceType} Aging Unpaid" type="h4"/></row-col>
@@ -215,7 +217,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <display format="#,##0.00"/></default-field></field>
                 <field name="glNetAmount" align="right" show-total="sum" from="invoiceType == 'Payable' ? creditMinusDebit : debitMinusCredit">
                     <default-field title="GL Net"><display format="#,##0.00"/></default-field></field>
-                <field name="difference" align="right" show-total="sum" from="unpaidAmount - (invoiceType == 'Payable' ? creditMinusDebit : debitMinusCredit)">
+                <field name="difference" align="right" show-total="sum" from="toDecimal(unpaidAmount ?? 0).subtract((invoiceType == 'Payable' ? creditMinusDebit : debitMinusCredit) ?? 0)">
                     <default-field title="Diff"><display format="#,##0.00"/></default-field></field>
             </form-list>
             <section name="ShowSqlInvoice" condition="invoiceGlList_xafind?.getQueryTextList()"><widgets>
@@ -261,7 +263,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <display format="#,##0.00"/></default-field></field>
                 <field name="glNetAmount" align="right" show-total="sum" from="invoiceType == 'Payable' ? debitMinusCredit : creditMinusDebit">
                     <default-field title="GL Net"><display format="#,##0.00"/></default-field></field>
-                <field name="difference" align="right" show-total="sum" from="amountApplied - (invoiceType == 'Payable' ? debitMinusCredit : creditMinusDebit)">
+                <field name="difference" align="right" show-total="sum" from="toDecimal(amountApplied ?? 0).subtract((invoiceType == 'Payable' ? debitMinusCredit : creditMinusDebit) ?? 0)">
                     <default-field title="Diff"><display format="#,##0.00"/></default-field></field>
             </form-list>
             <section name="ShowSqlPayment" condition="paymentGlList_xafind?.getQueryTextList()"><widgets>
@@ -285,7 +287,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <row-actions>
                     <service-call name="mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance"
-                            in-map="[acctgTransId:acctgTransId]" out-map="context"/>
+                            in-map="{acctgTransId:acctgTransId}" out-map="context"/>
                 </row-actions>
 
                 <field name="acctgTransId"><default-field title="Transaction">
@@ -294,7 +296,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
                 <field name="transactionDate"><default-field title="Date"><display/></default-field></field>
                 <field name="otherPartyId"><default-field><link url="editParty" entity-name="mantle.party.PartyDetail"
-                        text="PartyNameTemplate" link-type="anchor" parameter-map="[partyId:otherPartyId]"/></default-field></field>
+                        text="PartyNameTemplate" link-type="anchor" parameter-map="{partyId:otherPartyId}"/></default-field></field>
 
                 <field name="invoiceId"><default-field title="Invoice">
                     <link url="editInvoice" text="${invoiceId}" link-type="anchor"/></default-field></field>
@@ -319,7 +321,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <row-actions>
                     <service-call name="mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance"
-                            in-map="[acctgTransId:acctgTransId]" out-map="context"/>
+                            in-map="{acctgTransId:acctgTransId}" out-map="context"/>
                 </row-actions>
 
                 <field name="acctgTransId"><default-field title="Transaction">
@@ -328,7 +330,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
                 <field name="transactionDate"><default-field title="Date"><display/></default-field></field>
                 <field name="otherPartyId"><default-field><link url="editParty" entity-name="mantle.party.PartyDetail"
-                        text="PartyNameTemplate" link-type="anchor" parameter-map="[partyId:otherPartyId]"/></default-field></field>
+                        text="PartyNameTemplate" link-type="anchor" parameter-map="{partyId:otherPartyId}"/></default-field></field>
 
                 <field name="invoiceId"><default-field title="Invoice">
                     <link url="editInvoice" text="${invoiceId}" link-type="anchor"/></default-field></field>
@@ -359,7 +361,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <row-actions>
                     <service-call name="mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance"
-                            in-map="[acctgTransId:acctgTransId]" out-map="context"/>
+                            in-map="{acctgTransId:acctgTransId}" out-map="context"/>
                 </row-actions>
 
                 <field name="acctgTransId"><default-field title="Transaction">
@@ -368,7 +370,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
                 <field name="transactionDate"><default-field title="Date"><display/></default-field></field>
                 <field name="otherPartyId"><default-field><link url="editParty" entity-name="mantle.party.PartyDetail"
-                        text="PartyNameTemplate" link-type="anchor" parameter-map="[partyId:otherPartyId]"/></default-field></field>
+                        text="PartyNameTemplate" link-type="anchor" parameter-map="{partyId:otherPartyId}"/></default-field></field>
                 <field name="debitTotal" align="right"><default-field title="Total">
                     <display currency-unit-field="amountUomId"/></default-field></field>
             </form-list>

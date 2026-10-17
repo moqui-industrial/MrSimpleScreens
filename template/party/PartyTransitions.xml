@@ -47,9 +47,9 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="periodPurposeEnumId"/>
         <parameter name="pastOnly"/>
         <actions>
-            <set field="pageIndex" from="pageIndex ?: 0"/>
-            <set field="pageSize" from="pageSize ?: 20"/>
-            <set field="term" from="term ?: ''"/>
+            <set field="pageIndex" from="pageIndex || 0"/>
+            <set field="pageSize" from="pageSize || 20"/>
+            <set field="term" from="term || ''"/>
             <if condition="timePeriodTypeId"><set field="timePeriodTypeId_op" value="in"/></if>
 
             <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod">
@@ -69,9 +69,9 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </else></if>
             <script>
-                def outList = []
-                for (timePeriod in timePeriodList) outList.add([value:timePeriod.timePeriodId, label:timePeriod.periodName])
-                ec.web.sendJsonResponse([options:outList, pageSize:pageSize, count:(timePeriodListCount?:timePeriodList.size())])
+                const outList = []
+                for (const timePeriod of timePeriodList) outList.push({value:timePeriod.timePeriodId, label:timePeriod.periodName})
+                ec.web.sendJsonResponse({options:outList, pageSize:pageSize, count:(timePeriodListCount ?? timePeriodList.length)})
             </script>
         </actions>
         <default-response type="none"/>

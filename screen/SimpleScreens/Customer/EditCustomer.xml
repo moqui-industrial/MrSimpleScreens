@@ -63,7 +63,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="createContact"><service-call name="mantle.sales.AccountServices.create#Contact"/>
         <default-response url="."/></transition>
-    <transition name="removeContact"><service-call name="mantle.sales.AccountServices.delete#Contact" in-map="[partyRelationshipId:partyRelationshipId]"/>
+    <transition name="removeContact"><service-call name="mantle.sales.AccountServices.delete#Contact" in-map="{partyRelationshipId:partyRelationshipId}"/>
         <default-response url="."/></transition>
 
     <transition name="updatePaymentMethodInfo"><default-response url="UpdatePaymentMethodInfo"/></transition>
@@ -124,14 +124,14 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="disabled" operator="not-equals" value="Y" or-null="true"/>
             <order-by field-name="userId"/>
         </entity-find>
-        <if condition="!userAccountList">
+        <if condition="!userAccountList?.length">
             <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
                 <econdition field-name="partyId"/>
                 <econdition field-name="disabled" value="Y"/>
                 <order-by field-name="userId"/>
             </entity-find>
         </if>
-        <set field="userAccount" from="userAccountList ? userAccountList[0] : null"/>
+        <set field="userAccount" from="userAccountList?.length ? userAccountList[0] : null"/>
 
         <entity-find-count entity-name="mantle.request.RequestAndParty" count-field="requestCount">
             <date-filter/><econdition field-name="partyId"/></entity-find-count>
@@ -141,14 +141,14 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="toPartyId" from="partyId"/></entity-find-count>
 
         <entity-find entity-name="mantle.party.PartyRole" list="partyRoleList"><econdition field-name="partyId"/></entity-find>
-        <set field="roleTypeIdList" from="partyRoleList*.roleTypeId"/>
+        <set field="roleTypeIdList" from="partyRoleList.map(it => it.roleTypeId)"/>
     </actions>
     <widgets>
         <container-row><row-col lg="6">
-            <link url="findRequest" text="Requests" badge="${requestCount}" parameter-map="[partyId:partyId]"/>
-            <link url="findOrder" text="Orders" badge="${customerOrderPartCount}" parameter-map="[customerPartyId:partyId]"/>
-            <link url="findShipment" text="Shipments To" badge="${toShipmentCount}" parameter-map="[toPartyId:partyId]"/>
-            <link url="receivableStatement" text="Statement PDF" parameter-map="[toPartyId:partyId]"/>
+            <link url="findRequest" text="Requests" badge="${requestCount}" parameter-map="{partyId:partyId}"/>
+            <link url="findOrder" text="Orders" badge="${customerOrderPartCount}" parameter-map="{customerPartyId:partyId}"/>
+            <link url="findShipment" text="Shipments To" badge="${toShipmentCount}" parameter-map="{toPartyId:partyId}"/>
+            <link url="receivableStatement" text="Statement PDF" parameter-map="{toPartyId:partyId}"/>
 
             <section-include name="NonUserPerson" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
 

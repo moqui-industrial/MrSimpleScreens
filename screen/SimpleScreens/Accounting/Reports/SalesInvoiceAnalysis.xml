@@ -23,12 +23,12 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
 
     <actions>
-        <set field="invoiceDate_poffset" from="invoiceDate_poffset ?: '-1'"/>
-        <set field="invoiceDate_period" from="invoiceDate_period ?: 'month'"/>
+        <set field="invoiceDate_poffset" from="invoiceDate_poffset || '-1'"/>
+        <set field="invoiceDate_period" from="invoiceDate_period || 'month'"/>
 
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
             <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-        <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+        <set field="productItemTypes" from="productItemTypeEgms.map(it => it.enumId)"/>
 
         <if condition="!assetClassEnumId"><set field="assetClassEnumId" value="AsClsInventoryFin"/></if>
     </actions>
@@ -94,12 +94,12 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="totalCost" align="right" show-total="sum"><header-field show-order-by="true"><range-find size="15"/></header-field>
                 <default-field><display format="#,##0.00"/></default-field></field>
 
-            <field name="marginAmount" from="(totalSales ?: 0.0) - (totalCost ?: 0.0)" align="right" show-total="true">
+            <field name="marginAmount" from="toDecimal(totalSales ?? 0).subtract(totalCost ?? 0)" align="right" show-total="true">
                 <default-field title="Margin"><display format="#,##0.00"/></default-field></field>
             <field name="marginPercent" align="right"><default-field title="Margin %">
-                <display text="${ec.l10n.format(totalSales ? ((((totalSales ?: 0.0) - (totalCost ?: 0.0)).divide(totalSales, 10, BigDecimal.ROUND_HALF_EVEN))*100.0) : 0.0, '0.00')}"/></default-field></field>
+                <display text="${ec.l10n.format(!toDecimal(totalSales ?? 0).isZero() ? toDecimal(totalSales).subtract(totalCost ?? 0).divide(totalSales, 10, 'HALF_EVEN').multiply(100) : 0, '0.00')}"/></default-field></field>
             <field name="costPercent" align="right"><default-field title="Cost %">
-                <display text="${ec.l10n.format(totalSales ? (((totalCost ?: 0.0).divide(totalSales, 10, BigDecimal.ROUND_HALF_EVEN))*100.0) : 0.0, '0.00')}"/></default-field></field>
+                <display text="${ec.l10n.format(!toDecimal(totalSales ?? 0).isZero() ? toDecimal(totalCost ?? 0).divide(totalSales, 10, 'HALF_EVEN').multiply(100) : 0, '0.00')}"/></default-field></field>
 
             <field name="find"><header-field title="Find"><submit/></header-field></field>
         </form-list>

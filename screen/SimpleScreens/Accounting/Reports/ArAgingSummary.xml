@@ -22,13 +22,13 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <set field="pageNoLimit" value="true"/>
-        <set field="periodDays" from="(periodDays ?: '30') as int"/>
-        <set field="periodDaysBd" from="new BigDecimal(periodDays)"/>
-        <set field="dateField" from="dateField ?: 'invoiceDate'"/>
+        <set field="periodDays" from="parseInt(periodDays || '30', 10)"/>
+        <set field="periodDaysBd" from="toDecimal(periodDays)"/>
+        <set field="dateField" from="dateField || 'invoiceDate'"/>
         <!-- FUTURE: [OrgTimeZoneMarker] instead of using Java system default TimeZone use one configured for the organization -->
-        <set field="asOfDate" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS', null, TimeZone.getDefault()) : ec.user.nowTimestamp"/>
+        <set field="asOfDate" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS') : ec.user.nowTimestamp"/>
 
-        <set field="orderBySave" from="orderByField ?: 'toName'"/>
+        <set field="orderBySave" from="orderByField || 'toName'"/>
         <set field="orderByField" from="null"/>
         <entity-find entity-name="mantle.account.invoice.InvoicePaymentApplicationSummary" list="invoiceAgingList" use-clone="true">
             <search-form-inputs/>
@@ -84,73 +84,69 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find>
         <set field="orderByField" from="orderBySave"/>
 
-        <set field="agingInfoByToPartyId" from="[:]"/>
-        <set field="totalsRow" from="[toName:'Totals']"/>
+        <set field="agingInfoByToPartyId" from="{}"/>
+        <set field="totalsRow" from="{toName:'Totals'}"/>
         <script><![CDATA[
-            for (invoice in invoiceAgingList) {
-                BigDecimal unpaidAmount = invoice.itemsTotal - (invoice.amountApplied ?: 0.0) - (invoice.toAmountApplied ?: 0.0)
-                if (unpaidAmount == 0.0) continue
-
-                String toPartyId = invoice.toPartyId
-                Map toPartyInfo = agingInfoByToPartyId.get(toPartyId)
+            const addAgingAmount = (map, key, amount) => { map[key] = toDecimal(map[key] ?? 0).add(amount); };
+            for (const invoice of invoiceAgingList) {
+                const unpaidAmount = toDecimal(invoice.itemsTotal ?? 0).subtract(invoice.amountApplied ?? 0).subtract(invoice.toAmountApplied ?? 0);
+                if (unpaidAmount.isZero()) continue;
+                const toPartyId = invoice.toPartyId;
+                let toPartyInfo = agingInfoByToPartyId[toPartyId];
                 if (toPartyInfo == null) {
-                    toPartyInfo = invoice.getMap()
-                    agingInfoByToPartyId.put(toPartyId, toPartyInfo)
-                    toPartyInfo.count = 1
+                    toPartyInfo = invoice.getMap();
+                    agingInfoByToPartyId[toPartyId] = toPartyInfo;
+                    toPartyInfo.count = 1;
                 } else {
-                    toPartyInfo.count++
+                    toPartyInfo.count++;
                 }
-
-                Timestamp dateTs = invoice.get(dateField)
-                Integer dateDays = dateTs != null ? asOfDate - dateTs : null
-                Integer dateIdx = dateDays != null ? (dateDays < 0 ? 0 :
-                        ((dateDays as BigDecimal) / periodDaysBd).setScale(0, BigDecimal.ROUND_DOWN).intValue() + 1) : null
-                if (dateIdx != null && dateIdx > 4) dateIdx = 4
+                const dateTs = invoice[dateField];
+                const dateDays = dateTs != null ? Math.trunc((Number(asOfDate) - Number(dateTs)) / 86400000) : null;
+                const dateIdx = dateDays == null ? null : Math.min(4, dateDays < 0 ? 0 : Math.trunc(dateDays / periodDays) + 1);
                 if (dateIdx != null) {
-                    addToBigDecimalInMap("period" + dateIdx, unpaidAmount, toPartyInfo)
-                    addToBigDecimalInMap("period" + dateIdx, unpaidAmount, totalsRow)
+                    addAgingAmount(toPartyInfo, 'period' + dateIdx, unpaidAmount);
+                    addAgingAmount(totalsRow, 'period' + dateIdx, unpaidAmount);
                 }
-                addToBigDecimalInMap("unpaidAmount", unpaidAmount, toPartyInfo)
-                addToBigDecimalInMap("unpaidAmount", unpaidAmount, totalsRow)
-                addToBigDecimalInMap("balanceDue", unpaidAmount, toPartyInfo)
-                addToBigDecimalInMap("balanceDue", unpaidAmount, totalsRow)
-                addToListInMap("invoiceIds", invoice.invoiceId, toPartyInfo)
+                for (const key of ['unpaidAmount', 'balanceDue']) {
+                    addAgingAmount(toPartyInfo, key, unpaidAmount);
+                    addAgingAmount(totalsRow, key, unpaidAmount);
+                }
+                (toPartyInfo.invoiceIds ??= []).push(invoice.invoiceId);
             }
         ]]></script>
 
         <script><![CDATA[
-            for (payment in paymentAndAppList) {
-                BigDecimal unappliedAmount = payment.amount - (payment.amountApplied ?: 0.0) - (payment.toAmountApplied ?: 0.0)
-                if (unappliedAmount == 0.0) continue
-
-                String toPartyId = payment.fromPartyId // yes, fromPartyId; invoice.toPartyId = payment.fromPartyId
-                Map toPartyInfo = agingInfoByToPartyId.get(toPartyId)
+            for (const payment of paymentAndAppList) {
+                const unappliedAmount = toDecimal(payment.amount ?? 0).subtract(payment.amountApplied ?? 0).subtract(payment.toAmountApplied ?? 0);
+                if (unappliedAmount.isZero()) continue;
+                const toPartyId = payment.fromPartyId; // invoice.toPartyId = payment.fromPartyId
+                let toPartyInfo = agingInfoByToPartyId[toPartyId];
                 if (toPartyInfo == null) {
-                    Map party = ec.entity.find("mantle.party.PartyDetail").condition("partyId", toPartyId).one()
-                    toPartyInfo = [toPartyId:toPartyId, toPseudoId:party.pseudoId,
-                            toName:"${party.firstName ? party.firstName + ' ' : ''}${party.lastName?:''}${party.organizationName?:''}".toString()]
-                    agingInfoByToPartyId.put(toPartyId, toPartyInfo)
+                    const party = ec.entity.find('mantle.party.PartyDetail').condition('partyId', toPartyId).one();
+                    toPartyInfo = {toPartyId:toPartyId, toPseudoId:party?.pseudoId,
+                        toName:ec.resource.expand('PartyNameTemplate', '', party)};
+                    agingInfoByToPartyId[toPartyId] = toPartyInfo;
                 }
-
-                addToBigDecimalInMap("unappliedTotal", unappliedAmount, toPartyInfo)
-                addToBigDecimalInMap("unappliedTotal", unappliedAmount, totalsRow)
-                addToBigDecimalInMap("balanceDue", -unappliedAmount, toPartyInfo)
-                addToBigDecimalInMap("balanceDue", -unappliedAmount, totalsRow)
-                addToListInMap("paymentIds", payment.paymentId, toPartyInfo)
+                for (const map of [toPartyInfo, totalsRow]) {
+                    map.unappliedTotal = toDecimal(map.unappliedTotal ?? 0).add(unappliedAmount);
+                    map.balanceDue = toDecimal(map.balanceDue ?? 0).subtract(unappliedAmount);
+                }
+                (toPartyInfo.paymentIds ??= []).push(payment.paymentId);
             }
         ]]></script>
 
         <!-- make and sort the list -->
-        <set field="agingInfoList" from="new ArrayList(agingInfoByToPartyId.values())"/>
-        <script>orderMapList(agingInfoList, orderByField.split(',') as List)</script>
+        <set field="agingInfoList" from="Object.values(agingInfoByToPartyId)"/>
+        <script>orderMapList(agingInfoList, orderByField.split(','))</script>
 
         <!-- add summary total and percent rows -->
         <script>
-            agingInfoList.add(totalsRow)
-            BigDecimal unpaidAmount = totalsRow.unpaidAmount
-            if (unpaidAmount) agingInfoList.add([toName:'Percent', period0:((totalsRow.period0 ?: 0.0)/unpaidAmount)*100.0,
-                    period1:((totalsRow.period1 ?: 0.0)/unpaidAmount)*100.0, period2:((totalsRow.period2 ?: 0.0)/unpaidAmount)*100.0,
-                    period3:((totalsRow.period3 ?: 0.0)/unpaidAmount)*100.0, period4:((totalsRow.period4 ?: 0.0)/unpaidAmount)*100.0])
+            agingInfoList.push(totalsRow);
+            if (!toDecimal(totalsRow.unpaidAmount ?? 0).isZero()) {
+                const percentRow = {toName:'Percent'};
+                for (let i = 0; i &lt; 5; i++) percentRow['period' + i] = toDecimal(totalsRow['period' + i] ?? 0).divide(totalsRow.unpaidAmount).multiply(100);
+                agingInfoList.push(percentRow);
+            }
         </script>
     </actions>
     <widgets>
@@ -177,10 +173,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field></field>
 
             <field name="toPseudoId"><header-field title="To ID" show-order-by="true"/>
-                <default-field><link url="editParty" text="${toPseudoId}" link-type="anchor" parameter-map="[partyId:toPartyId]"/></default-field></field>
+                <default-field><link url="editParty" text="${toPseudoId}" link-type="anchor" parameter-map="{partyId:toPartyId}"/></default-field></field>
             <field name="toName">
                 <header-field title="To Name" show-order-by="true"/>
-                <default-field><link url="editParty" text="${toName}" link-type="anchor" parameter-map="[partyId:toPartyId]"/></default-field>
+                <default-field><link url="editParty" text="${toName}" link-type="anchor" parameter-map="{partyId:toPartyId}"/></default-field>
             </field>
             <field name="count"><header-field show-order-by="true"/><default-field><display/></default-field></field>
 
@@ -196,14 +192,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field><display format="#,##0.00"/></default-field></field>
             <field name="unpaidAmount" align="right"><header-field title="Unpaid" show-order-by="true"/><default-field>
                 <link url="findInvoice" text="${ec.l10n.format(unpaidAmount, '#,##0.00')}" link-type="anchor"
-                        parameter-map="[invoiceId:(invoiceIds.join(',')), invoiceId_op:'in']" condition="unpaidAmount &amp;&amp; invoiceIds"/>
-                <label text="${ec.l10n.format(unpaidAmount, '#,##0.00')}" condition="unpaidAmount &amp;&amp; !invoiceIds"/>
+                        parameter-map="{invoiceId:(invoiceIds.join(',')), invoiceId_op:'in'}" condition="!toDecimal(unpaidAmount ?? 0).isZero() &amp;&amp; invoiceIds?.length > 0"/>
+                <label text="${ec.l10n.format(unpaidAmount, '#,##0.00')}" condition="!toDecimal(unpaidAmount ?? 0).isZero() &amp;&amp; !invoiceIds?.length"/>
             </default-field></field>
 
             <field name="unappliedTotal" align="right"><header-field title="Overpaid" show-order-by="true"/><default-field>
                 <link url="findPayment" text="${ec.l10n.format(unappliedTotal, '#,##0.00')}" link-type="anchor"
-                        parameter-map="[paymentId:(paymentIds.join(',')), paymentId_op:'in']" condition="unappliedTotal &amp;&amp; paymentIds"/>
-                <label text="${ec.l10n.format(unappliedTotal, '#,##0.00')}" condition="unappliedTotal &amp;&amp; !paymentIds"/>
+                        parameter-map="{paymentId:(paymentIds.join(',')), paymentId_op:'in'}" condition="!toDecimal(unappliedTotal ?? 0).isZero() &amp;&amp; paymentIds?.length > 0"/>
+                <label text="${ec.l10n.format(unappliedTotal, '#,##0.00')}" condition="!toDecimal(unappliedTotal ?? 0).isZero() &amp;&amp; !paymentIds?.length"/>
             </default-field></field>
             <field name="balanceDue" align="right"><header-field show-order-by="true"/>
                 <default-field><display format="#,##0.00"/></default-field></field>

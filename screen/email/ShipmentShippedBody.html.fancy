@@ -1,0 +1,64 @@
+<#-- Ported from the original FreeMarker template; HTML interpolation is escaped.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<table border="0" cellpadding="8px" cellspacing="0" width="100%"><tr>
+    <td width="50%">
+        <h1>Shipment ${shipmentId}</h1>
+        <#if has(detailLinkPath)><#list orderIdSet as orderId>
+            <h2><a href="<#if detailLinkPath.startsWith("http")>${detailLinkPath}<#else>http://${storeDomain}/${detailLinkPath}</#if>?orderId=${orderId}">Order ${orderId}</a></h2><br/>
+        </#list></#if>
+        <#if has(invoiceList)>
+            <h3>Invoice <#list invoiceList as invoice>${invoice.invoiceId}<#if has(invoice?.otherPartyOrderId) || has(invoice?.referenceNumber)> - PO ${(invoice.otherPartyOrderId ?? invoice.referenceNumber)}</#if><#if invoice_has_next>, </#if></#list></h3>
+        </#if>
+        <#if has(originFacility)><h4>Shipping from ${originFacility.facilityName}</h4></#if>
+    </td>
+    <td width="50%">
+    <#if has(firstShipmentMethodEnum)><strong>Ship By</strong> ${firstShipmentMethodEnum.description}<br/></#if>
+    <#if has(toContactInfo?.postalAddress)>
+        <#if has(toContactInfo?.postalAddress?.toName) || has(toContactInfo?.postalAddress?.attnName)>
+            <#if has(toContactInfo?.postalAddress?.toName)><strong>To: ${toContactInfo.postalAddress.toName}</strong><br/></#if>
+            <#if has(toContactInfo?.postalAddress?.attnName)><strong>Attn: ${toContactInfo.postalAddress.attnName}</strong><br/></#if>
+        <#else>
+            <strong>${(toPartyDetail?.organizationName ?? "")} ${(toPartyDetail?.firstName ?? "")} ${(toPartyDetail?.middleName ?? "")} ${(toPartyDetail?.lastName ?? "")}</strong><br/>
+        </#if>
+    ${(toContactInfo?.postalAddress?.address1 ?? "")}<#if has(toContactInfo?.postalAddress?.unitNumber)> #${toContactInfo.postalAddress.unitNumber}</#if><br/>
+        <#if has(toContactInfo?.postalAddress?.address2)>${toContactInfo.postalAddress.address2}<br/></#if>
+    ${(toContactInfo.postalAddress.city ?? "")}, ${(toContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(toContactInfo.postalAddress.postalCode ?? "")}<#if has(toContactInfo?.postalAddress?.postalCodeExt)>-${toContactInfo.postalAddress.postalCodeExt}</#if><#if has(toContactInfo?.postalAddress?.countryGeoId)> ${toContactInfo.postalAddress.countryGeoId}</#if><br/>
+    </#if>
+    <#if has(toContactInfo?.telecomNumber)>
+        <#if has(toContactInfo?.telecomNumber?.countryCode)>${toContactInfo.telecomNumber.countryCode}-</#if><#if has(toContactInfo?.telecomNumber?.areaCode)>${toContactInfo.telecomNumber.areaCode}-</#if>${(toContactInfo.telecomNumber.contactNumber ?? "")}<br/>
+    </#if>
+    <#if has(toContactInfo?.emailAddress)>
+        ${toContactInfo.emailAddress}<br/>
+    </#if>
+    </td>
+</tr></table>
+
+<#list shipmentPackageList as shipmentPackage>
+    <#-- <#assign shipmentBoxType = (shipmentPackage.boxType ?? '')> -->
+    <#assign weightUom = (shipmentPackage.weightUom ?? '')>
+    <#assign shipmentPackageContentList = shipmentPackage.contents>
+    <#assign packageRouteSeg = ec.entity.find("mantle.shipment.ShipmentPackageRouteSeg").condition("shipmentId", shipmentId).condition("shipmentPackageSeqId", shipmentPackage.shipmentPackageSeqId).condition("shipmentRouteSegmentSeqId", firstRouteSegment.shipmentRouteSegmentSeqId).one()>
+    <h2>Package ${shipmentPackage.shipmentPackageSeqId}</h2>
+
+    <#if has(shipmentPackage?.weight)>Weight ${ec.l10n.format(shipmentPackage.weight, "")} ${(weightUom?.description ?? "")}<br/></#if>
+    <strong>Tracking ${(firstCarrierDetail?.pseudoId ?? "")} ${(packageRouteSeg?.trackingCode ?? "N/A")}</strong><br/>
+
+    <table border="0" cellpadding="8px" cellspacing="0" width="100%">
+        <tr>
+            <td><strong>Description</strong></td>
+            <td align="right"><strong>Quantity</strong></td>
+        </tr>
+        <#list shipmentPackageContentList as shipmentPackageContent>
+            <#assign product = shipmentPackageContent.product>
+            <tr>
+                <td>${(product.productName ?? shipmentPackageContent.productId)}</td>
+                <td align="right">${shipmentPackageContent.quantity}</td>
+            </tr>
+        </#list>
+    </table>
+</#list>
+<#if has(shipment?.handlingInstructions)>
+    <strong>Shipping Instructions</strong><br/>
+    ${shipment.handlingInstructions}<br/>
+</#if>

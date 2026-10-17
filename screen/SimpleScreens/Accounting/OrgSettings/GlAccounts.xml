@@ -36,8 +36,8 @@ along with this software (see the LICENSE.md file). If not, see
 
         <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" in-map="context" out-map="context"/>
 
-        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask || ec.user.getPreference('GlAccountCodeMask')"/>
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <label text="GL Accounts for ${organization.organizationName}" type="h3"/>
@@ -48,7 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="organizationPartyId"><default-field><hidden/></default-field></field>
                 <field name="glAccountId"><default-field title="GL Account"><drop-down allow-empty="true">
                     <dynamic-options transition="getGlAccountListPaginated" server-search="true" min-length="0"
-                            parameter-map="[organizationPartyId:null]"/>
+                            parameter-map="{organizationPartyId:null}"/>
                 </drop-down></default-field></field>
                 <field name="submitButton"><default-field title="Add"><submit/></default-field></field>
             </form-single>
@@ -66,7 +66,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="parentGlAccountId"><default-field title="Parent Account">
                 <link url="editGlAccount" entity-name="mantle.ledger.account.GlAccount" link-type="anchor"
-                        condition="parentGlAccountId" parameter-map="[glAccountId:parentGlAccountId]"
+                        condition="parentGlAccountId" parameter-map="{glAccountId:parentGlAccountId}"
                         text="${accountCodeFormatter != null ? accountCodeFormatter.valueToString(accountCode) : accountCode}: ${accountName}"/>
             </default-field></field>
 
@@ -90,7 +90,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field>
                     <link url="deleteGlAccountOrganization" text=" " icon="fa fa-trash"
                             confirmation="Delete? Will be automatically added if any transactions are posted to it."
-                            parameter-map="[partyId:partyId, organizationPartyId:organizationPartyId, glAccountId:glAccountId]"/>
+                            parameter-map="{partyId:partyId, organizationPartyId:organizationPartyId, glAccountId:glAccountId}"/>
                 </default-field>
             </field>
         </form-list>

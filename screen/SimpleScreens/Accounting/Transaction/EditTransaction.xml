@@ -44,7 +44,7 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="acctgTrans == null"><return error="true" message="Transaction not found with ID ${acctgTransId}"/></if>
         <set field="organizationPartyId" from="acctgTrans.organizationPartyId"/>
         <service-call name="mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance"
-                in-map="[acctgTransId:acctgTransId]" out-map="context"/>
+                in-map="{acctgTransId:acctgTransId}" out-map="context"/>
 
         <entity-find-one entity-name="mantle.party.PartyDetail" value-field="orgDetail">
             <field-map field-name="partyId" from="acctgTrans.organizationPartyId"/></entity-find-one>
@@ -58,19 +58,19 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find-one entity-name="moqui.basic.Uom" value-field="origCurrencyAmountUom">
             <field-map field-name="uomId" from="acctgTrans.originalCurrencyUomId"/></entity-find-one>
 
-        <set field="glJournal" from="acctgTrans.'mantle.ledger.transaction.GlJournal'"/>
+        <set field="glJournal" from="acctgTrans['mantle.ledger.transaction.GlJournal']"/>
 
         <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry" list="entryList">
             <econdition field-name="acctgTransId"/><order-by field-name="acctgTransEntrySeqId"/></entity-find>
 
         <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <section name="NotPostedSection"><condition><expression>acctgTrans.isPosted != "Y"</expression></condition><widgets>
             <link url="postAcctgTrans" text="Post Transaction" confirmation="Post transaction?"/>
             <link url="postAcctgTrans" text="Force Post" confirmation="Force post transaction, ignoring closed periods?"
-                    btn-type="danger" condition="ec.user.hasPermission('GL_POST_CLOSED')" parameter-map="[forcePost:'true']"/>
+                    btn-type="danger" condition="ec.user.hasPermission('GL_POST_CLOSED')" parameter-map="{forcePost:'true'}"/>
             <link url="deleteAcctgTrans" text="Delete Transaction" confirmation="Really delete this transaction?"/>
 
             <container-dialog id="UpdateTxDialog" button-text="Update Transaction" width="900">
@@ -81,7 +81,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="enumTypeId" value="AcctgTransType"/></widget-template-include>
                     </default-field></field>
                     <field name="organizationPartyId"><default-field title="Organization">
-                        <display text="${orgDetail.organizationName?:''} [${orgDetail.pseudoId}]"/>
+                        <display text="${orgDetail.organizationName||''} [${orgDetail.pseudoId}]"/>
                     </default-field></field>
 
                     <field name="transactionDate"><default-field><date-time/></default-field></field>
@@ -114,9 +114,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="description"><default-field><text-area cols="80" rows="2"/></default-field></field>
 
                     <field name="invoiceId"><default-field title="Invoice ID"><text-line size="20"/>
-                        <link url="editInvoice" text="${invoiceId?:''}" link-type="anchor"/></default-field></field>
+                        <link url="editInvoice" text="${invoiceId||''}" link-type="anchor"/></default-field></field>
                     <field name="paymentId"><default-field title="Payment ID"><text-line size="20"/>
-                        <link url="editPayment" text="${paymentId?:''}" link-type="anchor"/></default-field></field>
+                        <link url="editPayment" text="${paymentId||''}" link-type="anchor"/></default-field></field>
                     <field name="paymentApplicationId"><default-field><text-line size="20"/></default-field></field>
 
                     <field name="finAccountTransId"><default-field><text-line size="20"/></default-field></field>
@@ -157,7 +157,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         </widgets><fail-widgets>
             <link url="unpostAcctgTrans" text="Un-post Transaction" confirmation="Un-post transaction?"/>
-            <link url="postReverseAcctgTrans" text="Create Reverse Transaction (don't post)" parameter-map="[createOnly:'true']"
+            <link url="postReverseAcctgTrans" text="Create Reverse Transaction (don't post)" parameter-map="{createOnly:'true'}"
                     condition="!acctgTrans.reversedByAcctgTransId"/>
             <link url="postReverseAcctgTrans" text="Create and Post Reverse Transaction"
                     condition="!acctgTrans.reverseOfAcctgTransId &amp;&amp; !acctgTrans.reversedByAcctgTransId"
@@ -170,9 +170,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="originalCurrencyUomId"><default-field><ignored/></default-field></field>
 
                     <field name="invoiceId"><default-field title="Invoice ID"><text-line size="20"/>
-                        <link url="editInvoice" text="${invoiceId?:''}" link-type="anchor"/></default-field></field>
+                        <link url="editInvoice" text="${invoiceId||''}" link-type="anchor"/></default-field></field>
                     <field name="paymentId"><default-field title="Payment ID"><text-line size="20"/>
-                        <link url="editPayment" text="${paymentId?:''}" link-type="anchor"/></default-field></field>
+                        <link url="editPayment" text="${paymentId||''}" link-type="anchor"/></default-field></field>
                     <field name="paymentApplicationId"><default-field><text-line size="20"/></default-field></field>
 
                     <field name="finAccountTransId"><default-field><text-line size="20"/></default-field></field>
@@ -188,17 +188,17 @@ along with this software (see the LICENSE.md file). If not, see
             <row-col lg="1"><label text="ID" type="strong"/></row-col>
             <row-col lg="3"><label text="${acctgTransId}" type="strong" style="${acctgTrans.reversedByAcctgTransId || acctgTrans.reverseOfAcctgTransId ? 'text-warning' : 'text-info'}"/></row-col>
             <row-col lg="1"><label text="Organization" type="strong"/></row-col>
-            <row-col lg="3"><label text="${orgDetail.organizationName?:''} [${orgDetail.pseudoId}]" type="p"/></row-col>
+            <row-col lg="3"><label text="${orgDetail.organizationName||''} [${orgDetail.pseudoId}]" type="p"/></row-col>
             <row-col lg="1"><label text="TX Type" type="strong"/></row-col>
-            <row-col lg="3"><label text="${typeEnum?.description?:''}"/></row-col>
+            <row-col lg="3"><label text="${typeEnum?.description||''}"/></row-col>
         </container-row>
         <container-row>
             <row-col lg="1"><label text="Journal" type="strong"/></row-col>
-            <row-col lg="3"><label text="${glJournal?.glJournalName?:''} [${acctgTrans.glJournalId?:''}]" type="p"/></row-col>
+            <row-col lg="3"><label text="${glJournal?.glJournalName||''} [${acctgTrans.glJournalId||''}]" type="p"/></row-col>
             <row-col lg="1"><label text="Currency" type="strong"/></row-col>
             <row-col lg="3"><label text="${amountUom?.description} [${amountUom?.uomId}]" type="p"/></row-col>
             <row-col lg="1"><label text="Orig. Currency" type="strong"/></row-col>
-            <row-col lg="3"><label text="${origCurrencyAmountUom?.description?:''} [${origCurrencyAmountUom?.uomId?:''}]"/></row-col>
+            <row-col lg="3"><label text="${origCurrencyAmountUom?.description||''} [${origCurrencyAmountUom?.uomId||''}]"/></row-col>
         </container-row>
         <container-row>
             <row-col lg="1"><label text="TX Date" type="strong"/></row-col>
@@ -210,39 +210,39 @@ along with this software (see the LICENSE.md file). If not, see
         </container-row>
         <container-row>
             <row-col lg="1"><label text="Invoice" type="strong"/></row-col>
-            <row-col lg="3"><link url="editInvoice" text="${acctgTrans.invoiceId?:''}" link-type="anchor" parameter-map="[invoiceId:acctgTrans.invoiceId]"/></row-col>
+            <row-col lg="3"><link url="editInvoice" text="${acctgTrans.invoiceId||''}" link-type="anchor" parameter-map="{invoiceId:acctgTrans.invoiceId}"/></row-col>
             <row-col lg="1"><label text="Payment" type="strong"/></row-col>
-            <row-col lg="3"><link url="editPayment" text="${acctgTrans.paymentId?:''}" link-type="anchor" parameter-map="[paymentId:acctgTrans.paymentId]"/></row-col>
+            <row-col lg="3"><link url="editPayment" text="${acctgTrans.paymentId||''}" link-type="anchor" parameter-map="{paymentId:acctgTrans.paymentId}"/></row-col>
             <row-col lg="1"><label text="Pmnt Appl" type="strong"/></row-col>
-            <row-col lg="3"><label text="${acctgTrans.paymentApplicationId?:''}"/></row-col>
+            <row-col lg="3"><label text="${acctgTrans.paymentApplicationId||''}"/></row-col>
         </container-row>
         <container-row>
             <row-col lg="1"><label text="Shipment" type="strong"/></row-col>
-            <row-col lg="3"><link url="shipmentDetail" text="${acctgTrans.shipmentId?:''}" link-type="anchor" parameter-map="[shipmentId:acctgTrans.shipmentId]"/></row-col>
+            <row-col lg="3"><link url="shipmentDetail" text="${acctgTrans.shipmentId||''}" link-type="anchor" parameter-map="{shipmentId:acctgTrans.shipmentId}"/></row-col>
             <row-col lg="1"><label text="Asset" type="strong"/></row-col>
-            <row-col lg="3"><link url="assetDetail" text="${acctgTrans.assetId?:''}" link-type="anchor" parameter-map="[assetId:acctgTrans.assetId]"/></row-col>
+            <row-col lg="3"><link url="assetDetail" text="${acctgTrans.assetId||''}" link-type="anchor" parameter-map="{assetId:acctgTrans.assetId}"/></row-col>
             <row-col lg="1"><label text="Voucher Ref" type="strong"/></row-col>
-            <row-col lg="3"><label text="${acctgTrans.voucherRef?:''}"/></row-col>
+            <row-col lg="3"><label text="${acctgTrans.voucherRef||''}"/></row-col>
         </container-row>
         <container-row>
             <row-col lg="1"><label text="Fin Acct TX" type="strong"/></row-col>
-            <row-col lg="3"><label text="${acctgTrans.finAccountTransId?:''}"/></row-col>
+            <row-col lg="3"><label text="${acctgTrans.finAccountTransId||''}"/></row-col>
             <row-col lg="1"><label text="Other Party" type="strong"/></row-col>
-            <row-col lg="3"><label text="${otherDetail?.organizationName?:''}${otherDetail?.firstName?:''} ${otherDetail?.lastName?:''} [${otherDetail?.pseudoId?:''}]"/></row-col>
+            <row-col lg="3"><label text="${otherDetail?.organizationName||''}${otherDetail?.firstName||''} ${otherDetail?.lastName||''} [${otherDetail?.pseudoId||''}]"/></row-col>
             <row-col lg="1"><label text="Voucher Date" type="strong"/></row-col>
             <row-col lg="3"><label text="${ec.l10n.format(acctgTrans.voucherDate, null)}"/></row-col>
         </container-row>
         <container-row>
             <row-col lg="1"><label text="Description" type="strong"/></row-col>
-            <row-col lg="11"><label text="${acctgTrans.description?:''}" type="p"/></row-col>
+            <row-col lg="11"><label text="${acctgTrans.description||''}" type="p"/></row-col>
         </container-row>
         <container-row>
             <row-col lg="1"><label text="Reverse Of" type="strong"/></row-col>
             <row-col lg="3"><link url="editTransaction" text="${acctgTrans.reverseOfAcctgTransId}" link-type="anchor-button"
-                    parameter-map="[acctgTransId:acctgTrans.reverseOfAcctgTransId]" condition="acctgTrans.reverseOfAcctgTransId"/></row-col>
+                    parameter-map="{acctgTransId:acctgTrans.reverseOfAcctgTransId}" condition="acctgTrans.reverseOfAcctgTransId"/></row-col>
             <row-col lg="1"><label text="Reversed By" type="strong"/></row-col>
             <row-col lg="3"><link url="editTransaction" text="${acctgTrans.reversedByAcctgTransId}" link-type="anchor-button"
-                    parameter-map="[acctgTransId:acctgTrans.reversedByAcctgTransId]" condition="acctgTrans.reversedByAcctgTransId"/></row-col>
+                    parameter-map="{acctgTransId:acctgTrans.reversedByAcctgTransId}" condition="acctgTrans.reversedByAcctgTransId"/></row-col>
         </container-row>
         <container-row>
             <row-col lg="1"><label text="Debit" type="strong"/></row-col>
@@ -268,7 +268,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </default-field></field>
                     <field name="glAccountId"><default-field title="GL Account"><drop-down allow-empty="true">
                         <dynamic-options transition="getGlAccountListPaginated" server-search="true" min-length="0"
-                                parameter-map="[onlyPostingAllowed:'true', organizationPartyId:organizationPartyId]"/>
+                                parameter-map="{onlyPostingAllowed:'true', organizationPartyId:organizationPartyId}"/>
                     </drop-down></default-field></field>
 
                     <field name="submitButton"><default-field title="Add"><submit/></default-field></field>
@@ -303,7 +303,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="glAccountId">
                     <conditional-field condition="acctgTrans.isPosted != 'Y'"><drop-down allow-empty="true">
                         <dynamic-options transition="getGlAccountListPaginated" server-search="true" min-length="0"
-                                parameter-map="[onlyPostingAllowed:'true', organizationPartyId:organizationPartyId]"/>
+                                parameter-map="{onlyPostingAllowed:'true', organizationPartyId:organizationPartyId}"/>
                     </drop-down></conditional-field>
                     <default-field title="GL Account"><display-entity entity-name="mantle.ledger.account.GlAccount"
                             text="GlAccountNameTemplate"/>
@@ -316,7 +316,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <link url="editProduct" entity-name="mantle.product.Product" text="ProductNameTemplate" link-type="anchor"/>
                 </default-field></field>
                 <field name="assetId"><default-field title="Asset">
-                    <link url="assetDetail" text="${assetId?:''}" link-type="anchor"/></default-field></field>
+                    <link url="assetDetail" text="${assetId||''}" link-type="anchor"/></default-field></field>
 
                 <field name="submitButton">
                     <conditional-field condition="acctgTrans.isPosted != 'Y'" title="Update"><submit/></conditional-field>
@@ -359,7 +359,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <display-entity text="UsernameTemplate" entity-name="mantle.party.PersonWithUserAccount" key-field-name="userId"/></default-field></field>
                 <field name="pkSecondaryValue"><default-field title="Entry"><display/></default-field></field>
                 <field name="changedFieldName"><default-field title="Field">
-                    <display text="${org.moqui.util.StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
+                    <display text="${StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
                 <field name="oldValueText"><default-field title="From">
                     <display text="${ec.entity.formatFieldString(changedEntityName, changedFieldName, oldValueText)}"/></default-field></field>
                 <field name="newValueText"><default-field title="To">

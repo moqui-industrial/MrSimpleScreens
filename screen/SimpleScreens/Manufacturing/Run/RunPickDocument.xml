@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="mantle.work.ManufacturingServices.get#ProductionRunPickInfo" in-map="context" out-map="context"/>
     </actions>
     <widgets>
-        <render-mode><text type="xsl-fo" location="component://SimpleScreens/template/work/ProductionRunPick.xsl-fo.ftl"
+        <render-mode><text type="html-print" location="component://SimpleScreens/template/work/ProductionRunPick.print.html.fancy"
                 template="true" encode="false" no-boundary-comment="true"/></render-mode>
     </widgets>
 </screen>

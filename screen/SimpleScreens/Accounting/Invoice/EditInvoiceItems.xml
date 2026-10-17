@@ -36,7 +36,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <service-call name="mantle.account.InvoiceServices.get#InvoiceBasicInfo" out-map="context"
-                in-map="[invoiceId:invoiceId, activeOrgId:activeOrgId]"/>
+                in-map="{invoiceId:invoiceId, activeOrgId:activeOrgId}"/>
 
         <!-- get invoice items -->
         <entity-find entity-name="mantle.account.invoice.InvoiceItem" list="invoiceItemList">
@@ -46,16 +46,19 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="invoiceItemSeqId"/>
         </entity-find>
 
-        <set field="topItemList" from="invoiceItemList.findAll({ it.parentItemSeqId == null })"/>
+        <set field="topItemList" from="invoiceItemList.filter(it => it.parentItemSeqId == null)"/>
         <!-- put items with parentItemSeqId in the list after their parent -->
         <script><![CDATA[
-            itemWithChildrenSet = new HashSet()
-            List reverseList = invoiceItemList.cloneList().orderByFields(["-invoiceItemSeqId"])
-            for (invoiceItem in reverseList) {
+            itemWithChildrenSet = [];
+            invoiceItemList = Array.from(invoiceItemList);
+            const reverseList = Array.from(invoiceItemList).reverse();
+            for (const invoiceItem of reverseList) {
                 if (invoiceItem.parentItemSeqId) {
-                    itemWithChildrenSet.add(invoiceItem.parentItemSeqId)
-                    invoiceItemList.move(invoiceItemList.indexMatching([invoiceItemSeqId:invoiceItem.invoiceItemSeqId]),
-                            invoiceItemList.indexMatching([invoiceItemSeqId:invoiceItem.parentItemSeqId])+1)
+                    itemWithChildrenSet.push(invoiceItem.parentItemSeqId);
+                    const index = invoiceItemList.findIndex(it => it.invoiceItemSeqId == invoiceItem.invoiceItemSeqId);
+                    const moved = invoiceItemList.splice(index, 1)[0];
+                    const parentIndex = invoiceItemList.findIndex(it => it.invoiceItemSeqId == invoiceItem.parentItemSeqId);
+                    invoiceItemList.splice(parentIndex + 1, 0, moved);
                 }
             }
         ]]></script>
@@ -73,7 +76,7 @@ along with this software (see the LICENSE.md file). If not, see
         </else></if>
 
         <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <section name="AddInvoiceItemSection" condition="invoiceEditable"><widgets><container>
@@ -96,7 +99,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <field name="typeGlAccount"><default-field title="Default GL Account">
                         <display dynamic-transition="getItemTypeGlAccount" also-hidden="false" depends-optional="true"
-                                parameter-map="[organizationPartyId:organizationPartyId, direction:(isFromPartyOrgInternal ? 'O' : 'I')]">
+                                parameter-map="{organizationPartyId:organizationPartyId, direction:(isFromPartyOrgInternal ? 'O' : 'I')}">
                             <depends-on field="itemTypeEnumId"/><depends-on field="productId"/></display>
                     </default-field></field>
                     <field name="overrideGlAccountId"><default-field title="Override GL Account"><drop-down allow-empty="true">
@@ -113,7 +116,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="invoiceItemSeqId"><default-field title="Item"><display style="${parentItemSeqId ? 'text-info' : 'text-strong'}"/></default-field></field>
             <field name="parentItemSeqId" align="center">
-                <conditional-field condition="itemWithChildrenSet.contains(invoiceItemSeqId)">
+                <conditional-field condition="itemWithChildrenSet.includes(invoiceItemSeqId)">
                     <display text=" "/></conditional-field>
                 <conditional-field condition="invoiceEditable"><drop-down allow-empty="true">
                     <list-options list="topItemList" key="${invoiceItemSeqId}" text="${invoiceItemSeqId}"/>
@@ -156,7 +159,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="typeGlAccount"><default-field title="Default GL Account">
                 <display dynamic-transition="getItemTypeGlAccount" also-hidden="false" depends-optional="true"
-                        parameter-map="[organizationPartyId:organizationPartyId, direction:(isFromPartyOrgInternal ? 'O' : 'I')]">
+                        parameter-map="{organizationPartyId:organizationPartyId, direction:(isFromPartyOrgInternal ? 'O' : 'I')}">
                     <depends-on field="itemTypeEnumId"/><depends-on field="productId"/></display>
             </default-field></field>
             <field name="overrideGlAccountId">
@@ -173,13 +176,13 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="itemDate"><default-field><date-time/></default-field></field>
 
             <!-- NOTE: CurrencyRoundingMarker scale here may vary by currency, make configurable -->
-            <field name="total" from="(((quantity != null ? quantity : 1.0) * (amount ?: 0.0)) as BigDecimal).setScale(2, BigDecimal.ROUND_HALF_UP)" align="right">
+            <field name="total" from="toDecimal(quantity ?? 1).multiply(amount ?? 0).setScale(2, 'HALF_UP')" align="right">
                 <default-field><display format="#,##0.00##" style="${parentItemSeqId ? 'text-info' : 'text-strong'}"/></default-field></field>
             <field name="isAdjustment"><default-field title="Is Adjust"><display/></default-field></field>
 
             <field name="deleteButton"><default-field title="">
                 <link url="deleteInvoiceItem" text="Delete" condition="invoiceEditable" confirmation="Delete this item?"
-                        parameter-map="[invoiceId:invoiceId, invoiceItemSeqId:invoiceItemSeqId]"/>
+                        parameter-map="{invoiceId:invoiceId, invoiceItemSeqId:invoiceItemSeqId}"/>
             </default-field></field>
 
             <field name="submitButton"><default-field title="Update"><submit/></default-field></field>

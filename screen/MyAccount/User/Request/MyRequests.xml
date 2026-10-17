@@ -76,8 +76,8 @@ along with this software (see the LICENSE.md file). If not, see
             <row-actions>
                 <entity-find entity-name="mantle.request.RequestParty" list="partyList">
                     <date-filter/><econdition field-name="requestId"/></entity-find>
-                <set field="customerRp" from="partyList.find({ it.roleTypeId == 'Customer' })"/>
-                <set field="assigneeRp" from="partyList.find({ it.roleTypeId == 'Assignee' })"/>
+                <set field="customerRp" from="partyList.find(it => it.roleTypeId == 'Customer')"/>
+                <set field="assigneeRp" from="partyList.find(it => it.roleTypeId == 'Assignee')"/>
             </row-actions>
             <field name="findPartyId"><header-field><ignored/></header-field></field>
             <field name="facilityId"><header-field><ignored/></header-field><default-field><ignored/></default-field></field>

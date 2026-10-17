@@ -15,7 +15,7 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-index="3" default-menu-title="Items List">
 
-    <parameter name="budgetId" from="budgetId ?: budgetId_0" required="true"/>
+    <parameter name="budgetId" from="budgetId || budgetId_0" required="true"/>
 
     <transition name="createBudgetItem"><service-call name="create#mantle.other.budget.BudgetItem"/><default-response url="."/></transition>
     <transition name="updateBudgetItem"><service-call name="update#mantle.other.budget.BudgetItem"/><default-response url="."/></transition>
@@ -27,7 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="timePeriod" from="budget.timePeriod"/>
         <if condition="budget.timePeriodId &amp;&amp; budget.subTimePeriodTypeId">
             <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="subPeriodOut"
-                    in-map="[parentPeriodId:budget.timePeriodId, timePeriodTypeId:budget.subTimePeriodTypeId, createMissing:true]"/>
+                    in-map="{parentPeriodId:budget.timePeriodId, timePeriodTypeId:budget.subTimePeriodTypeId, createMissing:true}"/>
             <set field="subTimePeriodList" from="subPeriodOut.timePeriodList"/>
         </if>
     </actions>
@@ -39,11 +39,11 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <field name="glAccountId"><default-field title="GL Account"><drop-down allow-empty="true">
                         <dynamic-options transition="getGlAccountListPaginated" server-search="true" min-length="0"
-                                parameter-map="[organizationPartyId:timePeriod?.partyId]"/></drop-down></default-field></field>
+                                parameter-map="{organizationPartyId:timePeriod?.partyId}"/></drop-down></default-field></field>
                     <field name="amount"><default-field><text-line size="12"/></default-field></field>
 
                     <field name="subTimePeriodId">
-                        <conditional-field condition="subTimePeriodList" title="Sub-Period"><drop-down allow-empty="true">
+                        <conditional-field condition="subTimePeriodList?.length > 0" title="Sub-Period"><drop-down allow-empty="true">
                             <list-options list="subTimePeriodList" key="${timePeriodId}" text="${periodNum} - ${periodName}"/>
                         </drop-down></conditional-field>
                         <default-field><ignored/></default-field>
@@ -67,7 +67,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="glAccountId">
                     <header-field title="GL Account"><drop-down allow-empty="true">
                         <dynamic-options transition="getGlAccountListPaginated" server-search="true" min-length="0"
-                                parameter-map="[organizationPartyId:timePeriod?.partyId]"/></drop-down></header-field>
+                                parameter-map="{organizationPartyId:timePeriod?.partyId}"/></drop-down></header-field>
                     <default-field><display-entity entity-name="mantle.ledger.account.GlAccount" text="GlAccountNameTemplate"/></default-field>
                 </field>
 
@@ -83,7 +83,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <default-field><display/></default-field></field>
 
                 <field name="deleteButton"><default-field title=""><link url="deleteBudgetItem" text="X" confirmation="Really delete?"
-                        parameter-map="[budgetId:budgetId, budgetItemSeqId:budgetItemSeqId]"/></default-field></field>
+                        parameter-map="{budgetId:budgetId, budgetItemSeqId:budgetItemSeqId}"/></default-field></field>
             </form-list>
         </box-body></container-box>
     </widgets>

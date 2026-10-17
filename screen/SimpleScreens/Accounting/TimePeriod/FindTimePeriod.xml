@@ -25,11 +25,11 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createTimePeriod"><service-call name="mantle.party.TimeServices.create#TimePeriod"/>
         <default-response url="../EditTimePeriod"/></transition>
     <transition name="createNextTimePeriod">
-        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="[previousPeriodId:previousPeriodId]"/>
+        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="{previousPeriodId:previousPeriodId}"/>
         <default-response url="."/>
     </transition>
     <transition name="createPreviousTimePeriod">
-        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="[nextPeriodId:nextPeriodId]"/>
+        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="{nextPeriodId:nextPeriodId}"/>
         <default-response url="."/>
     </transition>
 
@@ -70,7 +70,7 @@ along with this software (see the LICENSE.md file). If not, see
             <row-actions>
                 <entity-find entity-name="mantle.party.time.TimePeriod" list="nextTimePeriodList">
                     <econdition field-name="previousPeriodId" from="timePeriodId"/></entity-find>
-                <set field="nextTimePeriod" from="nextTimePeriodList ? nextTimePeriodList[0] : null"/>
+                <set field="nextTimePeriod" from="nextTimePeriodList?.length ? nextTimePeriodList[0] : null"/>
             </row-actions>
 
             <field name="partyId">
@@ -117,7 +117,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </drop-down>
                 </header-field>
                 <default-field><link url="editTimePeriod" text="${periodName} (${ec.l10n.localize('Closed##TimePeriod')}: ${isClosed})" entity-name="mantle.party.time.TimePeriod"
-                        parameter-map="[timePeriodId:parentPeriodId]" condition="parentPeriodId" link-type="anchor"/></default-field>
+                        parameter-map="{timePeriodId:parentPeriodId}" condition="parentPeriodId" link-type="anchor"/></default-field>
             </field>
             <field name="previousPeriodId">
                 <header-field title="Previous">
@@ -129,17 +129,17 @@ along with this software (see the LICENSE.md file). If not, see
                 </header-field>
                 <default-field>
                     <link url="editTimePeriod" text="${periodName} (${ec.l10n.localize('Closed##TimePeriod')}: ${isClosed})" entity-name="mantle.party.time.TimePeriod"
-                            parameter-map="[timePeriodId:previousPeriodId]" condition="previousPeriodId" link-type="anchor"/>
+                            parameter-map="{timePeriodId:previousPeriodId}" condition="previousPeriodId" link-type="anchor"/>
                     <link url="createPreviousTimePeriod" text="Create Previous" condition="!previousPeriodId"
-                            parameter-map="[nextPeriodId:timePeriodId]" pass-through-parameters="true"
+                            parameter-map="{nextPeriodId:timePeriodId}" pass-through-parameters="true"
                             confirmation="Really create previous period?"/>
                 </default-field>
             </field>
             <field name="nextPeriod"><default-field title="Next">
                 <link url="editTimePeriod" text="${nextTimePeriod.periodName}" text-map="nextTimePeriod"
-                        parameter-map="[timePeriodId:nextTimePeriod.timePeriodId]" condition="nextTimePeriod != null" link-type="anchor"/>
+                        parameter-map="{timePeriodId:nextTimePeriod.timePeriodId}" condition="nextTimePeriod != null" link-type="anchor"/>
                 <link url="createNextTimePeriod" text="Create Next" condition="nextTimePeriod == null"
-                        parameter-map="[previousPeriodId:timePeriodId]" pass-through-parameters="true"
+                        parameter-map="{previousPeriodId:timePeriodId}" pass-through-parameters="true"
                         confirmation="Really create next period?"/>
             </default-field></field>
             <field name="accounts"><default-field>

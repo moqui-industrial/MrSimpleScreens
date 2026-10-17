@@ -35,7 +35,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
             <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-        <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+        <set field="productItemTypes" from="productItemTypeEgms.map(it => it.enumId)"/>
     </actions>
     <widgets>
         <container-dialog id="ApplyToShipmentDialog" button-text="Apply Invoice to Shipment">
@@ -52,9 +52,9 @@ along with this software (see the LICENSE.md file). If not, see
         <section-iterate name="ItemListSection" list="invoiceItemList" entry="invoiceItem"><actions>
             <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="itemSourceList">
                 <econdition field-name="invoiceId"/><econdition field-name="invoiceItemSeqId" from="invoiceItem.invoiceItemSeqId"/></entity-find>
-            <set field="sourceQuantity" from="0"/>
-            <iterate list="itemSourceList" entry="itemSource"><set field="sourceQuantity" from="sourceQuantity + (itemSource.quantity ?: 0)"/></iterate>
-        </actions><widgets><section name="ItemListInner" condition="invoiceItem.itemTypeEnumId in productItemTypes"><widgets>
+            <set field="sourceQuantity" from="toDecimal(0)"/>
+            <iterate list="itemSourceList" entry="itemSource"><set field="sourceQuantity" from="sourceQuantity.add(itemSource.quantity ?? 0)"/></iterate>
+        </actions><widgets><section name="ItemListInner" condition="productItemTypes.includes(invoiceItem.itemTypeEnumId)"><widgets>
             <container-box><box-header title="Item ${invoiceItem.invoiceItemSeqId}: ${invoiceItem.description}"/><box-toolbar>
                 <container-dialog id="ApplyItemToShipmentDialog" button-text="Apply Item to Shipment">
                     <form-single name="ApplyItemToShipment" transition="applyInvoiceItemToShipment">
@@ -70,16 +70,16 @@ along with this software (see the LICENSE.md file). If not, see
             </box-toolbar><box-body>
                 <container-row>
                     <row-col sm="1" style="text-right"><label text="Item Type" type="strong"/></row-col>
-                    <row-col sm="3"><label text="${invoiceItem.type?.description ?: ''}"/></row-col>
+                    <row-col sm="3"><label text="${invoiceItem.type?.description || ''}"/></row-col>
                     <row-col sm="1" style="text-right"><label text="Quantity" type="strong"/></row-col>
                     <row-col sm="1"><label text="${ec.l10n.format(invoiceItem.quantity, '')}"/></row-col>
                     <row-col sm="1" style="text-right"><label text="Shipments" type="strong"/></row-col>
-                    <row-col sm="1"><label text="${ec.l10n.format(sourceQuantity, '')} (${ec.l10n.format((sourceQuantity / (invoiceItem.quantity ?: 1)) * 100, '0.0')}%)"
-                            style="${sourceQuantity &lt; (invoiceItem.quantity ?: 1) ? 'text-warning' : (sourceQuantity &gt; (invoiceItem.quantity ?: 1) ? 'text-danger' : 'text-success')}"/></row-col>
+                    <row-col sm="1"><label text="${ec.l10n.format(sourceQuantity, '')} (${ec.l10n.format(sourceQuantity.divide((toDecimal(invoiceItem.quantity ?? 0).isZero() ? toDecimal(1) : toDecimal(invoiceItem.quantity)), 4, 'HALF_UP').multiply(100), '0.0')}%)"
+                            style="${sourceQuantity &lt; (invoiceItem.quantity || 1) ? 'text-warning' : (sourceQuantity &gt; (invoiceItem.quantity || 1) ? 'text-danger' : 'text-success')}"/></row-col>
                     <row-col sm="1" style="text-right"><label text="Amount" type="strong"/></row-col>
                     <row-col sm="1"><label text="${ec.l10n.formatCurrency(invoiceItem.amount, invoice.currencyUomId)}"/></row-col>
                     <row-col sm="1" style="text-right"><label text="Total" type="strong"/></row-col>
-                    <row-col sm="1"><label text="${ec.l10n.formatCurrency((invoiceItem.quantity ?: 1) * (invoiceItem.amount ?: 0), invoice.currencyUomId)}"/></row-col>
+                    <row-col sm="1"><label text="${ec.l10n.formatCurrency((toDecimal(invoiceItem.quantity ?? 0).isZero() ? toDecimal(1) : toDecimal(invoiceItem.quantity)).multiply(invoiceItem.amount ?? 0), invoice.currencyUomId)}"/></row-col>
                 </container-row>
             </box-body><box-body-nopad>
                 <form-list name="ItemSourceList" list="itemSourceList" skip-form="true" multi="true">
@@ -95,12 +95,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <link url="editReturn" link-type="anchor" text="${returnId}:${returnItemSeqId}" condition="returnId"/></default-field></field>
 
                     <field name="quantity" align="right"><default-field title="Applied Qty"><display/></default-field></field>
-                    <field name="amountApplied" from="(quantity ?: 0) * (invoiceItem.amount ?: 0)" align="right"><default-field title="Applied Total">
+                    <field name="amountApplied" from="toDecimal(quantity ?? 0).multiply(invoiceItem.amount ?? 0)" align="right"><default-field title="Applied Total">
                         <display currency-unit-field="invoice.currencyUomId"/></default-field></field>
 
                     <field name="deleteButton" align="right"><default-field title="">
                         <link url="unapplyInvoiceItemFromShipment" text="" icon="fa fa-trash" confirmation="Unapply item from Shipment?"
-                                parameter-map="[invoiceId:invoiceId, shipmentItemSourceId:shipmentItemSourceId]"/>
+                                parameter-map="{invoiceId:invoiceId, shipmentItemSourceId:shipmentItemSourceId}"/>
                     </default-field></field>
                 </form-list>
             </box-body-nopad></container-box>

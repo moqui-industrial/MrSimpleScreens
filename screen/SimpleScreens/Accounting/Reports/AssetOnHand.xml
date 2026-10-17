@@ -63,19 +63,19 @@ along with this software (see the LICENSE.md file). If not, see
                         <order-by field-name="effectiveDate"/>
                     </entity-find>
                     <script>
-                        summaryList.add(orig.getMap())
-                        for (det in detailList) summaryList.add([assetId:det.assetId, effectiveDate:det.effectiveDate,
-                                orderId:(det.issOrderId ?: det.recOrderId), invoiceId:(det.issInvoiceId ?: det.recInvoiceId),
-                                shipmentId:det.shipmentId, onHandChange:det.quantityOnHandDiff])
+                        summaryList.push(orig.getMap());
+                        for (const det of detailList) summaryList.push({assetId:det.assetId, effectiveDate:det.effectiveDate,
+                                orderId:(det.issOrderId || det.recOrderId), invoiceId:(det.issInvoiceId || det.recInvoiceId),
+                                shipmentId:det.shipmentId, onHandChange:det.quantityOnHandDiff});
                     </script>
                 </iterate>
             </if>
         </then><else>
-            <set field="dateRange_period" from="dateRange_period ?: 'week'"/>
-            <set field="dateRange_poffset" from="dateRange_poffset ?: '-1'"/>
+            <set field="dateRange_period" from="dateRange_period || 'week'"/>
+            <set field="dateRange_poffset" from="dateRange_poffset || '-1'"/>
         </else></if>
 
-        <set field="sharedMap" from="[startingOnHand:null, prevStarting:null]"/>
+        <set field="sharedMap" from="{startingOnHand:null, prevStarting:null}"/>
     </actions>
     <widgets>
         <label text="Please select a Facility" condition="!facilityId" type="p"/>
@@ -147,7 +147,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field title="Starting" container-style="${isSummaryRow ? 'text-strong text-success' : ''}"><display/></default-field></field>
             <field name="onHandChange" align="right">
                 <default-field title="Change" container-style="${isSummaryRow ? 'text-strong text-success' : ''}"><display/></default-field></field>
-            <field name="endingOnHand" from="(sharedMap.startingOnHand ?: 0.0) + (onHandChange ?: 0.0)" align="right">
+            <field name="endingOnHand" from="toDecimal(sharedMap.startingOnHand ?? 0).add(onHandChange ?? 0)" align="right">
                 <default-field title="Ending" container-style="${isSummaryRow ? 'text-strong text-success' : ''}"><display/></default-field></field>
 
             <field name="showDetails"><header-field><check><option key="true" text=" "/></check></header-field></field>

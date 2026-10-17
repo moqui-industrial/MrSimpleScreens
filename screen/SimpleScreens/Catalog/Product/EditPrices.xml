@@ -46,10 +46,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </default-field></field>
                 <field name="vendorPartyId"><default-field title="Vendor">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Vendor,Supplier']"/></drop-down>
+                            parameter-map="{roleTypeId:'Vendor,Supplier'}"/></drop-down>
                 </default-field></field>
                 <field name="customerPartyId"><default-field title="Customer">
-                    <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="[roleTypeId:'Customer']"/></drop-down>
+                    <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="{roleTypeId:'Customer'}"/></drop-down>
                 </default-field></field>
 
                 <field name="otherPartyItemId"><default-field title="Other Party Product ID"><text-line size="25"/></default-field></field>
@@ -64,7 +64,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <field name="minQuantity"><default-field><text-line size="10" default-value="1"/></default-field></field>
                 <field name="price"><default-field><text-line size="10"/></default-field></field>
-                <field name="priceUomId"><default-field title="Currency"><drop-down no-current-selected-key="${ec.user.getPreference('CurrencyDefault') ?: 'USD'}">
+                <field name="priceUomId"><default-field title="Currency"><drop-down no-current-selected-key="${ec.user.getPreference('CurrencyDefault') || 'USD'}">
                     <entity-options key="${uomId}" text="${description} [${uomId}]">
                         <entity-find entity-name="moqui.basic.Uom">
                             <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE"/>
@@ -107,21 +107,21 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="vendorPartyId">
                 <header-field show-order-by="true">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Vendor,Supplier,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Vendor,Supplier,OrgInternal'}"/></drop-down>
                 </header-field>
                 <default-field title="Vendor">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Vendor,Supplier,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Vendor,Supplier,OrgInternal'}"/></drop-down>
                 </default-field>
             </field>
             <field name="customerPartyId">
                 <header-field show-order-by="true">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Customer,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Customer,OrgInternal'}"/></drop-down>
                 </header-field>
                 <default-field title="Customer">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Customer,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Customer,OrgInternal'}"/></drop-down>
                 </default-field>
             </field>
 

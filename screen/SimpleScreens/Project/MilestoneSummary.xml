@@ -27,7 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
 
     <pre-actions>
-        <set field="milestoneWorkEffortId" from="milestoneWorkEffortId ?: milestoneWorkEffortId_0"/>
+        <set field="milestoneWorkEffortId" from="milestoneWorkEffortId || milestoneWorkEffortId_0"/>
     </pre-actions>
     <actions>
         <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="milestoneWorkEffort">

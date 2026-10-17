@@ -27,10 +27,10 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find-one entity-name="mantle.order.return.ReturnHeader" value-field="returnHeader"/>
         <if condition="returnHeader == null"><return error="true" message="Return not found with ID ${returnId}"/></if>
 
-        <set field="returnChangeable" from="returnHeader.statusId in ['ReturnCreated', 'ReturnRequested', 'ReturnApproved']"/>
+        <set field="returnChangeable" from="['ReturnCreated', 'ReturnRequested', 'ReturnApproved'].includes(returnHeader.statusId)"/>
         <if condition="returnChangeable">
             <service-call name="mantle.order.ReturnServices.find#ReturnableOrderItems" out-map="context"
-                    in-map="[returnId:returnId, lookBackDays:lookBackDays]"/>
+                    in-map="{returnId:returnId, lookBackDays:lookBackDays}"/>
         </if>
     </actions>
     <widgets>

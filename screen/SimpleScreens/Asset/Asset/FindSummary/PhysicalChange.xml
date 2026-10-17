@@ -43,8 +43,8 @@ along with this software (see the LICENSE.md file). If not, see
             </having-econditions>
             <select-field field-name="lotId,quantityOnHandTotal"/>
         </entity-find>
-        <set field="qohByLotId" from="[:]"/>
-        <iterate list="assetLotList" entry="assetLot"><script>qohByLotId.put(assetLot.lotId, assetLot.quantityOnHandTotal)</script></iterate>
+        <set field="qohByLotId" from="{}"/>
+        <iterate list="assetLotList" entry="assetLot"><script>qohByLotId[assetLot.lotId] = assetLot.quantityOnHandTotal</script></iterate>
     </actions>
     <widgets>
         <label text="For physical inventory assets are grouped by Product, Facility, Location, Lot, Owner, Pool, and Status." type="p"/>

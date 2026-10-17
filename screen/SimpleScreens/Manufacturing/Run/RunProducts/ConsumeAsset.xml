@@ -34,14 +34,14 @@ along with this software (see the LICENSE.md file). If not, see
         <form-single name="ConsumeAssetForm" transition="issueAssetToWorkEffort">
             <field name="workEffortId"><default-field><hidden/></default-field></field>
 
-            <field name="facilityId" from="inventoryFacilityId ?: facilityId"><default-field title="Facility">
+            <field name="facilityId" from="inventoryFacilityId || facilityId"><default-field title="Facility">
                 <display-entity entity-name="mantle.facility.Facility" text="FacilityNameTemplate"/></default-field></field>
             <field name="productId"><conditional-field condition="productId" title="Product">
                 <display-entity entity-name="mantle.product.Product" text="ProductNameTemplate"/></conditional-field></field>
 
             <field name="assetId"><default-field title="Asset">
                 <drop-down allow-empty="true"><dynamic-options transition="getAssetList" server-search="true" min-length="0"
-                        parameter-map="[facilityId:(inventoryFacilityId?:facilityId), productId:productId, assetTypeEnumId:null, excludeZeroQoh:'true']"/></drop-down>
+                        parameter-map="{facilityId:(inventoryFacilityId||facilityId), productId:productId, assetTypeEnumId:null, excludeZeroQoh:'true'}"/></drop-down>
             </default-field></field>
             <field name="quantity"><default-field><text-line size="10" default-transition="getAssetAvailableToPromiseTotal">
                 <depends-on field="assetId"/></text-line></default-field></field>

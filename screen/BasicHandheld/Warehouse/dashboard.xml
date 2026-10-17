@@ -30,7 +30,7 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
 
     <actions>
-        <set field="facilityId" from="facilityId ?: ec.user.getPreference('FacilityActive') ?: ec.user.getPreference('FacilityGeneralDefault')"/>
+        <set field="facilityId" from="facilityId || ec.user.getPreference('FacilityActive') || ec.user.getPreference('FacilityGeneralDefault')"/>
     </actions>
     <widgets>
         <container-row><row-col md="6">
@@ -38,7 +38,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <form-single name="ActiveFacilityForm" transition="setActiveFacility">
                     <field name="facilityId"><default-field title="Active Warehouse">
                         <drop-down><dynamic-options transition="getFacilityList" server-search="true" min-length="0"
-                                parameter-map="[facilityTypeEnumId:'FcTpWarehouse']"/></drop-down>
+                                parameter-map="{facilityTypeEnumId:'FcTpWarehouse'}"/></drop-down>
                     </default-field></field>
                     <field name="submitButton"><default-field title="Set WH"><submit/></default-field></field>
                     <field-layout><field-row-big><field-ref name="facilityId"/><field-ref name="submitButton"/></field-row-big></field-layout>

@@ -1,0 +1,27 @@
+<#-- Shared print fragment, extracted from Invoice.print.html.fancy. -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#assign cellPadding = "1pt">
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+<#assign negOne = -1>
+
+    <#assign childItemList = Array.from(invoiceItemList).filter(it => it.parentItemSeqId === invoiceItem.invoiceItemSeqId)>
+    <#assign itemTypeEnum = (invoiceItem.type ?? '')>
+    <#assign product = (invoiceItem.product ?? '')>
+    <#assign asset = (invoiceItem.asset ?? '')>
+    <#assign lot = (asset.lot ?? '')>
+    <tr style="font-size:8pt;border-bottom:thin solid black">
+        <td style="padding:${cellPadding}"><div style="text-align:center"><#if (itemIndex> 0)>${itemIndex}<#else> </#if></div></td>
+        <td style="padding:${cellPadding}"><div>${(product?.pseudoId ?? invoiceItem?.productId ?? "")}</div></td>
+        <td style="padding:${cellPadding}"><div>${(lot?.lotNumber ?? asset?.lotId ?? "")}</div></td>
+        <td style="padding:${cellPadding}">
+            <div>${(invoiceItem?.description ?? itemTypeEnum?.description ?? "")}</div>
+            <#if has(invoiceItem?.otherPartyProductId)><div>Your Product: ${invoiceItem.otherPartyProductId}</div></#if>
+        </td>
+        <td style="padding:${cellPadding}"><div style="text-align:center">${(invoiceItem.quantity ?? "1")}</div></td>
+        <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency((invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>
+        <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency(toDecimal(invoiceItem.quantity ?? 1).multiply(invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>
+    </tr>
+    <#if has(childItemList)><#list childItemList as childItem>
+        ${raw(ec.resource.template("component://SimpleScreens/template/account/Invoice-productItemRow.html.fancy", {invoiceItem: childItem, invoiceItemList: invoiceItemList, itemIndex: negOne}))}
+    </#list></#if>
+

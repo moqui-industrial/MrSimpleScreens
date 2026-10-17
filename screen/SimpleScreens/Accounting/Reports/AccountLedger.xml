@@ -34,23 +34,22 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
 
     <actions>
-        <if condition="glAccountId &amp;&amp; !glAccountIdList"><set field="glAccountIdList" from="[glAccountId]"/></if>
-        <if condition="glAccountIdList instanceof String"><then>
-            <set field="glAccountIdList" from="glAccountIdList.contains(',') ? (glAccountIdList.split(',') as List) : [glAccountIdList]"/>
-        </then><else><set field="glAccountIdList" from="glAccountIdList as List"/></else></if>
-        <if condition="timePeriodId &amp;&amp; glAccountIdList">
+        <if condition="glAccountId &amp;&amp; !glAccountIdList?.length"><set field="glAccountIdList" from="[glAccountId]"/></if>
+        <!-- a request parameter is text, comma separated; a list from a caller stays a list -->
+        <set field="glAccountIdList" from="glAccountIdList == null ? null : (typeof glAccountIdList === 'string' ? glAccountIdList.split(',') : Array.from(glAccountIdList))"/>
+        <if condition="timePeriodId &amp;&amp; glAccountIdList?.length > 0">
             <service-call name="mantle.ledger.LedgerReportServices.get#AccountLedgerInfo" out-map="context"
-                    in-map="[timePeriodId:timePeriodId, glAccountIdList:glAccountIdList, showReverses:showReverses]"/>
+                    in-map="{timePeriodId:timePeriodId, glAccountIdList:glAccountIdList, showReverses:showReverses}"/>
         </if>
     </actions>
     <widgets>
-        <container-box><box-header title="${timePeriod?.periodName ?: 'No Period Selected'} ${timePeriod?.fromDate ? '(from ' + timePeriod.fromDate : ''}${timePeriod?.thruDate ? ' thru ' + timePeriod.thruDate + ')': ''}"/><box-body-nopad>
+        <container-box><box-header title="${timePeriod?.periodName || 'No Period Selected'} ${timePeriod?.fromDate ? '(from ' + timePeriod.fromDate : ''}${timePeriod?.thruDate ? ' thru ' + timePeriod.thruDate + ')': ''}"/><box-body-nopad>
             <form-list name="AccountLedger" list="entryInfoList" skip-form="true" header-dialog="true"
                     select-columns="true" saved-finds="true" show-csv-button="true" show-xlsx-button="true">
                 <field name="glAccountIdList">
                     <header-field title="GL Account"><drop-down allow-multiple="true">
                         <dynamic-options transition="getGlAccountListPaginated" server-search="true" min-length="0"
-                                parameter-map="[glAccountId:null, organizationPartyId:null]"/></drop-down></header-field>
+                                parameter-map="{glAccountId:null, organizationPartyId:null}"/></drop-down></header-field>
                 </field>
                 <field name="organizationPartyId">
                     <header-field title="Organization"><drop-down>
@@ -63,13 +62,13 @@ along with this software (see the LICENSE.md file). If not, see
                 </field>
                 <field name="timePeriodId"><header-field title="Time Period"><drop-down>
                     <dynamic-options transition="getTimePeriodList" server-search="true" min-length="0"
-                            parameter-map="[timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', timePeriodId:null]">
+                            parameter-map="{timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', timePeriodId:null}">
                         <depends-on field="organizationPartyId" parameter="partyId"/></dynamic-options>
                 </drop-down></header-field></field>
 
                 <field name="acctgTransId"><default-field title="TX ID">
                     <link url="editTransaction" text="${acctgTransId}" link-type="anchor" condition="acctgTransId"/>
-                    <label text="${accountCode?:''}" style="text-strong" condition="!acctgTransId"/>
+                    <label text="${accountCode||''}" style="text-strong" condition="!acctgTransId"/>
                 </default-field></field>
                 <field name="glJournalId"><default-field title="Jrnl">
                     <display-entity entity-name="mantle.ledger.transaction.GlJournal" text="${glJournalName?.take(3)}"/></default-field></field>
@@ -80,16 +79,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="acctgTransTypeEnumId"><default-field title="TX Type">
                     <display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
                 <field name="description"><default-field container-style="${acctgTransId ? '' : 'text-strong'}">
-                    <display text="${description ?: txDescription ?: ec.entity.find('moqui.basic.Enumeration').condition('enumId', acctgTransTypeEnumId).one()?.description ?: ''}"/></default-field></field>
+                    <display text="${description || txDescription || ec.entity.find('moqui.basic.Enumeration').condition('enumId', acctgTransTypeEnumId).one()?.description || ''}"/></default-field></field>
                 <field name="otherPartyId"><default-field title="Other Party">
-                    <link url="editParty" link-type="anchor" parameter-map="[partyId:otherPartyId]" text="PartyNameTemplate" condition="otherPartyId"/>
+                    <link url="editParty" link-type="anchor" parameter-map="{partyId:otherPartyId}" text="PartyNameTemplate" condition="otherPartyId"/>
                 </default-field></field>
 
                 <field name="invoiceId"><default-field title="Invoice">
                     <link url="editInvoice" text="${invoiceId}" link-type="anchor" condition="invoiceId"/></default-field></field>
                 <field name="referenceNumber"><default-field title="Inv Ref"><display/></default-field></field>
                 <field name="invoiceByRef"><default-field title="Invoice/Ref">
-                    <link text="${acctgTransTypeEnumId == 'AttPurchaseInvoice' ? (referenceNumber ?: otherPartyOrderId ?: invoiceId) : invoiceId}"
+                    <link text="${acctgTransTypeEnumId == 'AttPurchaseInvoice' ? (referenceNumber || otherPartyOrderId || invoiceId) : invoiceId}"
                             url="editInvoice" link-type="anchor" condition="invoiceId"/>
                     <label text="${txVoucherRef}" condition="txVoucherRef"/>
                 </default-field></field>

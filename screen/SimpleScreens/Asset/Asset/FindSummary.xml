@@ -27,7 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
         <error-response url="."/>
     </transition>
     <transition name="recordChange"><service-call name="mantle.product.AssetServices.record#PhysicalInventoryChange"/>
-        <default-response url=".." parameter-map="[productId:productId, facilityId:facilityId, locationSeqId:locationSeqId]"/></transition>
+        <default-response url=".." parameter-map="{productId:productId, facilityId:facilityId, locationSeqId:locationSeqId}"/></transition>
 
     <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
     <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
@@ -43,7 +43,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="facilityTypeEnumId" value="FcTpWarehouse"/><order-by field-name="facilityName"/></entity-find>
 
         <!-- ReceiveAssetForm: Rejection reasons -->
-        <service-call name="org.moqui.impl.BasicServices.find#Enumeration" in-map="[enumTypeId:'RejectionReason']" out-map="reasonOut"/>
+        <service-call name="org.moqui.impl.BasicServices.find#Enumeration" in-map="{enumTypeId:'RejectionReason'}" out-map="reasonOut"/>
     </actions>
     <widgets>
         <link url="../FindAsset" text="Find Individual Assets"/>
@@ -68,7 +68,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="receivedDate" from="ec.user.nowTimestamp"><default-field title="Received Date"><date-time/></default-field></field>
 
                 <field name="mfgPartyId"><default-field title="Manufacturer"><drop-down allow-empty="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,Manufacturer']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,Manufacturer'}"/>
                 </drop-down></default-field></field>
                 <field name="lotId"><default-field title="Lot" tooltip="Select an existing Lot, for new enter Lot Number (and Dates) below">
                     <drop-down allow-empty="true"><dynamic-options transition="getLotList" server-search="true" min-length="0">
@@ -80,12 +80,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="manufacturedDate"><default-field title="Manufactured"><date-time type="date"/></default-field></field>
                 <field name="expectedEndOfLife"><default-field title="Expiration"><date-time type="date"/></default-field></field>
 
-                <field name="ownerPartyId" from="ownerPartyId ?: activeOrgId"><default-field title="Owner">
+                <field name="ownerPartyId" from="ownerPartyId || activeOrgId"><default-field title="Owner">
                     <label text="Default Asset Owner (${ownerPartyId}) different from Facility owner (${destinationFacility.ownerPartyId}), if not consignment inventory change now" style="text-warning"
                             condition="ownerPartyId &amp;&amp; destinationFacility?.ownerPartyId &amp;&amp; ownerPartyId != destinationFacility.ownerPartyId"/>
                     <label text="Asset Owner will default to Facility owner" condition="!ownerPartyId"/>
                     <drop-down allow-empty="true">
-                        <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,OrgInternal']"/>
+                        <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,OrgInternal'}"/>
                     </drop-down>
                 </default-field></field>
                 <field name="assetPoolId"><default-field title="Pool"><drop-down allow-empty="true">
@@ -191,14 +191,14 @@ along with this software (see the LICENSE.md file). If not, see
             </header-field></field>
 
             <field name="assetsLink">
-                <default-field title="Assets"><link url="findAsset" text="Assets" parameter-map="[productId:productId, statusId:statusId,
-                            facilityId:facilityId, locationSeqId:locationSeqId, lotId:lotId]" condition="pseudoId"/></default-field>
+                <default-field title="Assets"><link url="findAsset" text="Assets" parameter-map="{productId:productId, statusId:statusId,
+                            facilityId:facilityId, locationSeqId:locationSeqId, lotId:lotId}" condition="pseudoId"/></default-field>
             </field>
             <field name="productId"><header-field title="Product"><drop-down allow-empty="true">
                 <dynamic-options transition="getProductList" server-search="true"/></drop-down></header-field></field>
             <field name="pseudoId">
                 <header-field title="Product ID" show-order-by="true"><text-find size="15" hide-options="true"/></header-field>
-                <default-field><link url="editProduct" text="${pseudoId?:productId}" link-type="anchor"/></default-field>
+                <default-field><link url="editProduct" text="${pseudoId||productId}" link-type="anchor"/></default-field>
             </field>
             <field name="productName">
                 <header-field show-order-by="case-insensitive"><text-find size="15" hide-options="true"/></header-field>
@@ -238,7 +238,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="facilityId">
                 <header-field title="Facility" show-order-by="case-insensitive"><drop-down allow-empty="true">
-                    <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="[ownerPartId:null]"/></drop-down></header-field>
+                    <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="{ownerPartId:null}"/></drop-down></header-field>
                 <default-field><link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate" link-type="anchor"/></default-field>
             </field>
             <field name="locationSeqId">
@@ -284,8 +284,8 @@ along with this software (see the LICENSE.md file). If not, see
             </default-field></field>
             <field name="moveLink"><default-field title="Move">
                 <link url="../SelectAsset" text="Move" condition="quantityOnHandTotal"
-                        parameter-map="[productId:productId, facilityId:facilityId, locationSeqId:locationSeqId,
-                            containerId:containerId, lotId:lotId, assetPoolId:assetPoolId]"/>
+                        parameter-map="{productId:productId, facilityId:facilityId, locationSeqId:locationSeqId,
+                            containerId:containerId, lotId:lotId, assetPoolId:assetPoolId}"/>
             </default-field></field>
 
             <field name="findButton"><header-field title="Find"><submit/></header-field></field>

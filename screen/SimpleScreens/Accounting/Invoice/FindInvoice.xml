@@ -35,27 +35,27 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="${ec.web.getWebappRootUrl(false, null)}/fop/apps/${appRoot}/Accounting/Invoice/ReceivableStatement" url-type="plain">
             <parameter name="renderMode" value="xsl-fo"/><parameter name="pageNoLimit" value="true"/>
             <parameter name="toPartyId"/><parameter name="fromPartyId"/><parameter name="periodDays"/><parameter name="asOfDate"/>
-            <parameter name="filename" value="Statement-${toPartyId}-${asOfDate ?: ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')}.pdf"/>
+            <parameter name="filename" value="Statement-${toPartyId}-${asOfDate || ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')}.pdf"/>
         </default-response>
     </transition>
 
     <actions>
         <if condition="!invoiceType"><set field="invoiceType" value="Any"/></if>
-        <if condition="'payable'.equalsIgnoreCase(invoiceType)"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
-            <else-if condition="'receivable'.equalsIgnoreCase(invoiceType)"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
+        <if condition="String(invoiceType).toLowerCase() == 'payable'"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
+            <else-if condition="String(invoiceType).toLowerCase() == 'receivable'"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
 
         <!-- NOTE: the way the aging summary is calculated is ugly (would be nice in a separate service) but minimizes runtime
             overhead and maintains compatibility with column selection, etc -->
-        <set field="periodDays" from="periodDays ? periodDays as Integer : 30"/>
-        <set field="periodDaysBd" from="new BigDecimal(periodDays)"/>
+        <set field="periodDays" from="periodDays ? (periodDays == null ? null : Math.trunc(toDecimal(periodDays).toNumber())) : 30"/>
+        <set field="periodDaysBd" from="toDecimal(periodDays)"/>
         <set field="nowTimestamp" from="ec.user.nowTimestamp"/>
-        <!-- using AtomicBoolean as a mutable boolean so that in spite of context nesting these fields will be set -->
-        <set field="hasReceivableAging" from="new java.util.concurrent.atomic.AtomicBoolean(false)"/>
-        <set field="hasPayableAging" from="new java.util.concurrent.atomic.AtomicBoolean(false)"/>
-        <set field="receivableAgingList" from="new ArrayList([0.0, 0.0, 0.0, 0.0, 0.0])"/>
-        <set field="receivableDueAgingList" from="new ArrayList([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])"/>
-        <set field="payableAgingList" from="new ArrayList([0.0, 0.0, 0.0, 0.0, 0.0])"/>
-        <set field="payableDueAgingList" from="new ArrayList([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])"/>
+        <!-- Mutable holders retain the summary flags across row context nesting. -->
+        <set field="hasReceivableAging" from="{value:false}"/>
+        <set field="hasPayableAging" from="{value:false}"/>
+        <set field="receivableAgingList" from="[0, 0, 0, 0, 0]"/>
+        <set field="receivableDueAgingList" from="[0, 0, 0, 0, 0, 0]"/>
+        <set field="payableAgingList" from="[0, 0, 0, 0, 0]"/>
+        <set field="payableDueAgingList" from="[0, 0, 0, 0, 0, 0]"/>
     </actions>
     <widgets>
         <container-dialog id="NewPayableDialog" button-text="New Payable">
@@ -245,26 +245,22 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <row-actions>
                 <script><![CDATA[
-                if (unpaidTotal) {
+                if (!toDecimal(unpaidTotal ?? 0).isZero()) {
                     // The actions transition does not run screen actions, so these are unset there.
-                    def nowTs = nowTimestamp ?: ec.user.nowTimestamp
-                    def periodBd = periodDaysBd ?: new BigDecimal(periodDays ?: 30)
-                    Integer invoiceDateDays = invoiceDate != null && nowTs != null ? nowTs - invoiceDate : null
-                    Integer invoiceDateIdx = invoiceDateDays != null ? ((invoiceDateDays as BigDecimal) / periodBd).setScale(0, BigDecimal.ROUND_DOWN).intValue() : null
-                    if (invoiceDateIdx != null && invoiceDateIdx > 4) invoiceDateIdx = 4
-                    Integer dueDateDays = dueDate != null && nowTs != null ? nowTs - dueDate : null
-                    Integer dueDateIdx = dueDateDays != null ? (dueDateDays < 0 ? 0 :
-                            ((dueDateDays as BigDecimal) / periodBd).setScale(0, BigDecimal.ROUND_DOWN).intValue() + 1) : null
-                    if (dueDateIdx != null && dueDateIdx > 5) dueDateIdx = 5
-
-                    if (statusId in ['InvoiceInProcess','InvoiceFinalized','InvoiceSent','InvoiceAcked']) {
-                        if (receivableAgingList != null && invoiceDateIdx != null) receivableAgingList[invoiceDateIdx] = receivableAgingList[invoiceDateIdx] + unpaidTotal
-                        if (receivableDueAgingList != null && dueDateIdx != null) receivableDueAgingList[dueDateIdx] = receivableDueAgingList[dueDateIdx] + unpaidTotal
-                        if (hasReceivableAging != null) hasReceivableAging.set(true)
-                    } else if (statusId in ['InvoiceIncoming','InvoiceReceived','InvoiceApproved']) {
-                        if (payableAgingList != null && invoiceDateIdx != null) payableAgingList[invoiceDateIdx] = payableAgingList[invoiceDateIdx] + unpaidTotal
-                        if (payableDueAgingList != null && dueDateIdx != null) payableDueAgingList[dueDateIdx] = payableDueAgingList[dueDateIdx] + unpaidTotal
-                        if (hasPayableAging != null) hasPayableAging.set(true)
+                    const nowTs = nowTimestamp || ec.user.nowTimestamp;
+                    const daysPerPeriod = toNumber(periodDaysBd ?? periodDays ?? 30);
+                    const invoiceDateDays = invoiceDate != null ? Math.trunc((Number(nowTs) - Number(invoiceDate)) / 86400000) : null;
+                    const invoiceDateIdx = invoiceDateDays == null ? null : Math.max(0, Math.min(4, Math.trunc(invoiceDateDays / daysPerPeriod)));
+                    const dueDateDays = dueDate != null ? Math.trunc((Number(nowTs) - Number(dueDate)) / 86400000) : null;
+                    const dueDateIdx = dueDateDays == null ? null : Math.min(5, dueDateDays < 0 ? 0 : Math.trunc(dueDateDays / daysPerPeriod) + 1);
+                    if (['InvoiceInProcess','InvoiceFinalized','InvoiceSent','InvoiceAcked'].includes(statusId)) {
+                        if (receivableAgingList != null && invoiceDateIdx != null) receivableAgingList[invoiceDateIdx] = toDecimal(receivableAgingList[invoiceDateIdx] ?? 0).add(unpaidTotal);
+                        if (receivableDueAgingList != null && dueDateIdx != null) receivableDueAgingList[dueDateIdx] = toDecimal(receivableDueAgingList[dueDateIdx] ?? 0).add(unpaidTotal);
+                        if (hasReceivableAging != null) hasReceivableAging.value = true;
+                    } else if (['InvoiceIncoming','InvoiceReceived','InvoiceApproved'].includes(statusId)) {
+                        if (payableAgingList != null && invoiceDateIdx != null) payableAgingList[invoiceDateIdx] = toDecimal(payableAgingList[invoiceDateIdx] ?? 0).add(unpaidTotal);
+                        if (payableDueAgingList != null && dueDateIdx != null) payableDueAgingList[dueDateIdx] = toDecimal(payableDueAgingList[dueDateIdx] ?? 0).add(unpaidTotal);
+                        if (hasPayableAging != null) hasPayableAging.value = true;
                     }
                 }
                 ]]></script>
@@ -308,7 +304,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="From"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                        link-type="anchor" parameter-map="[partyId:fromPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:fromPartyId}"/></default-field>
             </field>
             <field name="productStoreId">
                 <header-field title="Store">
@@ -322,7 +318,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="To"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                        link-type="anchor" parameter-map="[partyId:toPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:toPartyId}"/></default-field>
             </field>
 
             <field name="invoiceTotal" align="right" show-total="true"><header-field title="Total" show-order-by="true"><range-find/></header-field>
@@ -342,22 +338,23 @@ along with this software (see the LICENSE.md file). If not, see
             <form-list-column><field-ref name="unpaidTotal"/></form-list-column>
         </form-list>
 
-        <section name="AgingSummarySection" condition="hasReceivableAging.get() || hasPayableAging.get()"><actions>
+        <section name="AgingSummarySection" condition="hasReceivableAging.value || hasPayableAging.value"><actions>
             <script>
-                agingSummaryList = []
-                if (hasReceivableAging.get()) {
-                    agingSummaryList.add([description:'Receivable by Invoice Date', period0:receivableAgingList[0], period1:receivableAgingList[1],
-                            period2:receivableAgingList[2], period3:receivableAgingList[3], periodRemaining:receivableAgingList[4], total:receivableAgingList.sum()])
-                    agingSummaryList.add([description:'Receivable by Due Date', current:receivableDueAgingList[0], period0:receivableDueAgingList[1],
+                agingSummaryList = [];
+                const sumAging = list => list.reduce((sum, amount) => sum.add(amount ?? 0), toDecimal(0));
+                if (hasReceivableAging.value) {
+                    agingSummaryList.push({description:'Receivable by Invoice Date', period0:receivableAgingList[0], period1:receivableAgingList[1],
+                            period2:receivableAgingList[2], period3:receivableAgingList[3], periodRemaining:receivableAgingList[4], total:sumAging(receivableAgingList)});
+                    agingSummaryList.push({description:'Receivable by Due Date', current:receivableDueAgingList[0], period0:receivableDueAgingList[1],
                             period1:receivableDueAgingList[2], period2:receivableDueAgingList[3], period3:receivableDueAgingList[4],
-                            periodRemaining:receivableDueAgingList[5], total:receivableDueAgingList.sum()])
+                            periodRemaining:receivableDueAgingList[5], total:sumAging(receivableDueAgingList)});
                 }
-                if (hasPayableAging.get()) {
-                    agingSummaryList.add([description:'Payable by Invoice Date', period0:payableAgingList[0], period1:payableAgingList[1],
-                            period2:payableAgingList[2], period3:payableAgingList[3], periodRemaining:payableAgingList[4], total:payableAgingList.sum()])
-                    agingSummaryList.add([description:'Payable by Due Date', current:payableDueAgingList[0], period0:payableDueAgingList[1],
+                if (hasPayableAging.value) {
+                    agingSummaryList.push({description:'Payable by Invoice Date', period0:payableAgingList[0], period1:payableAgingList[1],
+                            period2:payableAgingList[2], period3:payableAgingList[3], periodRemaining:payableAgingList[4], total:sumAging(payableAgingList)});
+                    agingSummaryList.push({description:'Payable by Due Date', current:payableDueAgingList[0], period0:payableDueAgingList[1],
                             period1:payableDueAgingList[2], period2:payableDueAgingList[3], period3:payableDueAgingList[4],
-                            periodRemaining:payableDueAgingList[5], total:payableDueAgingList.sum()])
+                            periodRemaining:payableDueAgingList[5], total:sumAging(payableDueAgingList)});
                 }
             </script>
         </actions><widgets>

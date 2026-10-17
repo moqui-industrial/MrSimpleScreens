@@ -29,7 +29,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="${ec.web.getWebappRootUrl(false, null)}/fop/apps/${appRoot}/Accounting/FinancialAccount/FinancialAccountStatement" url-type="plain">
             <parameter name="renderMode" value="xsl-fo"/><parameter name="pageNoLimit" value="true"/>
             <parameter name="finAccountId"/><parameter name="year"/><parameter name="month"/>
-            <parameter name="filename" value="AccountStatement-${finAccountId}-${year ?: 'ALL-' + ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')}${month ? '-' + month : ''}.pdf"/>
+            <parameter name="filename" value="AccountStatement-${finAccountId}-${year || 'ALL-' + ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')}${month ? '-' + month : ''}.pdf"/>
         </default-response>
     </transition>
 
@@ -40,9 +40,9 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="pkPrimaryValue" from="finAccountId"/>
 
         <script><![CDATA[
-            yearList = []
-            int curYear = ec.user.getNowCalendar().get(Calendar.YEAR)
-            for (int i = 0; i < 10; i++) yearList.add((curYear - i) as String)
+            yearList = [];
+            const curYear = new Date(Number(ec.user.nowTimestamp)).getUTCFullYear();
+            for (let i = 0; i < 10; i++) yearList.push(String(curYear - i));
         ]]></script>
     </actions>
     <widgets>

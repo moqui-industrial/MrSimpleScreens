@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="completeShipmentPack">
         <service-call name="mantle.shipment.ShipmentServices.complete#ShipmentPack"/>
         <actions><if condition="localQzPrint == 'true' &amp;&amp; !ec.getMessage().hasError()">
-            <script>ec.web.sessionAttributes.put('qzPackShipment' + shipmentId, true)</script></if></actions>
+            <script>ec.web.sessionAttributes['qzPackShipment' + shipmentId] = 'true'</script></if></actions>
         <default-response url=".."/>
     </transition>
 
@@ -31,9 +31,9 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="shipmentId"/>
             <order-by field-name="shipmentRouteSegmentSeqId"/>
         </entity-find>
-        <set field="firstRouteSegment" from="shipmentRouteSegmentList ? shipmentRouteSegmentList.first() : null"/>
+        <set field="firstRouteSegment" from="shipmentRouteSegmentList?.length ? shipmentRouteSegmentList[0] : null"/>
 
-        <set field="shippingGatewayConfigId" from="firstRouteSegment.shippingGatewayConfigId ?: ec.user.getPreference('DefaultShipmentGatewayConfigId')"/>
+        <set field="shippingGatewayConfigId" from="firstRouteSegment.shippingGatewayConfigId || ec.user.getPreference('DefaultShipmentGatewayConfigId')"/>
         <if condition="shippingGatewayConfigId"><entity-find-one entity-name="mantle.shipment.carrier.ShippingGatewayConfig" value-field="shippingGatewayConfig"/></if>
 
         <!-- Get settings from ProductStore(s) through order(s) -->
@@ -42,11 +42,11 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="settingTypeEnumId" operator="in" value="PsstGetReturnLabels,PsstShipRestrictCarriers"/>
             <select-field field-name="productStoreId,settingTypeEnumId,settingValue"/>
         </entity-find>
-        <set field="retLabelSettings" from="settingsLookupList.findAll({it.settingTypeEnumId == 'PsstGetReturnLabels'})*.settingValue"/>
-        <set field="defaultGetReturnLabels" from="retLabelSettings.contains('true') ? 'true' : ''"/>
+        <set field="retLabelSettings" from="settingsLookupList.filter(it => it.settingTypeEnumId == 'PsstGetReturnLabels').map(it => it.settingValue)"/>
+        <set field="defaultGetReturnLabels" from="retLabelSettings.includes('true') ? 'true' : ''"/>
 
         <set field="restrictCarrierProductStoreId" from="null"/>
-        <iterate list="settingsLookupList.findAll({it.settingTypeEnumId == 'PsstShipRestrictCarriers'})" entry="restrictCarrierSetting">
+        <iterate list="settingsLookupList.filter(it => it.settingTypeEnumId == 'PsstShipRestrictCarriers')" entry="restrictCarrierSetting">
             <if condition="restrictCarrierSetting.settingValue == 'true'">
                 <set field="restrictCarrierProductStoreId" from="restrictCarrierSetting.productStoreId"/>
             </if>
@@ -57,16 +57,16 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="restrictCarrierProductStoreId">
             <entity-find entity-name="mantle.product.store.ProductStoreShippingGateway" list="storeShippingGatewayList" cache="true">
                 <econdition field-name="productStoreId" from="restrictCarrierProductStoreId"/></entity-find>
-            <set field="carrierPartyIdList" from="storeShippingGatewayList*.carrierPartyId"/>
+            <set field="carrierPartyIdList" from="storeShippingGatewayList.map(it => it.carrierPartyId)"/>
         </if>
         <service-call name="mantle.shipment.ShipmentServices.get#ShipmentShippingOptions" out-map="context"
-                in-map="[shipmentId:shipmentId, carrierPartyIdList:carrierPartyIdList, getRates:true]"/>
+                in-map="{shipmentId:shipmentId, carrierPartyIdList:carrierPartyIdList, getRates:true}"/>
         <set field="curShipmentMethodEnumId" from="firstRouteSegment.shipmentMethodEnumId"/>
         <set field="lowestCarrierAndShipmentMethod" from="firstRouteSegment.carrierPartyId ? firstRouteSegment.carrierPartyId + ':' + firstRouteSegment.shipmentMethodEnumId : ''"/>
-        <set field="lowestRate" from="10000.0"/>
+        <set field="lowestRate" from="toDecimal(10000)"/>
         <iterate list="shippingOptions" entry="shipOption">
-            <set field="shippingTotalBd" from="shipOption.shippingTotal ? new BigDecimal(shipOption.shippingTotal) : null"/>
-            <if condition="shippingTotalBd &amp;&amp; shippingTotalBd &lt; lowestRate &amp;&amp; (!curShipmentMethodEnumId || curShipmentMethodEnumId == shipOption.shipmentMethodEnumId)">
+            <set field="shippingTotalBd" from="shipOption.shippingTotal != null ? toDecimal(shipOption.shippingTotal) : null"/>
+            <if condition="toNumber(shippingTotalBd) &amp;&amp; shippingTotalBd.compare(lowestRate) &lt; 0 &amp;&amp; (!curShipmentMethodEnumId || curShipmentMethodEnumId == shipOption.shipmentMethodEnumId)">
                 <set field="lowestCarrierAndShipmentMethod" from="shipOption.carrierPartyId + ':' + shipOption.shipmentMethodEnumId"/>
                 <set field="lowestRate" from="shippingTotalBd"/>
             </if>
@@ -83,7 +83,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="orderPartSeqId" operator="is-not-null"/>
             <select-field field-name="orderId,orderPartSeqId"/>
         </entity-find>
-        <if condition="sisOrderItemList">
+        <if condition="(sisOrderItemList?.length > 0)">
             <entity-find-one entity-name="mantle.order.OrderPart" value-field="firstOrderPart">
                 <field-map field-name="orderId" from="sisOrderItemList[0].orderId"/>
                 <field-map field-name="orderPartSeqId" from="sisOrderItemList[0].orderPartSeqId"/>
@@ -107,7 +107,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="assemblyWorkEffort">
                 <field-map field-name="workEffortId" from="shipment.assemblyWorkEffortId"/></entity-find-one>
             <service-call name="mantle.work.ManufacturingServices.get#ConsumedAssetRemaining"
-                    in-map="[workEffortId:shipment.assemblyWorkEffortId]" out-map="assemblyAssetInfo"/>
+                    in-map="{workEffortId:shipment.assemblyWorkEffortId}" out-map="assemblyAssetInfo"/>
         </if>
     </actions>
     <widgets>
@@ -127,7 +127,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <section name="AssemblyPackWarnings" condition="assemblyAssetInfo?.componentIssuedAvailable"><actions>
             <!-- turn the Map into a List of Map for a form-list -->
-            <set field="componentsUnusedList" from="assemblyAssetInfo.componentIssuedAvailable.entrySet().collect({ [productId:it.key, quantity:it.value] })"/>
+            <set field="componentsUnusedList" from="Object.entries(assemblyAssetInfo.componentIssuedAvailable).map(([productId, quantity]) => ({productId, quantity}))"/>
         </actions><widgets>
             <container-box type="danger"><box-header title="Remove Unused Assembly Components Before Continuing"/><box-body>
                 <label text="These items will be removed from the Assembly Task automatically, so must be removed from packages before continuing."
@@ -145,7 +145,7 @@ along with this software (see the LICENSE.md file). If not, see
             <label text="Store" type="dt" condition="productStore != null"/>
             <label text="${productStore.productStoreId}: ${productStore.storeName}" type="dd" condition="productStore != null"/>
             <label text="Shipping Gateway" type="dt"/>
-            <label text="${shippingGatewayConfig?.description ?: 'No Shipping Gateway'}" type="dd"/>
+            <label text="${shippingGatewayConfig?.description || 'No Shipping Gateway'}" type="dd"/>
             <label text="Order Ship By" type="dt"/>
             <label text="${orderCarrierShipmentMethod?.description ? orderCarrierShipmentMethod.description : (orderCarrierDetail ? orderCarrierDetail.pseudoId : 'N/A') + ' ' + (orderShipmentMethodEnum ? orderShipmentMethodEnum.description : 'None')}" type="dd"/>
         </container>
@@ -163,10 +163,10 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="getReturnLabels" from="defaultGetReturnLabels"><default-field title="Get Return Labels">
                 <check><option key="true" text=" "/></check></default-field></field>
 
-            <field name="networkPrinterId" from="defaultNetworkPrinterId"><conditional-field title="Printer" condition="networkPrinterList">
-                <drop-down><list-options list="networkPrinterList" key="${networkPrinterId}" text="${description ?: printerName} (${serverHost})"/></drop-down>
+            <field name="networkPrinterId" from="defaultNetworkPrinterId"><conditional-field title="Printer" condition="(networkPrinterList?.length > 0)">
+                <drop-down><list-options list="networkPrinterList" key="${networkPrinterId}" text="${description || printerName} (${serverHost})"/></drop-down>
             </conditional-field></field>
-            <field name="makeDefaultPrinter"><conditional-field title="Make Default" condition="networkPrinterList">
+            <field name="makeDefaultPrinter"><conditional-field title="Make Default" condition="(networkPrinterList?.length > 0)">
                 <check><option key="true" text=" "/></check></conditional-field></field>
 
             <field name="localQzPrint"><default-field title="Local Print"><check all-checked="true">

@@ -37,18 +37,16 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find entity-name="mantle.product.issuance.AssetIssuanceDetail" list="assetIssuanceDetailList">
             <search-form-inputs default-order-by="pseudoId,productName,assetId,-issuedDate"/>
             <econdition field-name="workEffortId"/></entity-find>
-        <set field="aidTotal" from="[:]"/>
+        <set field="aidTotal" from="{}"/>
         <iterate list="assetIssuanceDetailList" entry="aid"><script>
-            if (aidTotal[aid.assetId]) aidTotal[aid.assetId] += aid.quantity
-            else aidTotal[aid.assetId] = aid.quantity
+            aidTotal[aid.assetId] = toDecimal(aidTotal[aid.assetId] ?? 0).add(aid.quantity ?? 0)
         </script></iterate>
 
         <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="assetReceiptList">
             <econdition field-name="workEffortId"/></entity-find>
-        <set field="arTotal" from="[:]"/>
+        <set field="arTotal" from="{}"/>
         <iterate list="assetReceiptList" entry="ar"><script>
-            if (arTotal[ar.assetId]) arTotal[ar.assetId] += ar.quantityAccepted
-            else arTotal[ar.assetId] = ar.quantityAccepted
+            arTotal[ar.assetId] = toDecimal(arTotal[ar.assetId] ?? 0).add(ar.quantityAccepted ?? 0)
         </script></iterate>
     </actions>
     <widgets>
@@ -60,15 +58,15 @@ along with this software (see the LICENSE.md file). If not, see
             <form-single name="ConsumeAssetForm" transition="issueAnyAssetToWorkEffort"
                     extends="component://SimpleScreens/screen/SimpleScreens/Manufacturing/Run/RunProducts/ConsumeProduct.xml#ConsumeAssetForm"/>
         </container-dialog>
-        <link url="findAsset" text="Warehouse Assets" parameter-map="[facilityId:inventoryFacilityId]" target-window="_blank"/>
+        <link url="findAsset" text="Warehouse Assets" parameter-map="{facilityId:inventoryFacilityId}" target-window="_blank"/>
 
         <form-list name="IssuedAssetForm" list="assetIssuanceDetailList" skip-form="true">
             <row-actions>
                 <set field="receiveQuantityBackToInventory" from="quantity"/>
-                <if condition="arTotal[assetId]"><script>
-                    if (receiveQuantityBackToInventory &gt; (aidTotal[assetId] - arTotal[assetId]))
-                        receiveQuantityBackToInventory = aidTotal[assetId] - arTotal[assetId]
-                    aidTotal[assetId] -= receiveQuantityBackToInventory
+                <if condition="toNumber(arTotal[assetId])"><script>
+                    const notReceived = toDecimal(aidTotal[assetId] ?? 0).subtract(arTotal[assetId])
+                    if (toDecimal(receiveQuantityBackToInventory ?? 0).compare(notReceived) &gt; 0) receiveQuantityBackToInventory = notReceived
+                    aidTotal[assetId] = toDecimal(aidTotal[assetId] ?? 0).subtract(receiveQuantityBackToInventory ?? 0)
                 </script></if>
             </row-actions>
             <field name="pseudoId"><header-field title="Product" show-order-by="true"/>
@@ -85,12 +83,12 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="assetIssuanceId"><default-field title="Issuance"><display/></default-field></field>
 
             <field name="receiveButton">
-                <conditional-field title="" condition="receiveQuantityBackToInventory &lt;= 0">
+                <conditional-field title="" condition="toDecimal(receiveQuantityBackToInventory ?? 0).compare(0) &lt;= 0">
                     <display text="Received Back to Inventory"/></conditional-field>
                 <default-field title="">
                     <link url="receiveAsset" text="Receive ${ec.l10n.format(receiveQuantityBackToInventory, '#,##0')} Back to Inventory"
-                            parameter-map="[workEffortId:workEffortId, productId:productId, assetId:assetId, facilityId:inventoryFacilityId,
-                                ownerPartyId:ownerPartyId, quantity:receiveQuantityBackToInventory, noProduceProduct:'ignore']"/>
+                            parameter-map="{workEffortId:workEffortId, productId:productId, assetId:assetId, facilityId:inventoryFacilityId,
+                                ownerPartyId:ownerPartyId, quantity:receiveQuantityBackToInventory, noProduceProduct:'ignore'}"/>
                 </default-field>
             </field>
         </form-list>

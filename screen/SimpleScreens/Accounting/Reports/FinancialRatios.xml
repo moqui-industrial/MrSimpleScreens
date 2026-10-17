@@ -20,9 +20,16 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <service-call name="mantle.ledger.LedgerReportServices.run#FinancialRatios" out-map="context" in-map="context"/>
+        <!-- the statement's rows are built in LedgerReport.js: the fancy template dialect has no macros or decimal operators -->
+        <script>
+            const ledger = ec.resource.script('component://SimpleScreens/template/ledger/LedgerReport.js')
+            ledgerTable = ledger.financialRatios()
+        </script>
     </actions>
     <widgets>
-        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/ledger/FinancialRatios.html.ftl"
-                template="true" encode="false" no-boundary-comment="true"/></render-mode>
+        <render-mode>
+            <text type="html,vuet,qvt" location="component://SimpleScreens/template/ledger/LedgerTable.html.fancy"
+                    template="true" encode="false" no-boundary-comment="true"/>
+        </render-mode>
     </widgets>
 </screen>

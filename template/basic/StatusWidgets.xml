@@ -28,7 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem"/>
             <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">
                 <econdition field-name="statusId"/>
-                <econdition field-name="statusFlowId" from="statusFlowId ?: 'Default'"/>
+                <econdition field-name="statusFlowId" from="statusFlowId || 'Default'"/>
                 <order-by field-name="transitionSequence,transitionName"/>
             </entity-find>
         </actions><widgets>
@@ -36,14 +36,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <container style="float-plain condensed" type="ul">
                     <container type="li">
                         <container><label text="Status" type="strong"/></container>
-                        <container><label text="${statusItem?.description ?: ''}" type="strong" style="text-info"/></container>
+                        <container><label text="${statusItem?.description || ''}" type="strong" style="text-info"/></container>
                     </container>
                     <section-iterate name="StatusChangeLinkSection" list="statusTransitionList" entry="statusTransition"><condition>
-                        <expression>statusTransition.userPermissionId == null || statusTransition.userPermissionId.isEmpty() || ec.user.hasPermission(statusTransition.userPermissionId)</expression>
+                        <expression>!statusTransition.userPermissionId || ec.user.hasPermission(statusTransition.userPermissionId)</expression>
                     </condition><widgets>
                         <container type="li">
-                            <link url="${statusChangeTransition ?: 'updateStatus'}" text="StatusTransitionNameTemplate"
-                                    text-map="statusTransition" parameter-map="[statusId:statusTransition.toStatusId]"
+                            <link url="${statusChangeTransition || 'updateStatus'}" text="StatusTransitionNameTemplate"
+                                    text-map="statusTransition" parameter-map="{statusId:statusTransition.toStatusId}"
                                     confirmation="Change status to ${statusTransition.description}?"/>
                         </container>
                     </widgets></section-iterate>
@@ -54,7 +54,7 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- this requires a statusHistoryList field in the context (with moqui.entity.EntityAuditLog values) OR a
             changedEntityName (like "moqui.example.Example") and pkPrimaryValue (exampleId, orderId, etc value) -->
         <section name="StatusHistorySection"><actions>
-            <if condition="!statusHistoryList &amp;&amp; changedEntityName"><then>
+            <if condition="!statusHistoryList?.length &amp;&amp; changedEntityName"><then>
                 <entity-find entity-name="moqui.entity.EntityAuditLog" list="reverseList">
                     <econdition field-name="changedEntityName"/>
                     <econdition field-name="changedFieldName" value="statusId"/>
@@ -62,8 +62,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="newValueText,oldValueText,changedByUserId,changedDate"/>
                     <order-by field-name="-changedDate"/>
                 </entity-find>
-            </then><else-if condition="statusHistoryList">
-                <set field="reverseList" from="statusHistoryList.cloneList().orderByFields(['-changedDate'])"/>
+            </then><else-if condition="statusHistoryList?.length">
+                <set field="reverseList" from="Array.from(statusHistoryList)"/>
+                <order-map-list list="reverseList"><order-by field-name="-changedDate"/></order-map-list>
             </else-if></if>
         </actions><widgets>
             <container-box><box-header title="Status History"/><box-body>
@@ -92,10 +93,10 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem"/>
             <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">
                 <econdition field-name="statusId"/>
-                <econdition field-name="statusFlowId" from="statusFlowId ?: 'Default'"/>
+                <econdition field-name="statusFlowId" from="statusFlowId || 'Default'"/>
                 <order-by field-name="transitionSequence,transitionName"/>
             </entity-find>
-            <if condition="!statusHistoryList &amp;&amp; changedEntityName"><then>
+            <if condition="!statusHistoryList?.length &amp;&amp; changedEntityName"><then>
                 <entity-find entity-name="moqui.entity.EntityAuditLog" list="reverseList">
                     <econdition field-name="changedEntityName"/>
                     <econdition field-name="changedFieldName" value="statusId"/>
@@ -103,8 +104,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="newValueText,oldValueText,changedByUserId,changedDate"/>
                     <order-by field-name="-changedDate"/>
                 </entity-find>
-            </then><else-if condition="statusHistoryList">
-                <set field="reverseList" from="statusHistoryList.cloneList().orderByFields(['-changedDate'])"/>
+            </then><else-if condition="statusHistoryList?.length">
+                <set field="reverseList" from="Array.from(statusHistoryList)"/>
+                <order-map-list list="reverseList"><order-by field-name="-changedDate"/></order-map-list>
             </else-if></if>
         </actions><widgets>
             <container-box><box-header>
@@ -112,10 +114,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <!--<label text="${statusItem?.description?:''}" type="h5" style="text-success"/>-->
             </box-header><box-toolbar>
                 <section-iterate name="StatusChangeHistLinkSection" list="statusTransitionList" entry="statusTransition"><condition>
-                    <expression>statusTransition.userPermissionId == null || statusTransition.userPermissionId.isEmpty() || ec.user.hasPermission(statusTransition.userPermissionId)</expression>
+                    <expression>!statusTransition.userPermissionId || ec.user.hasPermission(statusTransition.userPermissionId)</expression>
                 </condition><widgets>
-                    <link url="${statusChangeTransition ?: 'updateStatus'}" text="StatusTransitionNameTemplate"
-                            text-map="statusTransition" parameter-map="[statusId:statusTransition.toStatusId]"
+                    <link url="${statusChangeTransition || 'updateStatus'}" text="StatusTransitionNameTemplate"
+                            text-map="statusTransition" parameter-map="{statusId:statusTransition.toStatusId}"
                             confirmation="Change status to ${statusTransition.description}?"/>
                 </widgets></section-iterate>
             </box-toolbar><box-body>

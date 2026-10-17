@@ -19,124 +19,122 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
 
     <actions>
-        <set field="interval" from="interval ?: 'w'"/>
-        <set field="maPeriods" from="(maPeriods ?: '0') as Integer"/>
+        <set field="interval" from="interval || 'w'"/>
+        <set field="maPeriods" from="parseInt(maPeriods || '0', 10)"/>
 
         <service-call name="mantle.sales.SalesReportServices.get#SalesOrderSummary" out-map="context"
-                in-map="[interval:(interval?:'w'), intervalCount:intervalCount, thruDate:thruDate, maPeriods:maPeriods,
+                in-map="{interval:(interval||'w'), intervalCount:intervalCount, thruDate:thruDate, maPeriods:maPeriods,
                     vendorPartyIds:vendorPartyIds, customerPartyIds:customerPartyIds, productStoreIds:productStoreIds,
-                    customerClassificationIds:customerClassificationIds, productIds:productIds]"/>
+                    customerClassificationIds:customerClassificationIds, productIds:productIds}"/>
         <if condition="salesOrderSummaryList == null"><return error="true" message="ElasticSearch not available"/></if>
 
         <service-call name="mantle.sales.SalesReportServices.get#SalesInvoiceSummary" out-map="context"
-                in-map="[interval:(interval?:'w'), intervalCount:intervalCount, thruDate:thruDate, maPeriods:maPeriods,
+                in-map="{interval:(interval||'w'), intervalCount:intervalCount, thruDate:thruDate, maPeriods:maPeriods,
                     fromPartyIds:vendorPartyIds, toPartyIds:customerPartyIds, productStoreIds:productStoreIds,
-                    customerClassificationIds:customerClassificationIds, productIds:productIds]"/>
+                    customerClassificationIds:customerClassificationIds, productIds:productIds}"/>
 
         <service-call name="mantle.sales.SalesReportServices.get#SalesTopProduct" out-map="context" transaction="force-new" ignore-error="true"
-                in-map="[interval:(interval?:'w'), intervalCount:intervalCount, thruDate:thruDate, topLimit:(topLimit?:15)]"/>
+                in-map="{interval:(interval||'w'), intervalCount:intervalCount, thruDate:thruDate, topLimit:(topLimit||15)}"/>
         <service-call name="mantle.sales.SalesReportServices.get#InvoicesByCustomerClass" out-map="context" transaction="force-new" ignore-error="true"
-                in-map="[interval:(interval?:'w'), intervalCount:intervalCount, thruDate:thruDate]"/>
+                in-map="{interval:(interval||'w'), intervalCount:intervalCount, thruDate:thruDate}"/>
 
         <script><![CDATA[
-            import java.math.RoundingMode
-
             defaultColors = ['rgba(92, 184, 92, 1.0)', 'rgba(91, 192, 222, 1.0)', 'rgba(240, 173, 78, 1.0)', 'rgba(217, 83, 79, 1.0)',
                     'rgba(60, 118, 61, 1.0)', 'rgba(49, 112, 143, 1.0)', 'rgba(138, 109, 59, 1.0)', 'rgba(169, 68, 66, 1.0)',
                     'rgba(223, 240, 216, 1.0)', 'rgba(217, 237, 247, 1.0)', 'rgba(252, 248, 227, 1.0)', 'rgba(242, 222, 222, 1.0)']
 
-            orderSummaryNoTotals = salesOrderSummaryList.subList(0, salesOrderSummaryList.size() - 2)
-            invoiceSummaryNoTotals = salesInvoiceSummaryList.subList(0, salesInvoiceSummaryList.size() - 2)
-            orderLabelList = orderSummaryNoTotals*.dateKey
-            invoiceLabelList = invoiceSummaryNoTotals*.dateKey
-
-            newCustomerPercentList = orderSummaryNoTotals*.newCustomerPercent.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            newCustomerPercentMaList = orderSummaryNoTotals*.newCustomerPercentMa.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            orderProductSaleTotalList = orderSummaryNoTotals*.productSaleTotal.collect({ it.setScale(2, RoundingMode.HALF_UP) })
-            orderNetSalesList = orderSummaryNoTotals*.netSales.collect({ it.setScale(2, RoundingMode.HALF_UP) })
-            orderDiscountPercentList = orderSummaryNoTotals*.discountPercent.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            orderDiscountPercentMaList = orderSummaryNoTotals*.discountPercentMa.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-
-            invoiceTotalList = invoiceSummaryNoTotals*.invoiceTotal.collect({ it.setScale(2, RoundingMode.HALF_UP) })
-            invoiceTotalMaList = invoiceSummaryNoTotals*.invoiceTotalMa.collect({ it.setScale(2, RoundingMode.HALF_UP) })
-            invoicePaidPercentList = invoiceSummaryNoTotals*.paidPercent.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            invoicePaidPercentMaList = invoiceSummaryNoTotals*.paidPercentMa.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            invoicePrePaidPercentList = invoiceSummaryNoTotals*.prePaidPercent.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            invoicePrePaidPercentMaList = invoiceSummaryNoTotals*.prePaidPercentMa.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            invoiceCostPercentList = invoiceSummaryNoTotals*.costPercent.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            invoiceCostPercentMaList = invoiceSummaryNoTotals*.costPercentMa.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            invoiceDiscountPercentList = invoiceSummaryNoTotals*.discountPercent.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
-            invoiceDiscountPercentMaList = invoiceSummaryNoTotals*.discountPercentMa.collect({ (it * 100.0).setScale(1, RoundingMode.HALF_UP) })
+            orderSummaryNoTotals = Array.from(salesOrderSummaryList).slice(0, -2);
+            invoiceSummaryNoTotals = Array.from(salesInvoiceSummaryList).slice(0, -2);
+            orderLabelList = orderSummaryNoTotals.map(it => it.dateKey);
+            invoiceLabelList = invoiceSummaryNoTotals.map(it => it.dateKey);
+            const chartAmounts = (list, key) => list.map(it => toDecimal(it[key] ?? 0).setScale(2, 'HALF_UP').toNumber());
+            const chartPercents = (list, key) => list.map(it => toDecimal(it[key] ?? 0).multiply(100).setScale(1, 'HALF_UP').toNumber());
+            newCustomerPercentList = chartPercents(orderSummaryNoTotals, 'newCustomerPercent');
+            newCustomerPercentMaList = chartPercents(orderSummaryNoTotals, 'newCustomerPercentMa');
+            orderProductSaleTotalList = chartAmounts(orderSummaryNoTotals, 'productSaleTotal');
+            orderNetSalesList = chartAmounts(orderSummaryNoTotals, 'netSales');
+            orderDiscountPercentList = chartPercents(orderSummaryNoTotals, 'discountPercent');
+            orderDiscountPercentMaList = chartPercents(orderSummaryNoTotals, 'discountPercentMa');
+            invoiceTotalList = chartAmounts(invoiceSummaryNoTotals, 'invoiceTotal');
+            invoiceTotalMaList = chartAmounts(invoiceSummaryNoTotals, 'invoiceTotalMa');
+            invoicePaidPercentList = chartPercents(invoiceSummaryNoTotals, 'paidPercent');
+            invoicePaidPercentMaList = chartPercents(invoiceSummaryNoTotals, 'paidPercentMa');
+            invoicePrePaidPercentList = chartPercents(invoiceSummaryNoTotals, 'prePaidPercent');
+            invoicePrePaidPercentMaList = chartPercents(invoiceSummaryNoTotals, 'prePaidPercentMa');
+            invoiceCostPercentList = chartPercents(invoiceSummaryNoTotals, 'costPercent');
+            invoiceCostPercentMaList = chartPercents(invoiceSummaryNoTotals, 'costPercentMa');
+            invoiceDiscountPercentList = chartPercents(invoiceSummaryNoTotals, 'discountPercent');
+            invoiceDiscountPercentMaList = chartPercents(invoiceSummaryNoTotals, 'discountPercentMa');
 
             countSummaryDatasets = [
-                    [label: 'Orders', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false,
-                            data: orderSummaryNoTotals*.orderCount],
-                    [label: 'New Customers', backgroundColor: defaultColors[1], borderColor: defaultColors[1], fill: false,
-                            data: orderSummaryNoTotals*.newCustomerOrderCount],
-                    [label: 'New Customer %', backgroundColor: defaultColors[3].replace('1.0', '0.5'), borderColor: defaultColors[3].replace('1.0', '0.5'), fill: false,
-                            yAxisID:'rightSide', data:newCustomerPercentList],
-                    [label: 'Invoices', backgroundColor: defaultColors[2], borderColor: defaultColors[2], fill: false,
-                            data: invoiceSummaryNoTotals*.invoiceCount],
+                    {label: 'Orders', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false,
+                            data: orderSummaryNoTotals.map(it => it.orderCount)},
+                    {label: 'New Customers', backgroundColor: defaultColors[1], borderColor: defaultColors[1], fill: false,
+                            data: orderSummaryNoTotals.map(it => it.newCustomerOrderCount)},
+                    {label: 'New Customer %', backgroundColor: defaultColors[3].replace('1.0', '0.5'), borderColor: defaultColors[3].replace('1.0', '0.5'), fill: false,
+                            yAxisID:'rightSide', data:newCustomerPercentList},
+                    {label: 'Invoices', backgroundColor: defaultColors[2], borderColor: defaultColors[2], fill: false,
+                            data: invoiceSummaryNoTotals.map(it => it.invoiceCount)},
             ]
             orderAmountsDatasets = [
-                    [label: 'Product Ordered', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false,
-                            data: orderProductSaleTotalList],
-                    [label: 'Order Discounts', backgroundColor: defaultColors[1], borderColor: defaultColors[1], fill: false,
-                            data: orderSummaryNoTotals*.discountTotal.collect({ -it.setScale(2, RoundingMode.HALF_UP) })],
-                    [label: 'Discount %', backgroundColor: defaultColors[3].replace('1.0', '0.5'), borderColor: defaultColors[3].replace('1.0', '0.5'), fill: false,
-                            yAxisID: 'rightSide', data: orderDiscountPercentList ],
+                    {label: 'Product Ordered', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false,
+                            data: orderProductSaleTotalList},
+                    {label: 'Order Discounts', backgroundColor: defaultColors[1], borderColor: defaultColors[1], fill: false,
+                            data: chartAmounts(orderSummaryNoTotals, 'discountTotal').map(it => -it)},
+                    {label: 'Discount %', backgroundColor: defaultColors[3].replace('1.0', '0.5'), borderColor: defaultColors[3].replace('1.0', '0.5'), fill: false,
+                            yAxisID: 'rightSide', data: orderDiscountPercentList },
             ]
             invoiceMarginDatasets = [
-                    [label: 'Product Invoiced', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false, type:'line',
-                            data: invoiceSummaryNoTotals*.productSaleTotal.collect({ it.setScale(2, RoundingMode.HALF_UP) })],
-                    [label: 'Invoice Discounts', backgroundColor: defaultColors[1].replace('1.0', '0.4'), borderColor: defaultColors[1], stack:'DiscCost',
-                            data: invoiceSummaryNoTotals*.discountTotal.collect({ -it.setScale(2, RoundingMode.HALF_UP) })],
-                    [label: 'Product Cost', backgroundColor: defaultColors[4].replace('1.0', '0.4'), borderColor: defaultColors[4], stack:'DiscCost',
-                            data: invoiceSummaryNoTotals*.productCostTotal.collect({ it.setScale(2, RoundingMode.HALF_UP) })],
+                    {label: 'Product Invoiced', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false, type:'line',
+                            data: chartAmounts(invoiceSummaryNoTotals, 'productSaleTotal')},
+                    {label: 'Invoice Discounts', backgroundColor: defaultColors[1].replace('1.0', '0.4'), borderColor: defaultColors[1], stack:'DiscCost',
+                            data: chartAmounts(invoiceSummaryNoTotals, 'discountTotal').map(it => -it)},
+                    {label: 'Product Cost', backgroundColor: defaultColors[4].replace('1.0', '0.4'), borderColor: defaultColors[4], stack:'DiscCost',
+                            data: chartAmounts(invoiceSummaryNoTotals, 'productCostTotal')},
             ]
             discountCostDatasets = [
-                    [label: 'Order Discount %', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false,
-                            data: orderDiscountPercentList],
-                    [label: 'Invoice Discount %', backgroundColor: defaultColors[1], borderColor: defaultColors[1], fill: false,
-                            data: invoiceDiscountPercentList],
-                    [label: 'Invoice Cost %', backgroundColor: defaultColors[2], borderColor: defaultColors[2], fill: false,
-                            data: invoiceCostPercentList],
+                    {label: 'Order Discount %', backgroundColor: defaultColors[0], borderColor: defaultColors[0], fill: false,
+                            data: orderDiscountPercentList},
+                    {label: 'Invoice Discount %', backgroundColor: defaultColors[1], borderColor: defaultColors[1], fill: false,
+                            data: invoiceDiscountPercentList},
+                    {label: 'Invoice Cost %', backgroundColor: defaultColors[2], borderColor: defaultColors[2], fill: false,
+                            data: invoiceCostPercentList},
             ]
             ]]></script>
 
         <set field="statsPanelColStyle" value="col-lg-3 col-md-4 col-sm-4 col-xs-6"/>
         <set field="statsChartColStyle" value="col-md-6 col-sm-6"/>
 
-        <if condition="vendorPartyIds">
-            <set field="vendorPartyIdList" from="vendorPartyIds instanceof List ? vendorPartyIds : (vendorPartyIds.split(',') as List)"/>
+        <if condition="vendorPartyIds?.length > 0">
+            <set field="vendorPartyIdList" from="typeof vendorPartyIds === 'string' ? vendorPartyIds.split(',') : Array.from(vendorPartyIds)"/>
             <entity-find entity-name="mantle.party.PartyDetail" list="selectedVendorPartyList">
                 <econdition field-name="partyId" operator="in" from="vendorPartyIdList"/>
                 <order-by field-name="pseudoId"/>
             </entity-find>
         </if>
-        <if condition="productStoreIds">
-            <set field="productStoreIdList" from="productStoreIds instanceof List ? productStoreIds : (productStoreIds.split(',') as List)"/>
+        <if condition="productStoreIds?.length > 0">
+            <set field="productStoreIdList" from="typeof productStoreIds === 'string' ? productStoreIds.split(',') : Array.from(productStoreIds)"/>
             <entity-find entity-name="mantle.product.store.ProductStore" list="selectedProductStoreList">
                 <econdition field-name="productStoreId" operator="in" from="productStoreIdList"/>
                 <order-by field-name="storeName"/>
             </entity-find>
         </if>
-        <if condition="customerClassificationIds">
-            <set field="customerClassificationIdList" from="customerClassificationIds instanceof List ? customerClassificationIds : (customerClassificationIds.split(',') as List)"/>
+        <if condition="customerClassificationIds?.length > 0">
+            <set field="customerClassificationIdList" from="typeof customerClassificationIds === 'string' ? customerClassificationIds.split(',') : Array.from(customerClassificationIds)"/>
             <entity-find entity-name="mantle.party.PartyClassification" list="selectedClassificationList">
                 <econdition field-name="partyClassificationId" operator="in" from="customerClassificationIdList"/>
                 <order-by field-name="description"/>
             </entity-find>
         </if>
-        <if condition="customerPartyIds">
-            <set field="customerPartyIdList" from="customerPartyIds instanceof List ? customerPartyIds : (customerPartyIds.split(',') as List)"/>
+        <if condition="customerPartyIds?.length > 0">
+            <set field="customerPartyIdList" from="typeof customerPartyIds === 'string' ? customerPartyIds.split(',') : Array.from(customerPartyIds)"/>
             <entity-find entity-name="mantle.party.PartyDetail" list="selectedCustomerPartyList">
                 <econdition field-name="partyId" operator="in" from="customerPartyIdList"/>
                 <order-by field-name="pseudoId"/>
             </entity-find>
         </if>
-        <if condition="productIds">
-            <set field="productIdList" from="productIds instanceof List ? productIds : (productIds.split(',') as List)"/>
+        <if condition="productIds?.length > 0">
+            <set field="productIdList" from="typeof productIds === 'string' ? productIds.split(',') : Array.from(productIds)"/>
             <entity-find entity-name="mantle.product.Product" list="selectedProductList">
                 <econdition field-name="productId" operator="in" from="productIdList"/>
                 <order-by field-name="pseudoId"/>
@@ -154,7 +152,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <text-line size="2" default-value="0"/></default-field></field>
 
                 <field name="vendorPartyIds"><default-field title="Vendors"><drop-down allow-empty="true" allow-multiple="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'OrgInternal']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'OrgInternal'}"/>
                 </drop-down></default-field></field>
                 <field name="productStoreIds"><default-field title="Stores"><drop-down allow-empty="true" allow-multiple="true">
                     <entity-options key="${productStoreId}" text="${productStoreId}: ${storeName}">
@@ -171,11 +169,11 @@ along with this software (see the LICENSE.md file). If not, see
                     </drop-down>
                 </default-field></field>
                 <field name="customerPartyIds"><default-field title="Customers"><drop-down allow-empty="true" allow-multiple="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Customer']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Customer'}"/>
                 </drop-down></default-field></field>
 
                 <field name="productIds"><default-field title="Products"><drop-down allow-multiple="true">
-                    <dynamic-options transition="getProductList" server-search="true" min-length="0" parameter-map="[assetClassEnumId:'AsClsInventoryFin']"/>
+                    <dynamic-options transition="getProductList" server-search="true" min-length="0" parameter-map="{assetClassEnumId:'AsClsInventoryFin'}"/>
                 </drop-down></default-field></field>
                 <field name="productNote"><default-field title="">
                     <label text="NOTE: Invoice level stats (total, pre-paid, paid, etc) are not available by Product and will show as having no data"/>
@@ -184,19 +182,19 @@ along with this software (see the LICENSE.md file). If not, see
             </form-single>
         </container-dialog>
         <container>
-            <label text="Sales Summary for ${intervalCount?:13} ${[d:'Days', w:'Weeks', M:'Months', q:'Quarters', y:'Years'].get(interval?:'w')}${thruDate ? ' thru ' + ec.l10n.format(thruDate, 'dd MMM yyyy') : ''}${maPeriods ? ' with ' + maPeriods + ' Period MA' : ''}" type="h3"/>
-            <label text="Vendors: ${selectedVendorPartyList.collect({ ec.resource.expand('PartyNameTemplate', '', it) }).join(', ')}" condition="selectedVendorPartyList" type="h5"/>
-            <label text="Stores: ${selectedProductStoreList.collect({ it.productStoreId + ': ' + it.storeName }).join(', ')}" condition="selectedProductStoreList" type="h5"/>
-            <label text="Customer Classes: ${selectedClassificationList*.description.join(', ')}" condition="selectedClassificationList" type="h5"/>
-            <label text="Customers: ${selectedCustomerPartyList.collect({ ec.resource.expand('PartyNameTemplate', '', it) }).join(', ')}" condition="selectedCustomerPartyList" type="h5"/>
-            <label text="Products: ${selectedProductList.collect({ ec.resource.expand('ProductNameTemplate', '', it) }).join(', ')}" condition="selectedProductList" type="h5"/>
+            <label text="Sales Summary for ${intervalCount||13} ${({d:'Days', w:'Weeks', M:'Months', q:'Quarters', y:'Years'})[interval||'w']}${thruDate ? ' thru ' + ec.l10n.format(thruDate, 'dd MMM yyyy') : ''}${maPeriods ? ' with ' + maPeriods + ' Period MA' : ''}" type="h3"/>
+            <label text="Vendors: ${selectedVendorPartyList.map(it => ec.resource.expand('PartyNameTemplate', '', it)).join(', ')}" condition="(selectedVendorPartyList?.length > 0)" type="h5"/>
+            <label text="Stores: ${selectedProductStoreList.map(it => it.productStoreId + ': ' + it.storeName).join(', ')}" condition="(selectedProductStoreList?.length > 0)" type="h5"/>
+            <label text="Customer Classes: ${selectedClassificationList.map(it => it.description).join(', ')}" condition="(selectedClassificationList?.length > 0)" type="h5"/>
+            <label text="Customers: ${selectedCustomerPartyList.map(it => ec.resource.expand('PartyNameTemplate', '', it)).join(', ')}" condition="(selectedCustomerPartyList?.length > 0)" type="h5"/>
+            <label text="Products: ${selectedProductList.map(it => ec.resource.expand('ProductNameTemplate', '', it)).join(', ')}" condition="(selectedProductList?.length > 0)" type="h5"/>
         </container>
 
-        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats.html.ftl"/></render-mode>
+        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats.html.fancy"/></render-mode>
 
-        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryCharts.html.ftl"/></render-mode>
+        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryCharts.html.fancy"/></render-mode>
 
-        <container-box><box-header title="Top Products Ordered (${[d:'Day', w:'Week', M:'Month', q:'Quarter', y:'Year'].get(interval?:'w')} from ${ec.l10n.format(topProductStart, 'dd MMM yyyy')} to ${ec.l10n.format((topProductEnd ? topProductEnd - 1 : null), 'dd MMM yyyy')})"/><box-body-nopad>
+        <container-box><box-header title="Top Products Ordered (${{d:'Day', w:'Week', M:'Month', q:'Quarter', y:'Year'}[interval||'w']} from ${ec.l10n.format(topProductStart, 'dd MMM yyyy')} to ${ec.l10n.format((topProductEnd ? topProductEnd - 1 : null), 'dd MMM yyyy')})"/><box-body-nopad>
             <form-list name="TopProductList" list="topProductList" skip-form="true">
                 <field name="productId"><default-field title="Product">
                     <display-entity entity-name="mantle.product.Product" text="ProductNameTemplate"/></default-field></field>
@@ -205,8 +203,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="productIssuedTotal" align="right"><default-field title="Total Issued"><display format="#,##0.00"/></default-field></field>
                 <field name="productCostTotal" align="right"><default-field title="Total Cost"><display format="#,##0.00"/></default-field></field>
                 <field name="costPercent" align="right"><default-field title="Cost %"><display format="0.0%"/></default-field></field>
-                <field name="marginPercent" from="1 - (costPercent ?: 0.0)" align="right"><default-field title="Margin %"><display format="0.0%"/></default-field></field>
-                <field name="percentOfTotal" from="ordersLast?.totalSales ? (totalSales / ordersLast.totalSales) : 0.0" align="right">
+                <field name="marginPercent" from="toDecimal(1).subtract(costPercent ?? 0)" align="right"><default-field title="Margin %"><display format="0.0%"/></default-field></field>
+                <field name="percentOfTotal" from="!toDecimal(ordersLast?.totalSales ?? 0).isZero() ? toDecimal(totalSales ?? 0).divide(ordersLast.totalSales) : toDecimal(0)" align="right">
                     <default-field title="% of Sales"><display format="0.0%"/></default-field></field>
             </form-list>
         </box-body-nopad></container-box>
@@ -245,7 +243,7 @@ along with this software (see the LICENSE.md file). If not, see
             </form-list>
         </box-body-nopad></container-box>
 
-        <container-box><box-header title="Invoices by Customer Classification (${[d:'Day', w:'Week', M:'Month', q:'Quarter', y:'Year'].get(interval?:'w')} from ${ec.l10n.format(topCustomerClassStart, 'dd MMM yyyy')} to ${ec.l10n.format((topCustomerClassEnd ? topCustomerClassEnd - 1 : null), 'dd MMM yyyy')})"/><box-body-nopad>
+        <container-box><box-header title="Invoices by Customer Classification (${{d:'Day', w:'Week', M:'Month', q:'Quarter', y:'Year'}[interval||'w']} from ${ec.l10n.format(topCustomerClassStart, 'dd MMM yyyy')} to ${ec.l10n.format((topCustomerClassEnd ? topCustomerClassEnd - 1 : null), 'dd MMM yyyy')})"/><box-body-nopad>
             <form-list name="TopCustomerClassList" list="topCustomerClassList" skip-form="true">
                 <row-actions><set field="rowStyle" from="customerClassId ? '' : 'text-strong'"/></row-actions>
                 <field name="classDescription"><default-field title="Classification"><display/></default-field></field>

@@ -29,7 +29,7 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
 
         <service-call name="mantle.order.OrderInfoServices.get#OrderItemDisplayInfo" out-map="context"
-                in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId]"/>
+                in-map="{orderId:orderId, orderItemSeqId:orderItemSeqId}"/>
 
         <entity-find-count entity-name="mantle.party.PartyRole" count-field="isCustomerInternalOrg">
             <econdition field-name="partyId" from="orderPart.customerPartyId"/>
@@ -78,7 +78,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="enumTypeId" value="ItemType"/><order-by field-name="description"/>
                         </entity-find></entity-options></drop-down>
                 </conditional-field> -->
-                <default-field title="Type" container-style="${isProductItemType ? 'text-info' : (itemTypeEnumId == 'ItemDiscount' ? 'text-success' : (itemTypeEnumId in ['ItemSalesTax','ItemVatTax'] ? 'text-warning' : ''))}">
+                <default-field title="Type" container-style="${isProductItemType ? 'text-info' : (itemTypeEnumId == 'ItemDiscount' ? 'text-success' : (['ItemSalesTax','ItemVatTax'].includes(itemTypeEnumId) ? 'text-warning' : ''))}">
                     <display-entity entity-name="moqui.basic.Enumeration" text="${description}${isPromo ? ' (Promotion)' : ''}"/>
                 </default-field>
             </field>
@@ -122,15 +122,14 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="unitAmountHist"><default-field title=" ">
                 <render-mode><text type="html,vuet"><![CDATA[
-                    <#assign popoverContent>
-                        <table style="width:100%;"><#list itemUnitAmountAuditList as auditInfo><tr>
-                            <td class="text-right">${ec.l10n.formatCurrency(auditInfo.auditLog.newValueText, orderHeader.currencyUomId, 3)}</td>
-                            <td class="text-center">${ec.resource.expand('UsernameTemplate', '', auditInfo.userAccount)}</td>
-                            <td class="text-center">${ec.l10n.format(auditInfo.auditLog.changedDate, 'yyyy-MM-dd HH:mm')}</td>
-                            <td class="text-center">${(auditInfo.changeReasonEnum.description)!(auditInfo.auditLog.changeReason)!''}</td>
+                    <details><summary>${ec.l10n.localize('Price History')}</summary>
+                        <table><#list itemUnitAmountAuditList as auditInfo><tr>
+                            <td>${WebUtilities.encodeHtml(ec.l10n.formatCurrency(auditInfo.auditLog.newValueText, orderHeader.currencyUomId, 3))}</td>
+                            <td>${WebUtilities.encodeHtml(ec.resource.expand('UsernameTemplate', '', auditInfo.userAccount))}</td>
+                            <td>${WebUtilities.encodeHtml(ec.l10n.format(auditInfo.auditLog.changedDate, 'yyyy-MM-dd HH:mm'))}</td>
+                            <td>${WebUtilities.encodeHtml(auditInfo.changeReasonEnum?.description ?? auditInfo.auditLog.changeReason ?? '')}</td>
                         </tr></#list></table>
-                    </#assign>
-                    <a role="button" data-toggle="popover" data-placement="left" data-title="${ec.resource.expand('Price History for Item ${orderItemSeqId}', null)}" data-content="${popoverContent?html}">${ec.l10n.localize('Price History')}</a>
+                    </details>
                 ]]></text><text type="qvt"><![CDATA[
                     <div class="text-primary cursor-pointer">${ec.l10n.localize('Price History')}<q-tooltip>
                         <div>${ec.resource.expand('Price History for Item ${orderItemSeqId}', null)}</div>
@@ -138,7 +137,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <td class="text-right">${ec.l10n.formatCurrency(auditInfo.auditLog.newValueText, orderHeader.currencyUomId, 3)}</td>
                             <td class="text-center">${ec.resource.expand('UsernameTemplate', '', auditInfo.userAccount)}</td>
                             <td class="text-center">${ec.l10n.format(auditInfo.auditLog.changedDate, 'yyyy-MM-dd HH:mm')}</td>
-                            <td class="text-center">${(auditInfo.changeReasonEnum.description)!(auditInfo.auditLog.changeReason)!''}</td>
+                            <td class="text-center">${auditInfo.changeReasonEnum?.description ?? auditInfo.auditLog.changeReason ?? ''}</td>
                         </tr></#list></table>
                     </q-tooltip></div>
                 ]]></text></render-mode>
@@ -163,15 +162,14 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="quantityHist"><default-field title=" ">
                 <render-mode><text type="html,vuet"><![CDATA[
-                    <#assign popoverContent>
-                        <table style="width:100%;"><#list itemQuantityAuditList as auditInfo><tr>
-                            <td class="text-right">${auditInfo.auditLog.newValueText}</td>
-                            <td class="text-center">${ec.resource.expand('UsernameTemplate', '', auditInfo.userAccount)}</td>
-                            <td class="text-center">${ec.l10n.format(auditInfo.auditLog.changedDate, 'yyyy-MM-dd HH:mm')}</td>
-                            <td class="text-center">${(auditInfo.changeReasonEnum.description)!(auditInfo.auditLog.changeReason)!''}</td>
+                    <details><summary>${ec.l10n.localize('Quantity History')}</summary>
+                        <table><#list itemQuantityAuditList as auditInfo><tr>
+                            <td>${WebUtilities.encodeHtml(auditInfo.auditLog.newValueText)}</td>
+                            <td>${WebUtilities.encodeHtml(ec.resource.expand('UsernameTemplate', '', auditInfo.userAccount))}</td>
+                            <td>${WebUtilities.encodeHtml(ec.l10n.format(auditInfo.auditLog.changedDate, 'yyyy-MM-dd HH:mm'))}</td>
+                            <td>${WebUtilities.encodeHtml(auditInfo.changeReasonEnum?.description ?? auditInfo.auditLog.changeReason ?? '')}</td>
                         </tr></#list></table>
-                    </#assign>
-                    <a role="button" data-toggle="popover" data-placement="left" data-title="${ec.resource.expand('Quantity History for Item ${orderItemSeqId}', null)}" data-content="${popoverContent?html}">${ec.l10n.localize('Quantity History')}</a>
+                    </details>
                 ]]></text><text type="qvt"><![CDATA[
                     <div class="text-primary cursor-pointer">${ec.l10n.localize('Quantity History')}<q-tooltip>
                         <div>${ec.resource.expand('Quantity History for Item ${orderItemSeqId}', null)}</div>
@@ -179,7 +177,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <td class="text-right">${auditInfo.auditLog.newValueText}</td>
                             <td class="text-center">${ec.resource.expand('UsernameTemplate', '', auditInfo.userAccount)}</td>
                             <td class="text-center">${ec.l10n.format(auditInfo.auditLog.changedDate, 'yyyy-MM-dd HH:mm')}</td>
-                            <td class="text-center">${(auditInfo.changeReasonEnum.description)!(auditInfo.auditLog.changeReason)!''}</td>
+                            <td class="text-center">${auditInfo.changeReasonEnum?.description ?? auditInfo.auditLog.changeReason ?? ''}</td>
                         </tr></#list></table>
                     </q-tooltip></div>
                 ]]></text></render-mode>
@@ -209,6 +207,5 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-ref name="submitButton"/>
             </field-layout>
         </form-single>
-        <render-mode><text type="html,vuet"><![CDATA[<script>$(function () { $('[data-toggle="popover"]').popover({ sanitize:false, html:true, trigger:"hover click" }); })</script>]]></text></render-mode>
     </widgets>
 </screen>

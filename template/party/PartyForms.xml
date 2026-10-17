@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-map field-name="partyId" from="term"/></entity-find-one>
             <!-- <log message="====== ${term}:${roleTypeId}, partyDetail: ${partyDetail}"/> -->
             <if condition="partyDetail != null"><then>
-                <script>ec.web.sendJsonResponse([[value:partyDetail.partyId, label:ec.resource.expand("PartyNameTemplate", "", partyDetail)]])</script>
+                <script>ec.web.sendJsonResponse([{value:partyDetail.partyId, label:ec.resource.expand("PartyNameTemplate", "", partyDetail)}])</script>
             </then><else>
                 <entity-find entity-name="mantle.party.PartyDetailAndRole" list="partyList" limit="20" distinct="true">
                     <econdition field-name="roleTypeId" operator="in" ignore-if-empty="true"/>
@@ -49,8 +49,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <order-by field-name="firstName,lastName,organizationName"/>
                 </entity-find>
                 <script>
-                    def outList = []
-                    for (party in partyList) outList.add([value:party.partyId, label:ec.resource.expand("PartyNameTemplate", "", party)])
+                    const outList = []
+                    for (const party of partyList) outList.push({value:party.partyId, label:ec.resource.expand("PartyNameTemplate", "", party)})
                     ec.web.sendJsonResponse(outList)
                 </script>
             </else></if>
@@ -68,10 +68,10 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="pageIndex"/>
         <actions>
             <if condition="!term &amp;&amp; !pageIndex"><script>ec.web.sendJsonResponse([])</script><return/></if>
-            <set field="term" from="term ?: '*'"/>
+            <set field="term" from="term || '*'"/>
 
-            <set field="indexName" from="indexName ?: searchIndexName ?: 'mantle'"/>
-            <set field="documentType" from="documentType ?: searchPartyDocType ?: 'MantleParty'"/>
+            <set field="indexName" from="indexName || searchIndexName || 'mantle'"/>
+            <set field="documentType" from="documentType || searchPartyDocType || 'MantleParty'"/>
             <!-- <log message="====== searchPartyList indexName=${indexName}, documentType=${documentType}, term=${term}"/> -->
 
             <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
@@ -79,7 +79,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <if condition="partyDetail != null"><then>
                 <script>
-                    def outList = [[value:partyDetail.partyId, label:ec.resource.expand("PartyNameTemplate", "", partyDetail)]]
+                    const outList = [{value:partyDetail.partyId, label:ec.resource.expand("PartyNameTemplate", "", partyDetail)}]
                     ec.web.sendJsonResponse(outList)
                 </script>
             </then><else>
@@ -87,31 +87,28 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="activeOrgId" from="ec.user.context?.activeOrgId"/>
                 <set field="filterOrgIds" from="ec.user.context?.filterOrgIds"/>
                 <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.party.Party')"/>
-                <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
+                <if condition="findFilters?.length"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
                 <!-- <log level="warn" message="Doing party search with activeOrgId ${activeOrgId} filterOrgIds ${filterOrgIds} entityFilterSetId ${entityFilterSetId}"/> -->
 
                 <script><![CDATA[
-                    StringBuilder termSb = new StringBuilder('(')
-                    termSb.append(elasticQueryAutoWildcard(term, false)).append(')')
-
-                    if (roleTypeId) termSb.append(' AND roles.roleTypeId:(').append(roleTypeId.replaceAll(/,/, ' OR ')).append(')')
-                    if (partyTypeEnumId) termSb.append(' AND (partyTypeEnumId:' + partyTypeEnumId + ')')
-                    if (!'true'.equals(includeDisabled)) termSb.append(' AND (NOT disabled:Y)')
-                    if (activeOrgId && 'true'.equals(restrictActiveOrg)) termSb.append(' AND (partyId:' + activeOrgId + ')')
-
-                    if ('MANTLE_USER_ORG'.equals(entityFilterSetId)) {
-                        termSb.append(' AND ownerPartyId:(' + (filterOrgIds ? filterOrgIds.join(' OR ') + ' OR ' : '') + '_NA_)')
-                    } else if ('MANTLE_ACTIVE_ORG'.equals(entityFilterSetId) && activeOrgId) {
-                        termSb.append(' AND ownerPartyId:(' + activeOrgId + ' OR _NA_)')
+                    let termSb = '(' + elasticQueryAutoWildcard(term, false) + ')'
+                    if (roleTypeId) termSb += ' AND roles.roleTypeId:(' + roleTypeId.replaceAll(',', ' OR ') + ')'
+                    if (partyTypeEnumId) termSb += ' AND (partyTypeEnumId:' + partyTypeEnumId + ')'
+                    if (includeDisabled !== 'true') termSb += ' AND (NOT disabled:Y)'
+                    if (activeOrgId && restrictActiveOrg === 'true') termSb += ' AND (partyId:' + activeOrgId + ')'
+                    if (entityFilterSetId === 'MANTLE_USER_ORG') {
+                        termSb += ' AND ownerPartyId:(' + (filterOrgIds?.length ? filterOrgIds.join(' OR ') + ' OR ' : '') + '_NA_)'
+                    } else if (entityFilterSetId === 'MANTLE_ACTIVE_ORG' && activeOrgId) {
+                        termSb += ' AND ownerPartyId:(' + activeOrgId + ' OR _NA_)'
                     }
                 ]]></script>
                 <!-- <log level="warn" message="Doing party search with queryString [${termSb.toString()}], indexName:${indexName}, documentType:${documentType}"/> -->
                 <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
-                        in-map="[queryString:termSb.toString(), indexName:indexName, documentType:documentType]"/>
+                        in-map="{queryString:termSb.toString(), indexName:indexName, documentType:documentType}"/>
                 <!-- <log level="warn" message="Got party search results: ${documentList}"/> -->
                 <script>
-                    def outList = []
-                    for (document in documentList) outList.add([value:document._id, label:ec.resource.expand("PartyNameTemplate", "", document)])
+                    const outList = []
+                    for (const document of documentList) outList.push({value:document._id, label:ec.resource.expand("PartyNameTemplate", "", document)})
                     ec.web.sendJsonResponse(outList)
                 </script>
                 <!-- <log level="warn" message="Got party search outList: ${outList}"/> -->
@@ -128,8 +125,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="description"/>
             </entity-find>
             <script>
-                def outList = []
-                for (cmp in cmpList) outList.add([value:cmp.contactMechPurposeId, label:cmp.description])
+                const outList = []
+                for (const cmp of cmpList) outList.push({value:cmp.contactMechPurposeId, label:cmp.description})
                 ec.web.sendJsonResponse(outList)
             </script>
         </actions>
@@ -141,10 +138,10 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <!-- this should ALWAYS be included for postal address forms (copy into your screen) -->
     <transition name="getGeoCountryStates"><service-call name="org.moqui.impl.BasicServices.get#GeoRegionsForDropDown"
-            in-map="[geoId:countryGeoId,term:term]" web-send-json-response="resultList"/>
+            in-map="{geoId:countryGeoId,term:term}" web-send-json-response="resultList"/>
         <default-response type="none"/></transition>
     <transition name="getGeoStateCounties"><service-call name="org.moqui.impl.BasicServices.get#GeoRegionsForDropDown"
-            out-map="context" in-map="[geoId:stateGeoId, geoTypeEnumId:'GEOT_COUNTY']" web-send-json-response="resultList"/>
+            out-map="context" in-map="{geoId:stateGeoId, geoTypeEnumId:'GEOT_COUNTY'}" web-send-json-response="resultList"/>
         <default-response type="none"/></transition>
 
     <!-- an example of a transition to call store#PaymentMethodInfo; this does a create or update -->
@@ -157,13 +154,13 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- an example of a call to get#PartyContactInfo to populate the form, plus a call to flatten the Map for simple use in the form -->
         <if condition="postalContactMechId || telecomContactMechId || emailContactMechId || otherContactMechId"><then>
             <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="contactInfo" in-map="context"/>
-            <set field="contactInfoFlat" from="contactInfo + flattenNestedMap(contactInfo)"/>
+            <set field="contactInfoFlat" from="Object.assign({}, contactInfo, CollectionUtilities.flattenNestedMap(contactInfo))"/>
         </then><else-if condition="postalContactMechPurposeId || telecomContactMechPurposeId || emailContactMechPurposeId || otherContactMechPurposeId">
-            <set field="contactInfoFlat" from="[postalContactMechPurposeId:postalContactMechPurposeId,
+            <set field="contactInfoFlat" from="{postalContactMechPurposeId:postalContactMechPurposeId,
                     telecomContactMechPurposeId:telecomContactMechPurposeId, emailContactMechPurposeId:emailContactMechPurposeId,
-                    otherContactMechPurposeId:otherContactMechPurposeId]"/>
+                    otherContactMechPurposeId:otherContactMechPurposeId}"/>
         </else-if><else>
-            <set field="contactInfoFlat" from="[:]"/>
+            <set field="contactInfoFlat" from="{}"/>
         </else></if>
         <if condition="createPostal || postalContactMechPurposeId">
             <entity-find entity-name="mantle.party.contact.PartyContactMechTelecomNumber" list="partyTelecomNumberList">
@@ -176,15 +173,15 @@ along with this software (see the LICENSE.md file). If not, see
 
         <!-- simple ContactInfo form for billing info -->
         <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="contactInfo"
-                in-map="[partyId:partyId, postalContactMechPurposeId:'PostalBilling',
-                    telecomContactMechPurposeId:'PhoneBilling', emailContactMechPurposeId:'EmailBilling']"/>
-        <set field="contactInfoFlat" from="contactInfo + flattenNestedMap(contactInfo)"/>
+                in-map="{partyId:partyId, postalContactMechPurposeId:'PostalBilling',
+                    telecomContactMechPurposeId:'PhoneBilling', emailContactMechPurposeId:'EmailBilling'}"/>
+        <set field="contactInfoFlat" from="Object.assign({}, contactInfo, CollectionUtilities.flattenNestedMap(contactInfo))"/>
 
         <!-- example code for PaymentMethodInfo form -->
         <!-- see the SimpleScreens/Party/EditParty/UpdatePaymentMethodInfo.xml screen, or reuse it with a subscreens.subscreens-item element -->
         <service-call name="mantle.account.PaymentMethodServices.get#PartyPaymentMethodInfo" out-map="methodInfo"
-                in-map="[partyId:partyId]"/>
-        <set field="methodInfoFlat" from="flattenNestedMap(methodInfo)"/>
+                in-map="{partyId:partyId}"/>
+        <set field="methodInfoFlat" from="CollectionUtilities.flattenNestedMap(methodInfo)"/>
         <entity-find entity-name="mantle.party.contact.PartyContactMechPostalAddress" list="partyPostalAddressList">
             <date-filter/><econdition field-name="partyId"/></entity-find>
         <entity-find entity-name="mantle.party.contact.PartyContactMechTelecomNumber" list="partyTelecomNumberList">
@@ -247,7 +244,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="countryGeoId">
                 <conditional-field condition="createPostal || postalContactMechPurposeId" title="">
-                    <drop-down no-current-selected-key="${ec.user.getPreference('PostalAddress.DefaultCountry') ?: 'USA'}">
+                    <drop-down no-current-selected-key="${ec.user.getPreference('PostalAddress.DefaultCountry') || 'USA'}">
                         <entity-options key="${geoId}" text="${geoName}">
                             <entity-find entity-name="moqui.basic.Geo" list="geoList">
                                 <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY"/>
@@ -292,7 +289,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="telecomContactMechId">
                 <conditional-field condition="telecomContactMechPurposeId || ((createPostal || postalContactMechPurposeId) &amp;&amp; telecomContactMechId)">
                     <hidden/></conditional-field>
-                <conditional-field title="Select Phone" condition="(createPostal || postalContactMechPurposeId) &amp;&amp; !telecomContactMechId &amp;&amp; partyTelecomNumberList">
+                <conditional-field title="Select Phone" condition="(createPostal || postalContactMechPurposeId) &amp;&amp; !telecomContactMechId &amp;&amp; (partyTelecomNumberList?.length > 0)">
                     <drop-down>
                         <option key="" text="New Phone"/>
                         <list-options list="partyTelecomNumberList" key="${contactMechId}" text="TelecomNumberSimpleTemplate"/>
@@ -318,7 +315,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <conditional-field condition="createTelecom || telecomContactMechPurposeId || telecomContactMechId || createPostal || postalContactMechPurposeId"
                         title="" tooltip="Country Code">
                     <label text="+"/>
-                    <text-line size="3" maxlength="3" default-value="${ec.user.getPreference('TelecomNumber.DefaultCountryCode') ?: '1'}"/>
+                    <text-line size="3" maxlength="3" default-value="${ec.user.getPreference('TelecomNumber.DefaultCountryCode') || '1'}"/>
                 </conditional-field>
                 <default-field><ignored/></default-field>
             </field>
@@ -336,7 +333,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <text-line size="10" maxlength="10"/></conditional-field>
                 <default-field><ignored/></default-field>
             </field>
-            <field name="telecomExtension" from="telecomExtension ?: telecomPartyContactMech?.extension">
+            <field name="telecomExtension" from="telecomExtension || telecomPartyContactMech?.extension">
                 <conditional-field condition="createTelecom || telecomContactMechPurposeId || telecomContactMechId || createPostal || postalContactMechPurposeId"
                         title="" tooltip="Extension">
                     <label text="x"/>
@@ -348,7 +345,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="emailContactMechId">
                 <conditional-field condition="emailContactMechPurposeId || ((createPostal || postalContactMechPurposeId) &amp;&amp; emailContactMechId)">
                     <hidden/></conditional-field>
-                <conditional-field title="Select Email" condition="(createPostal || postalContactMechPurposeId) &amp;&amp; !emailContactMechId &amp;&amp; partyEmailAddressList">
+                <conditional-field title="Select Email" condition="(createPostal || postalContactMechPurposeId) &amp;&amp; !emailContactMechId &amp;&amp; (partyEmailAddressList?.length > 0)">
                     <drop-down>
                         <option key="" text="New Email"/>
                         <list-options list="partyEmailAddressList" key="${contactMechId}" text="${infoString}"/>
@@ -473,7 +470,7 @@ along with this software (see the LICENSE.md file). If not, see
                         tooltip="Card Number (clear this field to update other fields without the full Card Number)">
                     <text-line size="16"/></conditional-field>
                 <conditional-field title="" condition="isCreditCard">
-                    <display text="${maskedCardNumber?:''}" also-hidden="false"/></conditional-field>
+                    <display text="${maskedCardNumber||''}" also-hidden="false"/></conditional-field>
                 <default-field><ignored/></default-field>
             </field>
             <field name="validateSecurityCode">
@@ -494,11 +491,11 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="expireYear">
                 <conditional-field title="" condition="isCreditCard"><drop-down current="selected"
                         no-current-selected-key="${ec.l10n.format(ec.user.nowTimestamp, 'yyyy')}">
-                    <list-options list="org.moqui.util.StringUtilities.getYearList(10)"/></drop-down></conditional-field>
+                    <list-options list="Array.from({length: 10}, (_, i) => String(new Date().getFullYear() + i))"/></drop-down></conditional-field>
                 <default-field><ignored/></default-field>
             </field>
             <field name="paymentGatewayConfigId">
-                <conditional-field title="Payment Gateway" condition="isCreditCard &amp;&amp; paymentGatewayConfigList">
+                <conditional-field title="Payment Gateway" condition="isCreditCard &amp;&amp; (paymentGatewayConfigList?.length > 0)">
                     <drop-down allow-empty="true">
                         <list-options key="${paymentGatewayConfigId}" text="${description}" list="paymentGatewayConfigList"/>
                     </drop-down>
@@ -508,7 +505,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- Contact Info fields -->
             <field name="postalContactMechId">
-                <conditional-field title="Select Address" condition="!paymentMethodId &amp;&amp; partyPostalAddressList">
+                <conditional-field title="Select Address" condition="!paymentMethodId &amp;&amp; (partyPostalAddressList?.length > 0)">
                     <drop-down>
                         <option key="" text="New Address"/>
                         <list-options list="partyPostalAddressList" key="${contactMechId}" text="PostalAddressSimpleTemplate"/>
@@ -539,7 +536,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="postalCodeExt"><default-field title="" tooltip="Zip/Postal Code Extension"><text-line size="4"/></default-field></field>
 
             <field name="telecomContactMechId">
-                <conditional-field title="Select Phone" condition="!paymentMethodId &amp;&amp; partyTelecomNumberList">
+                <conditional-field title="Select Phone" condition="!paymentMethodId &amp;&amp; (partyTelecomNumberList?.length > 0)">
                     <drop-down>
                         <option key="" text="New Phone"/>
                         <list-options list="partyTelecomNumberList" key="${contactMechId}" text="TelecomNumberSimpleTemplate"/>
@@ -548,7 +545,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field><ignored/></default-field>
             </field>
             <field name="countryCode"><default-field title="" tooltip="Country Code">
-                <label text="+"/><text-line size="3" maxlength="3" default-value="${ec.user.getPreference('TelecomNumber.DefaultCountryCode') ?: '1'}"/></default-field></field>
+                <label text="+"/><text-line size="3" maxlength="3" default-value="${ec.user.getPreference('TelecomNumber.DefaultCountryCode') || '1'}"/></default-field></field>
             <field name="areaCode"><default-field  title="" tooltip="Area Code">
                 <label text="-"/><text-line size="3" maxlength="3"/></default-field></field>
             <field name="contactNumber"><default-field  title="" tooltip="Phone Number">

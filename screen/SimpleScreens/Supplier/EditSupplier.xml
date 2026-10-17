@@ -81,7 +81,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <container-row><row-col lg="6">
-            <link url="findOrder" text="Orders" parameter-map="[vendorPartyId:partyId]"/>
+            <link url="findOrder" text="Orders" parameter-map="{vendorPartyId:partyId}"/>
             <dynamic-dialog id="FindDuplicatesDialog" button-text="Find Duplicates" transition="FindDuplicates" width="960"/>
             <section-include name="HasDuplicatesSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
 

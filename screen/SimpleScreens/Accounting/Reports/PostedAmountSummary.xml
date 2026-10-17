@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
-                in-map="[organizationPartyId:organizationPartyId]"/>
+                in-map="{organizationPartyId:organizationPartyId}"/>
 
         <if condition="dateRange_period">
             <set field="rangeList" from="ec.user.getPeriodRange(dateRange_period, dateRange_poffset, dateRange_pdate)"/>
@@ -41,8 +41,8 @@ along with this software (see the LICENSE.md file). If not, see
         </if>
         <service-call name="mantle.ledger.LedgerReportServices.run#PostedAmountSummary" out-map="context" in-map="context"/>
 
-        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask || ec.user.getPreference('GlAccountCodeMask')"/>
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <container>

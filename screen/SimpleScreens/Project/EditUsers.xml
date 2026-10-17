@@ -16,7 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Parties" default-menu-index="3">
 
     <parameter name="workEffortId"/>
-    <parameter name="rootWorkEffortId" required="true" from="rootWorkEffortId ?: workEffortId"/>
+    <parameter name="rootWorkEffortId" required="true" from="rootWorkEffortId || workEffortId"/>
 
     <transition name="addUserAssign"><service-call name="create#mantle.work.effort.WorkEffortParty" in-map="context"/>
         <default-response url="."/></transition>
@@ -82,7 +82,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find-one entity-name="moqui.basic.StatusItem" value-field="currentStatus"/>
                 <entity-find entity-name="moqui.security.UserAccount" list="uaList">
                     <econdition field-name="partyId"/></entity-find>
-                <set field="usernames" from="uaList*.username.join(', ')"/>
+                <set field="usernames" from="uaList.map(it => it.username).join(', ')"/>
             </row-actions>
             <hidden-parameters><parameter name="rootWorkEffortId"/><parameter name="workEffortId"/></hidden-parameters>
 

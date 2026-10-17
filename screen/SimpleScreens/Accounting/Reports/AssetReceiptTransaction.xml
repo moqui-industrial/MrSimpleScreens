@@ -35,7 +35,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <form-list name="AssetReceiptTxList" list="acctgTransEntryList" skip-form="true" header-dialog="true"
@@ -82,13 +82,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <order-by field-name="organizationName"/>
                     </entity-find></entity-options>
                 </drop-down></header-field>
-                <default-field><link url="editParty" link-type="anchor" parameter-map="[partyId:organizationPartyId]"
+                <default-field><link url="editParty" link-type="anchor" parameter-map="{partyId:organizationPartyId}"
                         entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"/></default-field>
             </field>
             <field name="otherPartyId">
                 <header-field title="Other Party"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
-                <default-field><link url="editParty" link-type="anchor" parameter-map="[partyId:otherPartyId]"
+                <default-field><link url="editParty" link-type="anchor" parameter-map="{partyId:otherPartyId}"
                         entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" condition="otherPartyId"/></default-field>
             </field>
 
@@ -111,11 +111,11 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="mfgPartyId">
                 <header-field title="Mfg ID"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
-                <default-field><link url="editParty" link-type="anchor" parameter-map="[partyId:mfgPartyId]"
+                <default-field><link url="editParty" link-type="anchor" parameter-map="{partyId:mfgPartyId}"
                         entity-name="mantle.party.PartyDetail" text="${pseudoId}" condition="mfgPartyId"/></default-field>
             </field>
             <field name="mfgName" from="mfgPartyId">
-                <default-field title="Manufacturer Name"><link url="editParty" link-type="anchor" parameter-map="[partyId:mfgPartyId]"
+                <default-field title="Manufacturer Name"><link url="editParty" link-type="anchor" parameter-map="{partyId:mfgPartyId}"
                         entity-name="mantle.party.PartyDetail" text="PartyNameOnlyTemplate" condition="mfgPartyId"/></default-field>
             </field>
             <field name="lotNumber"><header-field title="Lot #"><text-find size="15" hide-options="ignore-case"/></header-field>

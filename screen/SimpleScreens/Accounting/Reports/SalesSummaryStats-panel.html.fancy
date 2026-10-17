@@ -1,0 +1,33 @@
+<#-- Sales summary panel, with full-size dialog and compact chart. -->
+
+    <#assign modalId = title.replaceAll(" ", "_").replaceAll("-", "_") + "_Modal">
+    <#assign modalTitle = title + " Detail">
+    <#if sri.getRenderMode() == "vuet" || sri.getRenderMode() == "html">
+        <div class="panel panel-default"><div class="panel-body">
+                <h5 class="text-center" style="margin-top:0;"><button type="button" data-dialog="${modalId}" onclick="document.getElementById('${modalId}').showModal()">${title}</button></h5>
+                ${raw(ec.resource.template("component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats-content.html.fancy", {title: title, mainFormat: mainFormat, valThis: valThis, valLast: valLast, valPrior: valPrior, valAvg: valAvg, chartBig: false, chartList: chartList, chartMaList: chartMaList, labelList: labelList}))}
+        </div></div>
+        <dialog id="${modalId}" aria-label="${title}" style="width:1000px;max-width:90vw">
+            <div>
+                <div>
+                    <form method="dialog"><button type="submit" aria-label="Close">Close</button></form>
+                    <h4 class="modal-title">${title}</h4>
+                </div>
+                <div class="modal-body">
+                    ${raw(ec.resource.template("component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats-content.html.fancy", {title: modalTitle, mainFormat: mainFormat, valThis: valThis, valLast: valLast, valPrior: valPrior, valAvg: valAvg, chartBig: true, chartList: chartList, chartMaList: chartMaList, labelList: labelList}))}
+                </div>
+            </div>
+        </dialog>
+    <#elseif sri.getRenderMode() == "qvt">
+        <m-container-dialog title="${title}">
+            <template v-slot:button>
+                <q-card flat bordered class="q-ma-sm"><q-card-section>
+                    <h5 class="text-center" style="margin-top:0;margin-bottom:8px;">${title}</h5>
+                    ${raw(ec.resource.template("component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats-content.html.fancy", {title: title, mainFormat: mainFormat, valThis: valThis, valLast: valLast, valPrior: valPrior, valAvg: valAvg, chartBig: false, chartList: chartList, chartMaList: chartMaList, labelList: labelList}))}
+                </q-card-section></q-card>
+            </template>
+            <template v-slot:default>
+                ${raw(ec.resource.template("component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats-content.html.fancy", {title: modalTitle, mainFormat: mainFormat, valThis: valThis, valLast: valLast, valPrior: valPrior, valAvg: valAvg, chartBig: true, chartList: chartList, chartMaList: chartMaList, labelList: labelList}))}
+            </template>
+        </m-container-dialog>
+    </#if>

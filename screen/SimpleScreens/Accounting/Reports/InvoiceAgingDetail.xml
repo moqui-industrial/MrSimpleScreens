@@ -20,18 +20,18 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
 
     <actions>
-        <set field="invoiceType" from="invoiceType ?: 'Receivable'"/>
-        <if condition="'payable'.equalsIgnoreCase(invoiceType)"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
-            <else-if condition="'receivable'.equalsIgnoreCase(invoiceType)"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
+        <set field="invoiceType" from="invoiceType || 'Receivable'"/>
+        <if condition="invoiceType?.toLowerCase() === 'payable'"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
+            <else-if condition="invoiceType?.toLowerCase() === 'receivable'"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
 
-        <set field="periodDays" from="(periodDays ?: '30') as int"/>
-        <set field="periodDaysBd" from="new BigDecimal(periodDays)"/>
-        <set field="dateField" from="dateField ?: 'invoiceDate'"/>
-        <set field="statusId" from="statusId ?: (invoiceType == 'Payable' ? 'InvoiceApproved,InvoicePmtSent,InvoiceBilledThrough' : 'InvoiceFinalized,InvoiceSent,InvoiceAcked,InvoicePmtRecvd,InvoiceWriteOff')"/>
+        <set field="periodDays" from="parseInt(periodDays || '30', 10)"/>
+        <set field="periodDaysBd" from="toDecimal(periodDays)"/>
+        <set field="dateField" from="dateField || 'invoiceDate'"/>
+        <set field="statusId" from="statusId || (invoiceType == 'Payable' ? 'InvoiceApproved,InvoicePmtSent,InvoiceBilledThrough' : 'InvoiceFinalized,InvoiceSent,InvoiceAcked,InvoicePmtRecvd,InvoiceWriteOff')"/>
         <set field="statusId_op" value="in"/>
         <set field="referenceNumber" from="refNum"/>
         <!-- FUTURE: [OrgTimeZoneMarker] instead of using Java system default TimeZone use one configured for the organization -->
-        <set field="asOfDate" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS', null, TimeZone.getDefault()) : ec.user.nowTimestamp"/>
+        <set field="asOfDate" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS') : ec.user.nowTimestamp"/>
     </actions>
     <widgets>
         <form-single name="ReportOptions" transition=".">
@@ -84,14 +84,12 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <row-actions>
                 <script><![CDATA[
-                    unpaidAmount = itemsTotal - (amountApplied ?: 0.0) - (toAmountApplied ?: 0.0)
-                    agingList = new ArrayList([null, null, null, null, null, null])
-                    Timestamp dateTs = context.get(dateField)
-                    Integer dateDays = dateTs != null ? asOfDate - dateTs : null
-                    Integer dateIdx = dateDays != null ? (dateDays < 0 ? 0 :
-                            ((dateDays as BigDecimal) / periodDaysBd).setScale(0, BigDecimal.ROUND_DOWN).intValue() + 1) : null
-                    if (dateIdx != null && dateIdx > 5) dateIdx = 5
-                    if (dateIdx != null) agingList[dateIdx] = unpaidAmount
+                    unpaidAmount = toDecimal(itemsTotal ?? 0).subtract(amountApplied ?? 0).subtract(toAmountApplied ?? 0);
+                    agingList = [null, null, null, null, null, null];
+                    const dateTs = context[dateField];
+                    const dateDays = dateTs != null ? Math.trunc((Number(asOfDate) - Number(dateTs)) / 86400000) : null;
+                    const dateIdx = dateDays == null ? null : Math.min(5, dateDays < 0 ? 0 : Math.trunc(dateDays / periodDays) + 1);
+                    if (dateIdx != null) agingList[dateIdx] = unpaidAmount;
                 ]]></script>
             </row-actions>
 
@@ -107,17 +105,17 @@ along with this software (see the LICENSE.md file). If not, see
                 <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field></field>
 
             <field name="fromPseudoId" aggregate="group-by"><header-field title="From ID" show-order-by="true"/>
-                <default-field><link url="editParty" text="${fromPseudoId}" link-type="anchor" parameter-map="[partyId:fromPartyId]"/></default-field></field>
+                <default-field><link url="editParty" text="${fromPseudoId}" link-type="anchor" parameter-map="{partyId:fromPartyId}"/></default-field></field>
             <field name="toPseudoId" aggregate="group-by"><header-field title="To ID" show-order-by="true"/>
-                <default-field><link url="editParty" text="${toPseudoId}" link-type="anchor" parameter-map="[partyId:toPartyId]"/></default-field></field>
+                <default-field><link url="editParty" text="${toPseudoId}" link-type="anchor" parameter-map="{partyId:toPartyId}"/></default-field></field>
 
             <field name="fromName">
                 <header-field title="From Name" show-order-by="true"/>
-                <default-field><link url="editParty" text="${fromName}" link-type="anchor" parameter-map="[partyId:fromPartyId]"/></default-field>
+                <default-field><link url="editParty" text="${fromName}" link-type="anchor" parameter-map="{partyId:fromPartyId}"/></default-field>
             </field>
             <field name="toName">
                 <header-field title="To Name" show-order-by="true"/>
-                <default-field><link url="editParty" text="${toName}" link-type="anchor" parameter-map="[partyId:toPartyId]"/></default-field>
+                <default-field><link url="editParty" text="${toName}" link-type="anchor" parameter-map="{partyId:toPartyId}"/></default-field>
             </field>
 
             <field name="invoiceId" aggregate="group-by"><header-field show-order-by="true" title="Invoice"/>

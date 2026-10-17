@@ -31,26 +31,26 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <if condition="!dateRange_period &amp;&amp; !dateRange_from">
-            <set field="dateRange_period" from="dateRange_period ?: 'week'"/>
-            <set field="dateRange_poffset" from="dateRange_poffset ?: '-1'"/>
+            <set field="dateRange_period" from="dateRange_period || 'week'"/>
+            <set field="dateRange_poffset" from="dateRange_poffset || '-1'"/>
         </if>
 
         <set field="rangeList" from="ec.user.getPeriodRange('dateRange', context)"/>
         <!-- special case for AssetOnHandSummary, these 2 Timestamps must be in the context -->
         <set field="fromDate" from="rangeList[0]"/>
-        <set field="thruDate" from="rangeList[1] ?: ec.user.nowTimestamp"/>
+        <set field="thruDate" from="rangeList[1] || ec.user.nowTimestamp"/>
 
         <set field="fieldDescriptions" from="[
-            [fieldName:'Shipments In', description:'All Incoming Shipments except Return Shipments'],
-            [fieldName:'Returns', description:'Return Shipments'],
-            [fieldName:'Produced', description:'Produced by Production Run'],
-            [fieldName:'Other Receipts', description:'All Receipts except Incoming Shipments and Production Runs'],
-            [fieldName:'All Receipts', description:'All Asset Receipts'],
-            [fieldName:'Shipments Out', description:'All Outgoing Shipments'],
-            [fieldName:'Consumed', description:'Consumed by Production Run'],
-            [fieldName:'Other Issuances', description:'All Issuances except Outgoing Shipments and Production Runs'],
-            [fieldName:'All Issuances', description:'All Asset Issuances'],
-            [fieldName:'Adjustments', description:'Physical Inventory Adjustments'],
+            {fieldName:'Shipments In', description:'All Incoming Shipments except Return Shipments'},
+            {fieldName:'Returns', description:'Return Shipments'},
+            {fieldName:'Produced', description:'Produced by Production Run'},
+            {fieldName:'Other Receipts', description:'All Receipts except Incoming Shipments and Production Runs'},
+            {fieldName:'All Receipts', description:'All Asset Receipts'},
+            {fieldName:'Shipments Out', description:'All Outgoing Shipments'},
+            {fieldName:'Consumed', description:'Consumed by Production Run'},
+            {fieldName:'Other Issuances', description:'All Issuances except Outgoing Shipments and Production Runs'},
+            {fieldName:'All Issuances', description:'All Asset Issuances'},
+            {fieldName:'Adjustments', description:'Physical Inventory Adjustments'},
         ]"/>
     </actions>
     <widgets>
@@ -88,7 +88,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="dateRange"><header-field><date-period/></header-field></field>
             <field name="ownerPartyId">
                 <header-field title="Owner Party"><drop-down allow-empty="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'OrgInternal']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'OrgInternal'}"/>
                 </drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" link-type="anchor"/></default-field>
             </field>
@@ -156,7 +156,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="physicalAdjustments" align="right"><default-field title="Adjustments"><display/></default-field></field>
 
             <field name="onHandChange" align="right"><default-field title="Change"><display/></default-field></field>
-            <field name="endingOnHand" from="(startingOnHand ?: 0.0) + (onHandChange ?: 0.0)" align="right">
+            <field name="endingOnHand" from="toDecimal(startingOnHand ?? 0).add(onHandChange ?? 0)" align="right">
                 <default-field title="Ending"><display/></default-field></field>
 
             <field name="find"><header-field title="Find"><submit/></header-field></field>

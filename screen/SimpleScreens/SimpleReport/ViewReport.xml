@@ -26,7 +26,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="dataDocumentId"/>
                 <econdition field-name="userGroupId" operator="in" from="ec.user.getUserGroupIdSet()"/>
             </entity-find>
-            <if condition="!ddugList"><return error="true" message=""/></if>
+            <if condition="!ddugList?.length"><return error="true" message=""/></if>
 
             <set field="entityName" from="'DataDocument.' + dataDocumentId"/>
             <set field="aenDef" from="ec.entity.getEntityDefinition(entityName)"/>
@@ -43,7 +43,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </form-single>
             </container-dialog>
 
-            <section name="ReportCondView" condition="ddugList"><widgets>
+            <section name="ReportCondView" condition="(ddugList?.length > 0)"><widgets>
                 <form-list name="DataViewList" list="entityValueList" skip-form="true" dynamic="true" header-dialog="true"
                         show-csv-button="true" show-xlsx-button="true" show-page-size="true" saved-finds="true">
                     <entity-find entity-name="${entityName}" list="entityValueList" cache="false" use-clone="true">

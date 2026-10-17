@@ -42,7 +42,7 @@ along with this software (see the LICENSE.md file). If not, see
             <select-field field-name="locationSeqId,description,areaId,aisleId,sectionId,levelId,positionId"/>
         </entity-find>
         <!-- if no configured location(s) look for existing/prior Asset pick locations -->
-        <if condition="!pickLocList">
+        <if condition="!pickLocList?.length">
             <entity-find entity-name="mantle.product.asset.AssetLocationDetail" list="pickLocList" distinct="true">
                 <econdition field-name="productId"/><econdition field-name="facilityId"/>
                 <econdition field-name="locationTypeEnumId" value="FltPick"/>
@@ -59,10 +59,10 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="facilityId"><default-field title="Facility">
                 <link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate" link-type="anchor"/></default-field></field>
             <field name="currentLocation"><default-field>
-                <display text="FacilityLocationNameTemplate" text-map="facLoc?:[locationSeqId:'N/A']"/></default-field></field>
+                <display text="FacilityLocationNameTemplate" text-map="facLoc||{locationSeqId:'N/A'}"/></default-field></field>
             <field name="pickLocations"><default-field title="Pick Location(s)">
                 <section-iterate name="RecLocList" list="pickLocList" entry="recLoc"><widgets>
-                    <label text="${locationSeqId?:''} ${description?:''} [${areaId?:' '}:${aisleId?:' '}:${sectionId?:' '}:${levelId?:' '}:${positionId?:' '}]"
+                    <label text="${locationSeqId||''} ${description||''} [${areaId||' '}:${aisleId||' '}:${sectionId||' '}:${levelId||' '}:${positionId||' '}]"
                             text-map="recLoc" type="div"/>
                 </widgets></section-iterate>
             </default-field></field>

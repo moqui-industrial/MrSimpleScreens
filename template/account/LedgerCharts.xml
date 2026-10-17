@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="disabled" value="N" or-null="true"/>
                 <order-by field-name="organizationName"/>
             </entity-find>
-            <if condition="!organizationPartyId &amp;&amp; orgList"><set field="organizationPartyId" from="orgList[0].partyId"/></if>
+            <if condition="!organizationPartyId &amp;&amp; (orgList?.length > 0)"><set field="organizationPartyId" from="orgList[0].partyId"/></if>
         </actions><widgets>
             <form-single name="SelectOrganizationForm" transition=".">
                 <field name="organizationPartyId"><default-field title="">
@@ -45,28 +45,28 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="OperatingRevenueExpenseChart" condition="organizationPartyId"><actions>
             <script>
                 datasets = [
-                        [classGroupEnumId:'EngGlcNetRevenue'],
-                        [label:'Cost of Sales', classes:['COST_OF_SALES'], stack:'Expense'],
-                        [label:'Sales Expense', classes:['SALES_EXPENSE'], stack:'Expense'],
-                        [label:'Gen/Admin Expense', classes:['GEN_ADMIN_EXPENSE'], stack:'Expense'],
-                        [label:'Other Expense', classes:['CONTRIBUTIONS', 'NON_CASH_EXPENSE'], stack:'Expense'],
-                        [classGroupEnumId:'EngGlcNetOpIncome', type:'line', fill:false]
+                        {classGroupEnumId:'EngGlcNetRevenue'},
+                        {label:'Cost of Sales', classes:['COST_OF_SALES'], stack:'Expense'},
+                        {label:'Sales Expense', classes:['SALES_EXPENSE'], stack:'Expense'},
+                        {label:'Gen/Admin Expense', classes:['GEN_ADMIN_EXPENSE'], stack:'Expense'},
+                        {label:'Other Expense', classes:['CONTRIBUTIONS', 'NON_CASH_EXPENSE'], stack:'Expense'},
+                        {classGroupEnumId:'EngGlcNetOpIncome', type:'line', fill:false}
                 ]
             </script>
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups" out-map="periodsOut"
-                    in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]"/>
-            <if condition="periodsOut.timePeriodGroups">
+                    in-map="{partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods||13)}"/>
+            <if condition="periodsOut.timePeriodGroups?.length">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary" out-map="context"
-                        in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]"/>
+                        in-map="{organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets}"/>
 
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummaryRows" out-map="context" in-map="context"/>
-                <set field="revenueExpenseCsv" from="rowsList.collect({ it.join(',') }).join('\n')"/>
+                <set field="revenueExpenseCsv" from="rowsList.map(it => it.join(',')).join('\n')"/>
                 <!-- <iterate list="rowsList" entry="row"><log message="Row ${row_index}: ${row}"/></iterate> -->
             </if>
         </actions><widgets>
             <container-box><box-header title="Operating Revenue and Expense"/><box-toolbar>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
-                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${(revenueExpenseCsv!"")?js_string}', 'OperatingRevenueExpense.csv', 'text/csv')">Get CSV</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${JSON.stringify(String(revenueExpenseCsv ?? '')).slice(1, -1).replaceAll("'", "\\'")}', 'OperatingRevenueExpense.csv', 'text/csv')">Get CSV</button>
                 ]]></text></render-mode>
             </box-toolbar><box-body>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
@@ -75,8 +75,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                 var revenueExpenseChart = new Chart(document.getElementById("RevenueExpenseChart"), {
                     type: 'bar',
-                    data: { labels:${Static["groovy.json.JsonOutput"].toJson(periodLabels!"")},
-                        datasets:${Static["groovy.json.JsonOutput"].toJson(datasets!"")} },
+                    data: { labels:${JSON.stringify(periodLabels ?? '')},
+                        datasets:${JSON.stringify(datasets ?? '')} },
                     options: {
                         scales:{ yAxes:[{ ticks:{ beginAtZero:true } }] }, maintainAspectRatio:false,
                         tooltips:{ callbacks:{ label: function(tooltipItem, data) {
@@ -99,28 +99,28 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="NetIncomeChart" condition="organizationPartyId"><actions>
             <script>
                 datasets = [
-                        [classGroupEnumId:'EngGlcNetRevenue', stack:'Income'],
-                        [label:'Non Op Income', classes:['INCOME'], stack:'Income'],
-                        [label:'Cost of Sales', classes:['COST_OF_SALES'], stack:'Expense'],
-                        [label:'Operating Expense', classes:['EXPENSE'], stack:'Expense'],
-                        [label:'Non Op Expense', classes:['NON_OP_EXPENSE'], stack:'Expense'],
-                        [classGroupEnumId:'EngGlcNetIncome', type:'line', fill:false]
+                        {classGroupEnumId:'EngGlcNetRevenue', stack:'Income'},
+                        {label:'Non Op Income', classes:['INCOME'], stack:'Income'},
+                        {label:'Cost of Sales', classes:['COST_OF_SALES'], stack:'Expense'},
+                        {label:'Operating Expense', classes:['EXPENSE'], stack:'Expense'},
+                        {label:'Non Op Expense', classes:['NON_OP_EXPENSE'], stack:'Expense'},
+                        {classGroupEnumId:'EngGlcNetIncome', type:'line', fill:false}
                 ]
             </script>
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups" out-map="periodsOut"
-                    in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]"/>
-            <if condition="periodsOut.timePeriodGroups">
+                    in-map="{partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods||13)}"/>
+            <if condition="periodsOut.timePeriodGroups?.length">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary" out-map="context"
-                        in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]"/>
+                        in-map="{organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets}"/>
 
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummaryRows" out-map="context" in-map="context"/>
-                <set field="netIncomeCsv" from="rowsList.collect({ it.join(',') }).join('\n')"/>
+                <set field="netIncomeCsv" from="rowsList.map(it => it.join(',')).join('\n')"/>
                 <!-- <iterate list="rowsList" entry="row"><log message="Row ${row_index}: ${row}"/></iterate> -->
             </if>
         </actions><widgets>
             <container-box><box-header title="Net Income History"/><box-toolbar>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
-                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${(netIncomeCsv!"")?js_string}', 'NetIncomeHistory.csv', 'text/csv')">Get CSV</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${JSON.stringify(String(netIncomeCsv ?? '')).slice(1, -1).replaceAll("'", "\\'")}', 'NetIncomeHistory.csv', 'text/csv')">Get CSV</button>
                 ]]></text></render-mode>
             </box-toolbar><box-body>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
@@ -129,8 +129,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                 var netIncomeChart = new Chart(document.getElementById("NetIncomeChart"), {
                     type: 'bar',
-                    data: { labels:${Static["groovy.json.JsonOutput"].toJson(periodLabels!"")},
-                        datasets:${Static["groovy.json.JsonOutput"].toJson(datasets!"")} },
+                    data: { labels:${JSON.stringify(periodLabels ?? '')},
+                        datasets:${JSON.stringify(datasets ?? '')} },
                     options: {
                         scales:{ yAxes:[{ ticks:{ beginAtZero:true } }] }, maintainAspectRatio:false,
                         tooltips:{ callbacks:{ label: function(tooltipItem, data) {
@@ -145,41 +145,42 @@ along with this software (see the LICENSE.md file). If not, see
         </widgets></section>
         <section name="NetIncomeYoyChart" condition="organizationPartyId"><actions>
             <script>
-                datasets = [ [classGroupEnumId:'EngGlcNetIncome', fill:false], [classGroupEnumId:'EngGlcNetOpIncome', fill:false] ]
+                datasets = [ {classGroupEnumId:'EngGlcNetIncome', fill:false}, {classGroupEnumId:'EngGlcNetOpIncome', fill:false} ]
                 priorDatasets = [
-                        [datasetId:'PNI', label:'Prior Net Income', classGroupEnumId:'EngGlcNetIncome',
-                                backgroundColor:'rgba(240, 173, 78, 0.5)', borderColor:'rgba(240, 173, 78, 1.0)', pointStyle:'triangle', fill:false],
-                        [datasetId:'PNOI', label:'Prior Net Operating Income', classGroupEnumId:'EngGlcNetOpIncome',
-                                backgroundColor:'rgba(217, 83, 79, 0.5)', borderColor:'rgba(217, 83, 79, 1.0)', pointStyle:'triangle', fill:false] ]
+                        {datasetId:'PNI', label:'Prior Net Income', classGroupEnumId:'EngGlcNetIncome',
+                                backgroundColor:'rgba(240, 173, 78, 0.5)', borderColor:'rgba(240, 173, 78, 1.0)', pointStyle:'triangle', fill:false},
+                        {datasetId:'PNOI', label:'Prior Net Operating Income', classGroupEnumId:'EngGlcNetOpIncome',
+                                backgroundColor:'rgba(217, 83, 79, 0.5)', borderColor:'rgba(217, 83, 79, 1.0)', pointStyle:'triangle', fill:false} ]
             </script>
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups" out-map="periodsOut"
-                    in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]"/>
-            <if condition="periodsOut.timePeriodGroups">
+                    in-map="{partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods||13)}"/>
+            <if condition="periodsOut.timePeriodGroups?.length">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary" out-map="context"
-                        in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]"/>
+                        in-map="{organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets}"/>
 
-                <if condition="periodsOut.timePeriodGroups[0]">
+                <if condition="periodsOut.timePeriodGroups[0]?.length">
                     <set field="earliestPeriodId" from="periodsOut.timePeriodGroups[0][0]"/>
                     <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="earliestPeriod">
                         <field-map field-name="timePeriodId" from="earliestPeriodId"/></entity-find-one>
-                    <set field="priorThruDate" from="earliestPeriod.fromDate - 1"/>
+                    <!-- Groovy Date minus 1 is the day before -->
+                    <set field="priorThruDate" from="String(Number(earliestPeriod.fromDate) - 86400000)"/>
                     <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups" out-map="priorPeriodsOut"
-                            in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:priorThruDate]"/>
-                    <if condition="priorPeriodsOut.timePeriodGroups">
+                            in-map="{partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:priorThruDate}"/>
+                    <if condition="priorPeriodsOut.timePeriodGroups?.length">
                         <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary" out-map="priorOut"
-                                in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:priorPeriodsOut.timePeriodGroups, datasets:priorDatasets]"/>
-                        <script>datasets.add(priorOut.datasetsById.get("PNI")); datasets.add(priorOut.datasetsById.get("PNOI"))</script>
+                                in-map="{organizationPartyId:organizationPartyId, timePeriodGroups:priorPeriodsOut.timePeriodGroups, datasets:priorDatasets}"/>
+                        <script>datasets.push(priorOut.datasetsById["PNI"]); datasets.push(priorOut.datasetsById["PNOI"])</script>
                     </if>
                 </if>
 
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummaryRows" out-map="context" in-map="context"/>
-                <set field="netIncomeYoyCsv" from="rowsList.collect({ it.join(',') }).join('\n')"/>
+                <set field="netIncomeYoyCsv" from="rowsList.map(it => it.join(',')).join('\n')"/>
                 <!-- <iterate list="rowsList" entry="row"><log message="Row ${row_index}: ${row}"/></iterate> -->
             </if>
         </actions><widgets>
             <container-box><box-header title="Net Income Year Over Year"/><box-toolbar>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
-                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${(netIncomeYoyCsv!"")?js_string}', 'NetIncomeYoyHistory.csv', 'text/csv')">Get CSV</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${JSON.stringify(String(netIncomeYoyCsv ?? '')).slice(1, -1).replaceAll("'", "\\'")}', 'NetIncomeYoyHistory.csv', 'text/csv')">Get CSV</button>
                 ]]></text></render-mode>
             </box-toolbar><box-body>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
@@ -188,8 +189,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                 var netIncomeYoyChart = new Chart(document.getElementById("NetIncomeYoyChart"), {
                     type: 'line',
-                    data: { labels:${Static["groovy.json.JsonOutput"].toJson(periodLabels!"")},
-                        datasets:${Static["groovy.json.JsonOutput"].toJson(datasets!"")} },
+                    data: { labels:${JSON.stringify(periodLabels ?? '')},
+                        datasets:${JSON.stringify(datasets ?? '')} },
                     options: {
                         scales:{ yAxes:[{ ticks:{ beginAtZero:true } }] }, maintainAspectRatio:false,
                         tooltips:{ callbacks:{ label: function(tooltipItem, data) {
@@ -210,29 +211,29 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="CurrentAssetLiabilityChart" condition="organizationPartyId"><actions>
             <script>
                 datasets = [
-                        [label:'Cash', classes:['CASH_EQUIVALENT'], totalBasis:'Ending', stack:'Asset'],
-                        [label:'Inventory', classes:['INVENTORY_ASSET'], totalBasis:'Ending', stack:'Asset'],
-                        [label:'Receivable', classes:['ACCOUNTS_RECEIVABLE'], totalBasis:'Ending', stack:'Asset'],
-                        [label:'Other Cur Asset', classes:['LOANS_RECEIVABLE', 'PREPAID_EXPENSE', 'ACCRUED_REVENUE'], totalBasis:'Ending', stack:'Asset'],
-                        [label:'Payable', classes:['ACCOUNTS_PAYABLE'], totalBasis:'Ending', stack:'Liability'],
-                        [label:'Other Cur Liability', classes:['ACCRUED_EXPENSES', 'UNEARNED_REVENUE', 'THIRD_PARTY_HOLDINGS'], totalBasis:'Ending', stack:'Liability'],
-                        [classGroupEnumId:'EngGlcNetIncome', type:'line', fill:false]
+                        {label:'Cash', classes:['CASH_EQUIVALENT'], totalBasis:'Ending', stack:'Asset'},
+                        {label:'Inventory', classes:['INVENTORY_ASSET'], totalBasis:'Ending', stack:'Asset'},
+                        {label:'Receivable', classes:['ACCOUNTS_RECEIVABLE'], totalBasis:'Ending', stack:'Asset'},
+                        {label:'Other Cur Asset', classes:['LOANS_RECEIVABLE', 'PREPAID_EXPENSE', 'ACCRUED_REVENUE'], totalBasis:'Ending', stack:'Asset'},
+                        {label:'Payable', classes:['ACCOUNTS_PAYABLE'], totalBasis:'Ending', stack:'Liability'},
+                        {label:'Other Cur Liability', classes:['ACCRUED_EXPENSES', 'UNEARNED_REVENUE', 'THIRD_PARTY_HOLDINGS'], totalBasis:'Ending', stack:'Liability'},
+                        {classGroupEnumId:'EngGlcNetIncome', type:'line', fill:false}
                 ]
             </script>
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups" out-map="periodsOut"
-                    in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]"/>
-            <if condition="periodsOut.timePeriodGroups">
+                    in-map="{partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods||13)}"/>
+            <if condition="periodsOut.timePeriodGroups?.length">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary" out-map="context"
-                        in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]"/>
+                        in-map="{organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets}"/>
 
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummaryRows" out-map="context" in-map="context"/>
-                <set field="assetLiabilityCsv" from="rowsList.collect({ it.join(',') }).join('\n')"/>
+                <set field="assetLiabilityCsv" from="rowsList.map(it => it.join(',')).join('\n')"/>
                 <!-- <iterate list="rowsList" entry="row"><log message="Row ${row_index}: ${row}"/></iterate> -->
             </if>
         </actions><widgets>
             <container-box><box-header title="Current Assets and Liabilities"/><box-toolbar>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
-                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${(assetLiabilityCsv!"")?js_string}', 'CurrentAssetLiability.csv', 'text/csv')">Get CSV</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${JSON.stringify(String(assetLiabilityCsv ?? '')).slice(1, -1).replaceAll("'", "\\'")}', 'CurrentAssetLiability.csv', 'text/csv')">Get CSV</button>
                 ]]></text></render-mode>
             </box-toolbar><box-body>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
@@ -241,8 +242,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                 var assetLiabilityChart = new Chart(document.getElementById("AssetLiabilityChart"), {
                     type: 'bar',
-                    data: { labels:${Static["groovy.json.JsonOutput"].toJson(periodLabels!"")},
-                        datasets:${Static["groovy.json.JsonOutput"].toJson(datasets!"")} },
+                    data: { labels:${JSON.stringify(periodLabels ?? '')},
+                        datasets:${JSON.stringify(datasets ?? '')} },
                     options: {
                         scales:{ yAxes:[{ ticks:{ beginAtZero:true } }] }, maintainAspectRatio:false,
                         tooltips:{ callbacks:{ label: function(tooltipItem, data) {
@@ -258,27 +259,27 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="BalanceSheetChart" condition="organizationPartyId"><actions>
             <script>
                 datasets = [
-                        [classGroupEnumId:'EngGlcNetAsset', totalBasis:'Ending', stack:'Asset'],
-                        [classGroupEnumId:'EngGlcNetEquity', totalBasis:'Ending', stack:'LiabilityEquity'],
-                        [classGroupEnumId:'EngGlcLiability', totalBasis:'Ending', stack:'LiabilityEquity'],
-                        [label:'Unbooked Net Income', classGroupEnumId:'EngGlcNetIncome', totalBasis:'Posted', stack:'LiabilityEquity'],
-                        [classGroupEnumId:'EngGlcNetIncome', type:'line', fill:false]
+                        {classGroupEnumId:'EngGlcNetAsset', totalBasis:'Ending', stack:'Asset'},
+                        {classGroupEnumId:'EngGlcNetEquity', totalBasis:'Ending', stack:'LiabilityEquity'},
+                        {classGroupEnumId:'EngGlcLiability', totalBasis:'Ending', stack:'LiabilityEquity'},
+                        {label:'Unbooked Net Income', classGroupEnumId:'EngGlcNetIncome', totalBasis:'Posted', stack:'LiabilityEquity'},
+                        {classGroupEnumId:'EngGlcNetIncome', type:'line', fill:false}
                 ]
             </script>
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups" out-map="periodsOut"
-                    in-map="[partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods?:13)]"/>
-            <if condition="periodsOut.timePeriodGroups">
+                    in-map="{partyId:organizationPartyId, timePeriodTypeId:timePeriodTypeId, thruDate:thruDate, groups:(periods||13)}"/>
+            <if condition="periodsOut.timePeriodGroups?.length">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary" out-map="context"
-                        in-map="[organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets]"/>
+                        in-map="{organizationPartyId:organizationPartyId, timePeriodGroups:periodsOut.timePeriodGroups, datasets:datasets}"/>
 
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummaryRows" out-map="context" in-map="context"/>
-                <set field="balanceSheetCsv" from="rowsList.collect({ it.join(',') }).join('\n')"/>
+                <set field="balanceSheetCsv" from="rowsList.map(it => it.join(',')).join('\n')"/>
                 <!-- <iterate list="rowsList" entry="row"><log message="Row ${row_index}: ${row}"/></iterate> -->
             </if>
         </actions><widgets>
             <container-box><box-header title="Balance Sheet History"/><box-toolbar>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
-                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${(balanceSheetCsv!"")?js_string}', 'BalanceSheetHistory.csv', 'text/csv')">Get CSV</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="moqui.downloadData('${JSON.stringify(String(balanceSheetCsv ?? '')).slice(1, -1).replaceAll("'", "\\'")}', 'BalanceSheetHistory.csv', 'text/csv')">Get CSV</button>
                 ]]></text></render-mode>
             </box-toolbar><box-body>
                 <render-mode><text type="html,vuet,qvt"><![CDATA[
@@ -287,8 +288,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                 var balanceSheetChart = new Chart(document.getElementById("BalanceSheetChart"), {
                     type: 'bar',
-                    data: { labels:${Static["groovy.json.JsonOutput"].toJson(periodLabels!"")},
-                        datasets:${Static["groovy.json.JsonOutput"].toJson(datasets!"")} },
+                    data: { labels:${JSON.stringify(periodLabels ?? '')},
+                        datasets:${JSON.stringify(datasets ?? '')} },
                     options: {
                         scales:{ yAxes:[{ ticks:{ beginAtZero:true } }] }, maintainAspectRatio:false,
                         tooltips:{ callbacks:{ label: function(tooltipItem, data) {

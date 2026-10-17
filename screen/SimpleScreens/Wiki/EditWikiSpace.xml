@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="indexPages">
         <service-call name="org.moqui.search.SearchServices.index#WikiSpacePages"
-                      in-map="context + [dataDocumentId:'MantleWikiPage']"/>
+                      in-map="Object.assign({}, context, {dataDocumentId:'MantleWikiPage'})"/>
         <default-response url="."/>
     </transition>
     <transition name="cloneWikiSpace" begin-transaction="false">

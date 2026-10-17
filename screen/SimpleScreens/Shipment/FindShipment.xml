@@ -33,9 +33,9 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="incomingTypeOut"
-                in-map="[parentEnumId:'ShpTpIncoming']"/>
+                in-map="{parentEnumId:'ShpTpIncoming'}"/>
         <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="outgoingTypeOut"
-                in-map="[parentEnumId:'ShpTpOutgoing']"/>
+                in-map="{parentEnumId:'ShpTpOutgoing'}"/>
         <if condition="parentShipmentType == 'ShpTpIncoming'"><set field="shipmentTypeSet" from="incomingTypeOut.enumIdSet"/></if>
         <if condition="parentShipmentType == 'ShpTpOutgoing'"><set field="shipmentTypeSet" from="outgoingTypeOut.enumIdSet"/></if>
 
@@ -47,7 +47,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="shipmentTypeEnumId"><default-field title="Type">
                     <drop-down><list-options list="outgoingTypeOut.enumerationList" key="${enumId}" text="${description}"/></drop-down>
                 </default-field></field>
-                <field name="originFacilityId" from="originFacilityId ?: defaultFacilityId"><default-field title="Origin Facility">
+                <field name="originFacilityId" from="originFacilityId || defaultFacilityId"><default-field title="Origin Facility">
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
                 <field name="toPartyId"><default-field title="To Party">
@@ -65,7 +65,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="fromPartyId"><default-field title="From Party">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down>
                 </default-field></field>
-                <field name="destinationFacilityId" from="destinationFacilityId ?: defaultFacilityId"><default-field title="Destination Facility">
+                <field name="destinationFacilityId" from="destinationFacilityId || defaultFacilityId"><default-field title="Destination Facility">
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
                 <field name="estimatedArrivalDate"><default-field title="Arrival Date"><date-time/></default-field></field>
@@ -75,10 +75,10 @@ along with this software (see the LICENSE.md file). If not, see
         <container-dialog id="NewTransferShipmentDialog" button-text="New Transfer Shipment">
             <form-single name="NewTransferShipment" transition="createShipment">
                 <field name="shipmentTypeEnumId" from="'ShpTpTransfer'"><default-field><hidden/></default-field></field>
-                <field name="originFacilityId" from="originFacilityId ?: defaultFacilityId"><default-field title="Origin Facility">
+                <field name="originFacilityId" from="originFacilityId || defaultFacilityId"><default-field title="Origin Facility">
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
-                <field name="destinationFacilityId" from="destinationFacilityId ?: defaultFacilityId"><default-field title="Destination Facility">
+                <field name="destinationFacilityId" from="destinationFacilityId || defaultFacilityId"><default-field title="Destination Facility">
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
                 <field name="toPartyId"><default-field title="To Party">
@@ -115,12 +115,12 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="shipmentId"/><select-field field-name="trackingCode,returnTrackingCode"/></entity-find>
                 <!-- Orders -->
                 <entity-find entity-name="mantle.order.OrderHeader" list="orderHeaderList">
-                    <econdition field-name="orderId" operator="in" from="sisList*.orderId"/>
+                    <econdition field-name="orderId" operator="in" from="sisList.map(it => it.orderId)"/>
                     <select-field field-name="orderId,salesChannelEnumId"/>
                 </entity-find>
                 <!-- Order Other Parties -->
                 <entity-find entity-name="mantle.order.OrderPartPartyDetail" list="orderPartyList">
-                    <econdition field-name="orderId" operator="in" from="sisList*.orderId"/>
+                    <econdition field-name="orderId" operator="in" from="sisList.map(it => it.orderId)"/>
                     <select-field field-name="partyId,pseudoId,firstName,lastName,organizationName,description"/>
                 </entity-find>
             </row-actions>
@@ -147,7 +147,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
 
             <field name="priority" align="center"><header-field show-order-by="true"><range-find size="4"/></header-field><default-field>
-                <display text="${priority == 1 ? '-- ' : (priority == 2 || priority == 3 ? '- ' : '')}${priority?:''}${priority == 1 ? ' --' : (priority == 2 || priority == 3 ? ' -' : '')}"
+                <display text="${priority == 1 ? '-- ' : (priority == 2 || priority == 3 ? '- ' : '')}${priority||''}${priority == 1 ? ' --' : (priority == 2 || priority == 3 ? ' -' : '')}"
                         style="${priority == 1 ? 'text-strong text-danger' : (priority == 2 || priority == 3 ? 'text-strong text-warning' : '')}"/>
             </default-field></field>
             <field name="entryDate"><header-field show-order-by="true"><date-period/></header-field>
@@ -163,7 +163,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="shipWorkEffortId">
                 <header-field title="Picklist" show-order-by="true"><text-find size="15" hide-options="true"/></header-field>
                 <default-field><link url="picklistDetail" text="${shipWorkEffortId}" link-type="anchor"
-                        parameter-map="[workEffortId:shipWorkEffortId]" condition="shipWorkEffortId"/></default-field>
+                        parameter-map="{workEffortId:shipWorkEffortId}" condition="shipWorkEffortId"/></default-field>
             </field>
 
             <field name="findProductId"><header-field title="Product">
@@ -185,14 +185,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </header-field>
                 <default-field><link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate"
-                        link-type="anchor" parameter-map="[facilityId:originFacilityId]"/></default-field>
+                        link-type="anchor" parameter-map="{facilityId:originFacilityId}"/></default-field>
             </field>
             <field name="destinationFacilityId">
                 <header-field title="Dest. Facility">
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </header-field>
                 <default-field><link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate"
-                        link-type="anchor" parameter-map="[facilityId:destinationFacilityId]"/></default-field>
+                        link-type="anchor" parameter-map="{facilityId:destinationFacilityId}"/></default-field>
             </field>
             <field name="productStoreId">
                 <header-field title="Store">
@@ -204,7 +204,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="handlingInstructions">
                 <header-field title="Shipping Instructions" show-order-by="true"><text-find/></header-field>
-                <default-field><display text="${handlingInstructions?.take(35)?:''}${handlingInstructions?.length() &gt; 35 ? '...' : ''}" style="text-strong"/></default-field>
+                <default-field><display text="${handlingInstructions?.take(35)||''}${handlingInstructions?.length() &gt; 35 ? '...' : ''}" style="text-strong"/></default-field>
             </field>
 
             <field name="fromPartyId">
@@ -213,7 +213,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </header-field>
                 <!-- TODO: this could also be from a Customer, add different link if has the Customer role -->
                 <default-field><link url="editSupplier" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                        link-type="anchor" parameter-map="[partyId:fromPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:fromPartyId}"/></default-field>
             </field>
             <field name="toPartyId">
                 <header-field title="To Party">
@@ -221,8 +221,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </header-field>
                 <default-field>
                     <link url="editCustomer" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                            link-type="anchor" parameter-map="[partyId:toPartyId]"/>
-                    <label text=" - ${custPcaaList*.description.join(', ')}" condition="custPcaaList"/>
+                            link-type="anchor" parameter-map="{partyId:toPartyId}"/>
+                    <label text=" - ${custPcaaList.map(it => it.description).join(', ')}" condition="(custPcaaList?.length > 0)"/>
                 </default-field>
             </field>
             <field name="customerClassificationId"><header-field title="Customer Class"><drop-down allow-empty="true">
@@ -244,8 +244,8 @@ along with this software (see the LICENSE.md file). If not, see
             </header-field></field>
             <field name="orderParties"><default-field>
                 <section-iterate name="OtherPartyListSection" list="orderPartyList" entry="partParty"><widgets><container>
-                    <link url="editParty" link-type="anchor" text="${ec.resource.expand('PartyNameTemplate','',partParty)} - ${partParty.description?:'N/A'}"
-                            parameter-map="[partyId:partParty.partyId]"/>
+                    <link url="editParty" link-type="anchor" text="${ec.resource.expand('PartyNameTemplate','',partParty)} - ${partParty.description||'N/A'}"
+                            parameter-map="{partyId:partParty.partyId}"/>
                 </container></widgets></section-iterate>
             </default-field></field>
 
@@ -259,14 +259,14 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="trackingCodes"><default-field>
                 <section-iterate name="TrackingSprsList" list="sprsList" entry="sprs"><widgets><container>
-                    <label text="${sprs.trackingCode?:''}${sprs.returnTrackingCode ? ' R: ' + sprs.returnTrackingCode :''}"/>
+                    <label text="${sprs.trackingCode||''}${sprs.returnTrackingCode ? ' R: ' + sprs.returnTrackingCode :''}"/>
                 </container></widgets></section-iterate>
             </default-field></field>
             <field name="orderIds"><default-field title="Orders">
                 <section-iterate name="OrderSisList" list="orderHeaderList" entry="orderHeader"><widgets>
                     <link url="orderDetail" text="${orderHeader.orderId}" link-type="anchor" condition="orderHeader.orderId"
-                            parameter-map="[orderId:orderHeader.orderId]"/>
-                    <label text=" - ${orderHeader.salesChannel?.description?:''}" condition="orderHeader.salesChannelEnumId"/>
+                            parameter-map="{orderId:orderHeader.orderId}"/>
+                    <label text=" - ${orderHeader.salesChannel?.description||''}" condition="orderHeader.salesChannelEnumId"/>
                 </widgets></section-iterate>
             </default-field></field>
 

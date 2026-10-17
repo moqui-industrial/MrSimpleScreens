@@ -40,7 +40,7 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find>
 
         <service-call name="mantle.humanres.PositionServices.get#PartyEmployersAndPositionClasses"
-                in-map="[partyId:partyId]" out-map="context"/>
+                in-map="{partyId:partyId}" out-map="context"/>
 
         <set field="hasRatePermission" from="ec.user.hasPermission('TIME_ENTRY_RATE')"/>
     </actions>
@@ -48,16 +48,16 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="ClockInOutSection"><actions>
             <if condition="openTimeEntry == null">
                 <entity-find entity-name="mantle.work.time.TimeEntry" list="openTimeEntryList">
-                    <econdition field-name="partyId" from="partyId ?: ec.user.userAccount?.partyId"/>
+                    <econdition field-name="partyId" from="partyId || ec.user.userAccount?.partyId"/>
                     <econdition field-name="thruDate" operator="is-null"/>
                     <order-by field-name="-fromDate"/>
                 </entity-find>
-                <set field="openTimeEntry" from="openTimeEntryList ? openTimeEntryList[0] : null"/>
+                <set field="openTimeEntry" from="openTimeEntryList?.length ? openTimeEntryList[0] : null"/>
             </if>
         </actions><widgets>
             <section name="ClockInOutInnerSection" condition="openTimeEntry != null"><widgets>
                 <dynamic-dialog id="ClockOutDialogDyn" button-text="Clock Out" transition="EditTimeEntry"
-                        parameter-map="[partyId:partyId, timeEntryId:openTimeEntry.timeEntryId]" type="success"/>
+                        parameter-map="{partyId:partyId, timeEntryId:openTimeEntry.timeEntryId}" type="success"/>
             </widgets><fail-widgets>
                 <!-- don't bother for now: <dynamic-dialog id="ClockInDialogDyn" button-text="Clock In" icon="fa fa-clock-o" transition="EditTimeEntry"
                         parameter-map="[partyId:partyId, timeEntryId:null, clockInMode:'true']" type="success"/> -->
@@ -68,7 +68,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <list-options list="employerPartyList" key="${partyId}" text="PartyNameTemplate"/></drop-down></default-field></field>
                         <field name="workEffortId"><default-field title="Task">
                             <drop-down allow-empty="true"><dynamic-options transition="getTaskList" min-length="0" server-search="true"
-                                    parameter-map="[assignedPartyId:partyId]"/></drop-down>
+                                    parameter-map="{assignedPartyId:partyId}"/></drop-down>
                         </default-field></field>
                         <field name="facilityId"><default-field title="Facility"><drop-down allow-empty="true">
                             <dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down></default-field></field>
@@ -90,9 +90,9 @@ along with this software (see the LICENSE.md file). If not, see
         </widgets></section>
 
         <dynamic-dialog id="AddTimeDialogDyn" button-text="Record Time" transition="EditTimeEntry"
-                parameter-map="[partyId:partyId, timeEntryId:'']"/>
+                parameter-map="{partyId:partyId, timeEntryId:''}"/>
 
-        <link url="resetAndGetTimeEntryRates" text="Auto Update Rates" parameter-map="[partyId:partyId]"/>
+        <link url="resetAndGetTimeEntryRates" text="Auto Update Rates" parameter-map="{partyId:partyId}"/>
 
         <container-dialog id="WorkerInvoiceDialog" button-text="Worker Invoice" width="700">
             <form-single name="WorkerInvoice" transition="createWorkerInvoiceItems">
@@ -149,7 +149,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="workEffortId">
                 <header-field title="Task" show-order-by="true">
                     <drop-down allow-empty="true"><dynamic-options transition="getTaskList" min-length="0" server-search="true"
-                            parameter-map="[assignedPartyId:partyId]"/></drop-down>
+                            parameter-map="{assignedPartyId:partyId}"/></drop-down>
                 </header-field>
                 <default-field><display-entity entity-name="mantle.work.effort.WorkEffort" text="WorkEffortNameTemplate"/></default-field>
             </field>
@@ -212,20 +212,20 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="invoiceId">
                 <header-field show-order-by="true"/>
                 <default-field title="Client Invoice">
-                    <link url="editInvoice" text="C: ${invoiceId}" link-type="anchor" condition="invoiceId" parameter-map="[invoiceId:invoiceId]"/>
+                    <link url="editInvoice" text="C: ${invoiceId}" link-type="anchor" condition="invoiceId" parameter-map="{invoiceId:invoiceId}"/>
                 </default-field>
             </field>
             <field name="vendorInvoiceId">
                 <header-field show-order-by="true"/>
                 <default-field title="Worker Invoice">
-                    <link url="editInvoice" text="W: ${vendorInvoiceId}" link-type="anchor" condition="vendorInvoiceId" parameter-map="[invoiceId:vendorInvoiceId]"/>
+                    <link url="editInvoice" text="W: ${vendorInvoiceId}" link-type="anchor" condition="vendorInvoiceId" parameter-map="{invoiceId:vendorInvoiceId}"/>
                 </default-field>
             </field>
 
             <field name="findButton" align="right">
                 <header-field title="Find"><submit/></header-field>
                 <default-field><dynamic-dialog id="EditTimeEntryDialog" button-text="Edit" icon="fa fa-pencil" transition="EditTimeEntry"
-                        parameter-map="[partyId:partyId, timeEntryId:timeEntryId]"/></default-field>
+                        parameter-map="{partyId:partyId, timeEntryId:timeEntryId}"/></default-field>
             </field>
 
             <form-list-column><field-ref name="fromDate"/><field-ref name="thruDate"/></form-list-column>

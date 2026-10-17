@@ -29,11 +29,11 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="partyId" from="ec.user.userAccount.partyId"/>
         <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="invoice"/>
         <if condition="invoice.fromPartyId != partyId">
-            <script>throw new IllegalArgumentException("You may not view or edit Invoice #${invoiceId}")</script>
+            <script>throw new Error(`You may not view or edit Invoice #${invoiceId}`)</script>
         </if>
     </pre-actions>
     <actions>
-        <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal" in-map="[invoiceId:invoiceId]" out-map="context"/>
+        <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal" in-map="{invoiceId:invoiceId}" out-map="context"/>
 
         <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="myProjectList">
             <date-filter/><econdition field-name="partyId"/>
@@ -42,10 +42,10 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <section name="SubmitInvoiceSection" condition="invoice.statusId == 'InvoiceIncoming' &amp;&amp; invoiceTotal"><widgets>
-            <link url="updateInvoice" text="Submit Invoice" parameter-map="[invoiceId:invoiceId, statusId:'InvoiceReceived']"/>
+            <link url="updateInvoice" text="Submit Invoice" parameter-map="{invoiceId:invoiceId, statusId:'InvoiceReceived'}"/>
         </widgets></section>
         <section name="CancelInvoiceSection" condition="invoice.statusId == 'InvoiceIncoming'"><widgets>
-            <link url="updateInvoice" text="Cancel Invoice" parameter-map="[invoiceId:invoiceId, statusId:'InvoiceCancelled']"/>
+            <link url="updateInvoice" text="Cancel Invoice" parameter-map="{invoiceId:invoiceId, statusId:'InvoiceCancelled'}"/>
             <container-dialog id="WorkerInvoiceDialog" button-text="Invoice Time" width="700">
                 <form-single name="WorkerInvoice" transition="createProjectInvoiceItems">
                     <field name="workerPartyId" from="partyId"><default-field><hidden/></default-field></field>

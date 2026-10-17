@@ -39,32 +39,32 @@ along with this software (see the LICENSE.md file). If not, see
 
         <set field="organizationPartyId" from="timePeriod.partyId"/>
         <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference"
-                in-map="[organizationPartyId:timePeriod.partyId]" out-map="context"/>
+                in-map="{organizationPartyId:timePeriod.partyId}" out-map="context"/>
 
-        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask || ec.user.getPreference('GlAccountCodeMask')"/>
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
 
         <set field="incomeStmtTopIds" from="['REVENUE', 'COST_OF_SALES', 'INCOME', 'EXPENSE', 'NON_OP_EXPENSE']"/>
-        <set field="incomeStmtClassIds" from="new HashSet()"/>
+        <set field="incomeStmtClassIds" from="[]"/>
         <iterate list="incomeStmtTopIds" entry="incomeStmtTopId">
             <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="incStmtClassOut" out-map-add-to-existing="false"
-                    in-map="[parentEnumId:incomeStmtTopId, includeParent:true, includeNested:true]"/>
-            <script>if (incStmtClassOut.enumIdSet) incomeStmtClassIds.addAll(incStmtClassOut.enumIdSet)</script>
+                    in-map="{parentEnumId:incomeStmtTopId, includeParent:true, includeNested:true}"/>
+            <script>for (const enumId of (incStmtClassOut.enumIdSet ?? [])) if (!incomeStmtClassIds.includes(enumId)) incomeStmtClassIds.push(enumId)</script>
         </iterate>
     </actions>
     <widgets>
         <label text="Accounts for ${timePeriod.periodName} [${timePeriod.timePeriodId}]" type="h3"/>
 
-        <link url="recalculateAllAmounts" text="Recalc All" parameter-map="[organizationPartyId:timePeriod.partyId]"/>
+        <link url="recalculateAllAmounts" text="Recalc All" parameter-map="{organizationPartyId:timePeriod.partyId}"/>
         <section name="PeriodCloseSection" condition="timePeriod.isClosed == 'Y'"><widgets>
             <label text="Period Closed" type="h4"/>
             <link url="reopenPeriod" text="Reopen Period" confirmation="Reopen period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}?"
                 condition="ec.user.hasPermission('FISCAL_REOPEN')"/>
         </widgets><fail-widgets>
-            <link url="recalculateAmounts" text="Recalc Period" parameter-map="[timePeriodId:timePeriodId]"/>
+            <link url="recalculateAmounts" text="Recalc Period" parameter-map="{timePeriodId:timePeriodId}"/>
             <link url="postFaDepreciations" text="Post Depreciation"/>
             <link url="closePeriod" text="Close Period" confirmation="Close period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}?"/>
-            <link url="closePeriod" text="Close Period + Depends" parameter-map="[closePrevious:'true', closeChildren:'true']"
+            <link url="closePeriod" text="Close Period + Depends" parameter-map="{closePrevious:'true', closeChildren:'true'}"
                     confirmation="Close period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)} plus any previous or child periods that are not closed?"/>
         </fail-widgets></section>
         <container-dialog id="ClosingTransDialog" button-text="Net Income Closing Transactions">
@@ -103,7 +103,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <row-actions>
                 <entity-find-one entity-name="mantle.ledger.account.GlAccount" value-field="glAccount"/>
-                <set field="rowStyle" from="incomeStmtClassIds.contains(glAccount?.glAccountClassEnumId) ? 'text-success' : ''"/>
+                <set field="rowStyle" from="incomeStmtClassIds.includes(glAccount?.glAccountClassEnumId) ? 'text-success' : ''"/>
             </row-actions>
 
             <field name="glAccountId"><default-field title="GL Account">

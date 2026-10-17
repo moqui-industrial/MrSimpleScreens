@@ -100,7 +100,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <section-iterate name="AssetListSection" list="assetList" entry="assetProduct"><widgets><container>
                     <label text="ATP ${ec.l10n.format(assetProduct.availableToPromiseTotal, null)} QOH ${ec.l10n.format(assetProduct.quantityOnHandTotal, null)}"/>
                     <link url="editProduct" text="ProductNameTemplate" text-map="assetProduct"
-                            link-type="anchor" parameter-map="[productId:assetProduct.productId]"/>
+                            link-type="anchor" parameter-map="{productId:assetProduct.productId}"/>
                 </container></widgets></section-iterate>
             </default-field></field>
 
