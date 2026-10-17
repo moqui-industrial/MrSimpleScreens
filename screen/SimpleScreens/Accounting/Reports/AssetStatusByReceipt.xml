@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <if condition="!asOfDate"><set field="asOfDate" from="ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')"/></if>
         <!-- FUTURE: [OrgTimeZoneMarker] instead of using Java system default TimeZone use one configured for the organization -->
-        <set field="thruTimestamp" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS', null, TimeZone.getDefault()) : ec.user.nowTimestamp"/>
+        <set field="thruTimestamp" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS') : ec.user.nowTimestamp"/>
     </actions>
     <widgets>
         <section-include name="EmailScreenSection" location="component://webroot/template/screen/BasicTransitions.xml"/>
@@ -77,7 +77,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="ownerPartyId">
                 <header-field title="Owner Party"><drop-down allow-empty="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'OrgInternal']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'OrgInternal'}"/>
                 </drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" link-type="anchor"/></default-field>
             </field>

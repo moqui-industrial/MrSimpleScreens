@@ -1,0 +1,192 @@
+<style>
+@page mrss-ShipmentPick { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
+.print-ShipmentPick { page:mrss-ShipmentPick; font:10pt Helvetica,Arial,sans-serif; }
+.print-ShipmentPick .page-header { position:relative; min-height:0.5in; }
+.print-ShipmentPick .page-footer { margin-top:.2in; }
+.print-ShipmentPick table { border-collapse:collapse; table-layout:fixed; }
+.print-ShipmentPick thead { display:table-header-group; }
+.print-ShipmentPick tbody tr { break-inside:avoid; }
+</style>
+<section class="print-ShipmentPick">
+<#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal plus a Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<#-- See the mantle.shipment.ShipmentServices.get#ShipmentPickPackInfo service for data preparation -->
+
+<#assign cellPadding = "1pt">
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+<#assign dateTimeFormat = (dateTimeFormat ?? "yyyy-MM-dd HH:mm")>
+
+
+<div class="page-header">
+            <#if has(fromPartyDetail)><div style="font-size:14pt;text-align:center">${(fromPartyDetail.organizationName ?? "")}${(fromPartyDetail.firstName ?? "")} ${(fromPartyDetail.lastName ?? "")}</div></#if>
+            <div style="font-size:12pt;text-align:center;margin-bottom:0.1in">Shipment Picklist</div>
+            <div style="position:absolute;top:0in;right:0.5in;width:3in">
+                <div style="text-align:right">
+                    ${raw(ec.resource.code128Svg(shipmentId, {height: '0.4in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="page-body">
+            <table style="margin-bottom:0.1in;width:7.5in">
+                <tbody><tr>
+                    <td style="padding:3pt;width:3in">
+                        <div style="font-weight:bold">Shipment #</div>
+                        <div>${shipmentId}</div>
+                        <#if has(originFacility)>
+                            <div style="font-weight:bold">Origin Facility</div>
+                            <div>${ec.resource.expand("FacilityNameTemplate", "", originFacility)}</div>
+                        </#if>
+                        <#if has(destinationFacility)>
+                            <div style="font-weight:bold">Destination Facility</div>
+                            <div>${ec.resource.expand("FacilityNameTemplate", "", destinationFacility)}</div>
+                        </#if>
+                    </td>
+                    <td style="padding:3pt;width:1.5in">
+                        <#if (shipment.estimatedReadyDate != null)>
+                            <div style="font-weight:bold">Est. Ready</div>
+                            <div>${ec.l10n.format(shipment.estimatedReadyDate, dateTimeFormat)}</div>
+                        </#if>
+                        <#if (shipment.estimatedShipDate != null)>
+                            <div style="font-weight:bold">Est. Ship</div>
+                            <div>${ec.l10n.format(shipment.estimatedShipDate, dateTimeFormat)}</div>
+                        </#if>
+                        <#if (shipment.estimatedArrivalDate != null)>
+                            <div style="font-weight:bold">Est. Arrival</div>
+                            <div>${ec.l10n.format(shipment.estimatedArrivalDate, dateTimeFormat)}</div>
+                        </#if>
+                    </td>
+                    <td style="padding:3pt;width:3in">
+                        <div>${(toPartyDetail.organizationName ?? "")} ${(toPartyDetail.firstName ?? "")} ${(toPartyDetail.lastName ?? "")}</div>
+                        <#if has(toContactInfo?.postalAddress)>
+                            <div style="font-size:8pt">${(toContactInfo?.postalAddress?.address1 ?? "")}<#if has(toContactInfo?.postalAddress?.unitNumber)> #${toContactInfo.postalAddress.unitNumber}</#if></div>
+                            <#if has(toContactInfo?.postalAddress?.address2)><div style="font-size:8pt">${toContactInfo.postalAddress.address2}</div></#if>
+                            <div style="font-size:8pt">${(toContactInfo.postalAddress.city ?? "")}, ${(toContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(toContactInfo.postalAddress.postalCode ?? "")}<#if has(toContactInfo?.postalAddress?.postalCodeExt)>-${toContactInfo.postalAddress.postalCodeExt}</#if></div>
+                            <#if has(toContactInfo?.postalAddress?.countryGeoId)><div style="font-size:8pt">${toContactInfo.postalAddress.countryGeoId}</div></#if>
+                        </#if>
+                        <#if has(toContactInfo?.telecomNumber)>
+                            <div style="font-size:8pt"><#if has(toContactInfo?.telecomNumber?.countryCode)>${toContactInfo.telecomNumber.countryCode}-</#if><#if has(toContactInfo?.telecomNumber?.areaCode)>${toContactInfo.telecomNumber.areaCode}-</#if>${(toContactInfo.telecomNumber.contactNumber ?? "")}</div>
+                        </#if>
+                        <#if has(toContactInfo?.emailAddress)>
+                            <div style="font-size:8pt">${toContactInfo.emailAddress}</div>
+                        </#if>
+                    </td>
+                </tr></tbody>
+            </table>
+
+            <#if has(reservedLocationInfoList)>
+                ${raw(ec.resource.template("component://SimpleScreens/template/shipment/ShipmentPick-locationInfoTable.html.fancy", {locationInfoList: reservedLocationInfoList, titleString: "By Loc - Res"}))}
+            </#if>
+            <#if has(otherLocationInfoList)>
+                ${raw(ec.resource.template("component://SimpleScreens/template/shipment/ShipmentPick-locationInfoTable.html.fancy", {locationInfoList: otherLocationInfoList, titleString: "By Loc - Alt"}))}
+            </#if>
+
+            <#if has(productInfoList)>
+                <table style="width:7.5in;border-bottom:solid black;margin-top:10pt">
+                    <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black"><tr>
+                        <td style="width:1.4in;padding:${cellPadding}"><div style="text-align:left">By Product</div></td>
+                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Ar</div></td>
+                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Ais</div></td>
+                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Sec</div></td>
+                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Lev</div></td>
+                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Pos</div></td>
+                        <td style="width:0.8in;padding:${cellPadding}"><div style="text-align:center">Cont</div></td>
+
+                        <td style="width:2.8in;padding:${cellPadding}"><div>Lot</div></td>
+                        <td style="width:0.5in;padding:${cellPadding}"><div style="text-align:center">Bin</div></td>
+                        <td style="width:0.5in;padding:${cellPadding}"><div style="text-align:right">Quantity</div></td>
+                    </tr></thead>
+                    <tbody>
+                    <#list productInfoList as productInfo>
+                        <tr style="font-size:9pt;border-top:solid black">
+                            <td colspan="4" style="padding:${cellPadding}"><div style="text-align:center">
+                                ${raw(ec.resource.code128Svg(productInfo.pseudoId, {height: '0.4in', moduleWidth: '0.25mm', fontSize: '7pt', humanReadable: true}))}
+                            </div></td>
+                            <td colspan="5" style="padding:${cellPadding}"><div style="text-align:left">${ec.resource.expand("ProductNameTemplate", "", productInfo)}</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right">${productInfo.quantity}</div></td>
+                        </tr>
+                        <#if has(productInfo?.reservedLocationInfoList)><#list productInfo.reservedLocationInfoList as locationInfo>
+                            <tr style="font-size:9pt;border-top:thin solid black">
+                                <td style="padding:${cellPadding}"><div style="text-align:left">(Res) ${(locationInfo.description ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.areaId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.aisleId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.sectionId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.levelId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.positionId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo?.container?.serialNumber ?? locationInfo?.container?.containerId ?? " ")}</div></td>
+
+                                <td colspan="3" style="padding:${cellPadding}">
+                                    <div><#if has(locationInfo?.lot)>${ec.resource.expand('LotNameTemplate', '', locationInfo.lot)}</#if> </div></td>
+                            </tr>
+                            <#list Object.keys(locationInfo.quantityByBin) as binLocationNumber>
+                                <tr style="font-size:9pt">
+                                    <td colspan="8" style="padding:${cellPadding}"><div> </div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:center">${(binLocationNumber ?? " ")}</div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:right">${locationInfo.quantityByBin[binLocationNumber ?? ""]}</div></td>
+                                </tr>
+                            </#list>
+                        </#list></#if>
+                        <#if has(productInfo?.otherLocationInfoList)><#list productInfo.otherLocationInfoList as locationInfo>
+                            <tr style="font-size:9pt;border-top:thin solid black">
+                                <td style="padding:${cellPadding}"><div style="text-align:left">(Alt) ${(locationInfo.description ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.areaId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.aisleId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.sectionId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.levelId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.positionId ?? " ")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo?.container?.serialNumber ?? locationInfo?.container?.containerId ?? " ")}</div></td>
+
+                                <td colspan="3" style="padding:${cellPadding}">
+                                    <div><#if has(locationInfo?.lot)>${ec.resource.expand('LotNameTemplate', '', locationInfo.lot)}</#if> </div></td>
+                            </tr>
+                            <#list Object.keys(locationInfo.quantityByBin) as binLocationNumber>
+                                <tr style="font-size:9pt">
+                                    <td colspan="8" style="padding:${cellPadding}"><div> </div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:center">${(binLocationNumber ?? " ")}</div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:right">${locationInfo.quantityByBin[binLocationNumber ?? ""]}</div></td>
+                                </tr>
+                            </#list>
+                        </#list></#if>
+                    </#list>
+                    </tbody>
+                </table>
+            </#if>
+            <#if has(shipment?.handlingInstructions)>
+                <div style="font-weight:bold;margin-top:0.1in">Shipping Instructions</div>
+                <div>${shipment.handlingInstructions}</div>
+            </#if>
+        </div>
+    
+
+<div class="page-footer" style="font-size:8pt">
+            <div style="border-top:thin solid black">
+                <#-- not displaying address, not needed in general:
+                <div style="text-align:center">
+                <#if has(fromContactInfo?.postalAddress)>
+                ${(fromContactInfo?.postalAddress?.address1 ?? "")}<#if has(fromContactInfo?.postalAddress?.unitNumber)> #${fromContactInfo.postalAddress.unitNumber}</#if><#if has(fromContactInfo?.postalAddress?.address2)>, ${fromContactInfo.postalAddress.address2}</#if>, ${(fromContactInfo.postalAddress.city ?? "")}, ${(fromContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(fromContactInfo.postalAddress.postalCode ?? "")}<#if has(fromContactInfo?.postalAddress?.postalCodeExt)>-${fromContactInfo.postalAddress.postalCodeExt}</#if><#if has(fromContactInfo?.postalAddress?.countryGeoId)>, ${fromContactInfo.postalAddress.countryGeoId}</#if>
+                </#if>
+                <#if has(fromContactInfo?.telecomNumber)>
+                    -- <#if has(fromContactInfo?.telecomNumber?.countryCode)>${fromContactInfo.telecomNumber.countryCode}-</#if><#if has(fromContactInfo?.telecomNumber?.areaCode)>${fromContactInfo.telecomNumber.areaCode}-</#if>${(fromContactInfo.telecomNumber.contactNumber ?? "")}
+                </#if>
+                <#if has(fromContactInfo?.emailAddress)> -- ${fromContactInfo.emailAddress}</#if>
+                </div>
+                -->
+                <div style="text-align:center">Picklist for Shipment #${shipmentId} -- <#if (shipment.estimatedShipDate != null)>${ec.l10n.format(shipment.estimatedShipDate, dateFormat)} -- </#if>Printed ${ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat)}</div>
+            </div>
+        </div>
+</section>

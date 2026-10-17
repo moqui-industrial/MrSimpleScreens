@@ -41,13 +41,10 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="indexName" from="searchIndexName"/>
         <set field="originalQueryString" from="queryString"/>
         <if condition="queryString">
-            <!-- call lookup with async future call -->
-            <set field="lookupFuture" from="ec.service.async().name('mantle.GeneralServices.lookup#ById').parameter('lookupId', originalQueryString).callFuture()"/>
-            <!-- do search sync -->
+            <!-- the search, then the lookup by id; Java ran the lookup as an async future, which is not a context value here -->
             <service-call name="mantle.GeneralServices.search#MantleFiltered" in-map="context" out-map="context"/>
-            <!-- get lookup async results, wait at most 10 seconds -->
-            <set field="lookupResults" from="lookupFuture.get(10, java.util.concurrent.TimeUnit.SECONDS)"/>
-            <script>if (lookupResults) context.putAll(lookupResults)</script>
+            <service-call name="mantle.GeneralServices.lookup#ById" in-map="{lookupId:originalQueryString}" out-map="lookupResults"/>
+            <script>if (lookupResults) ec.context.putAll(lookupResults)</script>
         </if>
     </actions>
     <widgets>
@@ -77,7 +74,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <container-box><box-header title="Search Results"/><box-body-nopad>
             <form-list name="SearchResults" list="documentList" extends="component://SimpleScreens/screen/SimpleScreens/Search.xml#SearchResults"/>
-            <label text="Full search string: ${queryString?:''}" type="p"/>
+            <label text="Full search string: ${queryString||''}" type="p"/>
             <link url="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax"
                     url-type="plain" link-type="anchor" target-window="_blank" text="Search String Reference"/>
         </box-body-nopad></container-box>

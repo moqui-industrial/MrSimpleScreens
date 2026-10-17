@@ -48,7 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="locationSeqId,description,areaId,aisleId,sectionId,levelId,positionId"/>
                 </entity-find>
                 <!-- if no configured location(s) look for existing/prior Asset pick locations -->
-                <if condition="!pickLocList">
+                <if condition="!pickLocList?.length">
                     <!-- NOTE: this could get heavy/slow over time, consider not doing here, only on individual move screen; nice for move report though -->
                     <entity-find entity-name="mantle.product.asset.AssetLocationSummary" list="pickLocList" distinct="true">
                         <econdition field-name="productId"/><econdition field-name="facilityId"/>
@@ -65,8 +65,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="locationTypeEnumId" value="FltPick"/>
                     <select-field field-name="availableToPromiseTotal"/>
                 </entity-find>
-                <set field="pickAtpTotal" from="pickLocQtyList ? (pickLocQtyList[0].availableToPromiseTotal ?: 0.0) : 0.0"/>
-                <set field="needQuantity" from="quantity &gt; pickAtpTotal ? (quantity - pickAtpTotal) : 0.0"/>
+                <set field="pickAtpTotal" from="pickLocQtyList?.length ? toDecimal(pickLocQtyList[0].availableToPromiseTotal ?? 0) : toDecimal(0)"/>
+                <set field="needQuantity" from="toDecimal(quantity ?? 0).compare(pickAtpTotal) &gt; 0 ? toDecimal(quantity).subtract(pickAtpTotal) : toDecimal(0)"/>
             </row-actions>
 
             <field name="productId"><header-field title="Product">
@@ -75,17 +75,17 @@ along with this software (see the LICENSE.md file). If not, see
                 <link url="editProduct" entity-name="mantle.product.Product" text="ProductNameTemplate" link-type="anchor"/>
             </default-field></field>
             <field name="upca"><default-field title="UPC-A">
-                <display text="${upcaProdIdent?.idValue?:''}"/>
+                <display text="${upcaProdIdent?.idValue||''}"/>
             </default-field></field>
 
             <field name="facilityId">
                 <header-field title="Facility" show-order-by="true"><drop-down allow-empty="true">
-                    <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="[facilityTypeEnumId:'FcTpWarehouse']"/>
+                    <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="{facilityTypeEnumId:'FcTpWarehouse'}"/>
                 </drop-down></header-field>
                 <default-field><link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate" link-type="anchor"/></default-field>
             </field>
             <field name="locationSeqId"><default-field title="Location">
-                <display text="${description?:''} ${areaId?:' '}:${aisleId?:' '}:${sectionId?:' '}:${levelId?:' '}:${positionId?:' '}"/></default-field></field>
+                <display text="${description||''} ${areaId||' '}:${aisleId||' '}:${sectionId||' '}:${levelId||' '}:${positionId||' '}"/></default-field></field>
             <field name="locationTypeEnumId"><header-field title="Loc Type" show-order-by="true"/>
                 <default-field><display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
 
@@ -101,7 +101,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <link url="assetDetail" text="${assetId}" link-type="anchor"/></default-field></field>
 
             <!-- quantityOnHandTotal from AssetAndReservationSummary query gets wrong number as it is added repeatedly for each applicable reservation -->
-            <field name="quantityOnHandTotal" from="(quantityOnHandTotal ?: 0.0) / (reservationCount ?: 1.0)"><header-field title="QOH" show-order-by="true"/>
+            <field name="quantityOnHandTotal" from="toDecimal(quantityOnHandTotal ?? 0).divide(toNumber(reservationCount) || 1)"><header-field title="QOH" show-order-by="true"/>
                 <default-field><display/></default-field></field>
             <field name="reservationCount"><header-field title="Res Cnt" show-order-by="true"/>
                 <default-field><display/></default-field></field>
@@ -112,7 +112,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="recLocations"><default-field title="Pick Location(s)">
                 <section-iterate name="RecLocList" list="pickLocList" entry="recLoc"><widgets>
-                    <label text="${description?:''} ${areaId?:' '}:${aisleId?:' '}:${sectionId?:' '}:${levelId?:' '}:${positionId?:' '} - QOH ${ec.l10n.format(quantityOnHandTotal, '#,##0.##')}"
+                    <label text="${description||''} ${areaId||' '}:${aisleId||' '}:${sectionId||' '}:${levelId||' '}:${positionId||' '} - QOH ${ec.l10n.format(quantityOnHandTotal, '#,##0.##')}"
                             text-map="recLoc" type="div"/>
                 </widgets></section-iterate>
             </default-field></field>
@@ -122,11 +122,11 @@ along with this software (see the LICENSE.md file). If not, see
             </default-field></field>
 
             <field name="moveLink"><default-field title="Move Link">
-                <link url="selectAsset" text="Move Screen" parameter-map="[quantity:quantity]"/>
-                <link url="moveAsset" text="Move Asset" condition="assetId" parameter-map="[quantity:quantity]"/>
+                <link url="selectAsset" text="Move Screen" parameter-map="{quantity:quantity}"/>
+                <link url="moveAsset" text="Move Asset" condition="assetId" parameter-map="{quantity:quantity}"/>
             </default-field></field>
             <field name="assetSummaryLink"><default-field title="Assets Link">
-                <link url="findSummary" text="Product Assets" parameter-map="[productId:productId, facilityId:facilityId]" link-type="anchor"/>
+                <link url="findSummary" text="Product Assets" parameter-map="{productId:productId, facilityId:facilityId}" link-type="anchor"/>
             </default-field></field>
 
             <field name="submitButton"><header-field title="Find"><submit/></header-field></field>

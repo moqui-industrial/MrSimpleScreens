@@ -34,7 +34,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <form-single name="NewPicklist" transition="createPicklist">
                     <field name="facilityId"><default-field title="Facility"><drop-down>
                         <dynamic-options transition="getFacilityList" server-search="true" min-length="0"
-                                parameter-map="[facilityTypeEnumId:'FcTpWarehouse,FcTpDock']"/>
+                                parameter-map="{facilityTypeEnumId:'FcTpWarehouse,FcTpDock'}"/>
                     </drop-down></default-field></field>
                     <field name="ownerPartyId"><default-field title="Owner Org"><drop-down allow-empty="true">
                         <entity-options key="${partyId}" text="PartyNameTemplate">
@@ -104,7 +104,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="facilityId">
                 <header-field title="Facility" show-order-by="true"><drop-down allow-empty="true">
                     <dynamic-options transition="getFacilityList" server-search="true" min-length="0"
-                            parameter-map="[facilityTypeEnumId:'FcTpWarehouse,FcTpDock']"/>
+                            parameter-map="{facilityTypeEnumId:'FcTpWarehouse,FcTpDock'}"/>
                 </drop-down></header-field>
                 <default-field><link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate" link-type="anchor"/></default-field>
             </field>
@@ -131,30 +131,30 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="partyId"><header-field title="Person">
                 <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                        parameter-map="[roleTypeId:'Employee,Worker']"/></drop-down>
+                        parameter-map="{roleTypeId:'Employee,Worker'}"/></drop-down>
             </header-field></field>
             <field name="partyList"><default-field title="People">
                 <section-iterate name="PartyList" list="weapdList" entry="weapd"><widgets>
                     <container><link url="editParty" text="PartyNameTemplate" text-map="weapd"
-                            link-type="anchor" parameter-map="[partyId:weapd.partyId]"/></container>
+                            link-type="anchor" parameter-map="{partyId:weapd.partyId}"/></container>
                 </widgets></section-iterate>
             </default-field></field>
 
             <field name="assetId"><header-field title="Equipment">
                 <drop-down allow-empty="true"><dynamic-options transition="getAssetList" server-search="true" min-length="0"
-                        parameter-map="[assetTypeEnumId:'AstTpEquipment']"/></drop-down>
+                        parameter-map="{assetTypeEnumId:'AstTpEquipment'}"/></drop-down>
             </header-field></field>
             <field name="assetList"><default-field title="Equipment">
                 <section-iterate name="AssetList" list="assetList" entry="asset"><widgets>
                     <container><link url="equipmentDetail" text="AssetNameTemplate" text-map="asset"
-                            link-type="anchor" parameter-map="[assetId:asset.assetId]"/></container>
+                            link-type="anchor" parameter-map="{assetId:asset.assetId}"/></container>
                 </widgets></section-iterate>
             </default-field></field>
             <field name="shipmentId"><header-field title="Shipments"><text-find size="10" hide-options="true"/></header-field></field>
             <field name="shipmentList"><default-field title="Shipments">
                 <section-iterate name="ShipmentList" list="shipmentList" entry="shipment"><widgets>
                     <container><link url="shipmentDetail" text="${shipment.shipmentId}" link-type="anchor"
-                            parameter-map="[shipmentId:shipment.shipmentId]"/></container>
+                            parameter-map="{shipmentId:shipment.shipmentId}"/></container>
                 </widgets></section-iterate>
             </default-field></field>
 

@@ -16,7 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Project" default-menu-index="1">
 
     <parameter name="workEffortId"/>
-    <parameter name="rootWorkEffortId" required="true" from="rootWorkEffortId ?: workEffortId"/>
+    <parameter name="rootWorkEffortId" required="true" from="rootWorkEffortId || workEffortId"/>
 
     <transition name="updateProject"><service-call name="mantle.work.ProjectServices.update#Project" in-map="context"/>
         <default-response url="."/></transition>
@@ -45,12 +45,12 @@ along with this software (see the LICENSE.md file). If not, see
             <date-filter/><econdition field-name="workEffortId"/>
             <econdition field-name="roleTypeId" operator="in" value="Customer,CustomerBillTo"/>
         </entity-find>
-        <set field="clientWep" from="clientWepList?.getAt(0)"/>
+        <set field="clientWep" from="clientWepList?.[0]"/>
         <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="vendorWepList">
             <date-filter/><econdition field-name="workEffortId"/>
             <econdition field-name="roleTypeId" operator="in" value="Vendor,VendorBillFrom"/>
         </entity-find>
-        <set field="vendorWep" from="vendorWepList?.getAt(0)"/>
+        <set field="vendorWep" from="vendorWepList?.[0]"/>
     </actions>
     <widgets>
         <section-include name="ActiveProjectSection" location="component://SimpleScreens/screen/SimpleScreens/Project/ProjectSummary.xml"/>
@@ -79,13 +79,13 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="workEffortName"><default-field title="Project Name"><text-line/></default-field></field>
             <field name="clientPartyId" from="clientWep?.partyId"><default-field title="Client">
                 <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                        parameter-map="[roleTypeId:'Customer,CustomerBillTo,OrgInternal']"/></drop-down>
+                        parameter-map="{roleTypeId:'Customer,CustomerBillTo,OrgInternal'}"/></drop-down>
                 <link url="editClient" text="Edit Client" link-type="anchor" condition="clientWep">
                     <parameter name="partyId" from="clientWep?.partyId"/></link>
             </default-field></field>
             <field name="vendorPartyId" from="vendorWep?.partyId"><default-field title="Vendor">
                 <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                        parameter-map="[roleTypeId:'Vendor,VendorBillFrom,OrgInternal']"/></drop-down>
+                        parameter-map="{roleTypeId:'Vendor,VendorBillFrom,OrgInternal'}"/></drop-down>
                 <link url="editVendor" text="Edit Vendor" link-type="anchor" condition="vendorWep">
                     <parameter name="partyId" from="vendorWep?.partyId"/></link>
             </default-field></field>
@@ -111,8 +111,8 @@ along with this software (see the LICENSE.md file). If not, see
             </default-field></field>
             <field name="statusId"><default-field title="Status">
                 <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#statusTransitionWithFlowDropDown">
-                    <set field="currentDescription" from="workEffort?.'WorkEffort#moqui.basic.StatusItem'?.description"/>
-                    <set field="statusId" from="workEffort.statusId"/><set field="statusFlowId" from="workEffort.statusFlowId ?: 'Default'"/>
+                    <set field="currentDescription" from="workEffort?.['WorkEffort#moqui.basic.StatusItem']?.description"/>
+                    <set field="statusId" from="workEffort.statusId"/><set field="statusFlowId" from="workEffort.statusFlowId || 'Default'"/>
                 </widget-template-include>
             </default-field></field>
             <field name="statusFlowId"><default-field title="Status Flow">

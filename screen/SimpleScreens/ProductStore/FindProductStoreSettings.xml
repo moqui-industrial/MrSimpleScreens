@@ -94,7 +94,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="Value" show-order-by="case-insensitive"><text-find size="40" hide-options="true"/></header-field>
                 <conditional-field condition="settingTypeEnum.relatedEnumTypeId">
                     <drop-down><dynamic-options transition="getEnumRelatedByTypeList" value-field="enumId" label-field="description"
-                            parameter-map="[enumId:settingTypeEnumId]"/></drop-down>
+                            parameter-map="{enumId:settingTypeEnumId}"/></drop-down>
                 </conditional-field>
                 <default-field><text-line size="60"/></default-field>
             </field>
@@ -109,7 +109,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="submitButton" align="right"><default-field title="Update"><submit/></default-field></field>
             <field name="deleteButton" align="right"><default-field title="">
                 <link url="deleteStoreSetting" icon="fa fa-trash"
-                      parameter-map="[productStoreId:productStoreId, settingTypeEnumId:settingTypeEnumId, fromDate:fromDate]"
+                      parameter-map="{productStoreId:productStoreId, settingTypeEnumId:settingTypeEnumId, fromDate:fromDate}"
                       confirmation="Are you sure you want to remove this Setting?"/>
             </default-field></field>
         </form-list>

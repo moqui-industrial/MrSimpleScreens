@@ -24,7 +24,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <!-- FUTURE: [OrgTimeZoneMarker] instead of using Java system default TimeZone use one configured for the organization -->
-        <set field="thruTimestamp" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS', null, TimeZone.getDefault()) : ec.user.nowTimestamp"/>
+        <set field="thruTimestamp" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS') : ec.user.nowTimestamp"/>
     </actions>
     <widgets>
         <form-list name="AssetValuationSummary" list="summaryList" skip-form="true" header-dialog="true"
@@ -73,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="mfgPartyId">
                 <header-field title="Manufacturer"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
-                <default-field><link url="editParty" link-type="anchor" parameter-map="[partyId:mfgPartyId]"
+                <default-field><link url="editParty" link-type="anchor" parameter-map="{partyId:mfgPartyId}"
                         entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" condition="mfgPartyId"/></default-field>
             </field>
             <field name="lotNumber"><header-field><text-find size="15" hide-options="ignore-case"/></header-field>
@@ -81,7 +81,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="minAcquireCost" align="right"><default-field title="Min"><display format="#,##0.00"/></default-field></field>
             <field name="maxAcquireCost" align="right"><default-field title="Max"><display format="#,##0.00"/></default-field></field>
-            <field name="averageCost" from="quantityOnHandDiff &amp;&amp; totalCost ? totalCost/quantityOnHandDiff : 0.0" align="right">
+            <field name="averageCost" from="toNumber(quantityOnHandDiff) &amp;&amp; toNumber(totalCost) ? toDecimal(totalCost).divide(quantityOnHandDiff) : toDecimal(0)" align="right">
                 <default-field title="Avg"><display format="#,##0.00"/></default-field></field>
 
             <field name="quantityOnHandDiff" align="right" show-total="true"><header-field title="Quantity"/>

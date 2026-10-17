@@ -31,10 +31,10 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <if condition="postalContactMechId || telecomContactMechId || emailContactMechId"><then>
             <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="contactInfo" in-map="context"/>
-            <set field="contactInfoFlat" from="contactInfo + flattenNestedMap(contactInfo)"/>
+            <set field="contactInfoFlat" from="Object.assign({}, contactInfo, CollectionUtilities.flattenNestedMap(contactInfo))"/>
         </then><else>
-            <set field="contactInfoFlat" from="[postalContactMechPurposeId:postalContactMechPurposeId,
-                    telecomContactMechPurposeId:telecomContactMechPurposeId, emailContactMechPurposeId:emailContactMechPurposeId]"/>
+            <set field="contactInfoFlat" from="{postalContactMechPurposeId:postalContactMechPurposeId,
+                    telecomContactMechPurposeId:telecomContactMechPurposeId, emailContactMechPurposeId:emailContactMechPurposeId}"/>
         </else></if>
     </actions>
     <widgets>

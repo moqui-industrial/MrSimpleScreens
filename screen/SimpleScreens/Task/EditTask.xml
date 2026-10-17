@@ -40,8 +40,8 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="toWorkEffortId" from="task.workEffortId"/>
             <econdition field-name="workEffortAssocTypeEnumId" value="WeatMilestone"/>
         </entity-find>
-        <set field="milestoneAssoc" from="milestoneAssocList?.getAt(0)"/>
-        <set field="statusFlowId" from="(task.statusFlowId ?: project?.statusFlowId) ?: 'Default'"/>
+        <set field="milestoneAssoc" from="milestoneAssocList?.[0]"/>
+        <set field="statusFlowId" from="(task.statusFlowId || project?.statusFlowId) || 'Default'"/>
     </actions>
     <widgets>
         <form-single name="EditTask" transition="updateTask" map="task">
@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
             </default-field></field>
             <field name="statusId"><default-field title="Status">
                 <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#statusTransitionWithFlowDropDown">
-                    <set field="currentDescription" from="task?.'WorkEffort#moqui.basic.StatusItem'?.description"/>
+                    <set field="currentDescription" from="task?.['WorkEffort#moqui.basic.StatusItem']?.description"/>
                     <set field="statusId" from="task.statusId"/></widget-template-include>
             </default-field></field>
             <field name="resolutionEnumId"><default-field title="Resolution">

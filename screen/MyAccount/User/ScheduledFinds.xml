@@ -31,13 +31,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="screenPath,formListFindId"/>
             </entity-find>
             <row-actions>
-                <set field="cronDescription" from="org.moqui.impl.service.ScheduledJobRunner.getCronDescription(cronExpression, ec.user.getLocale(), true)"/>
+                <set field="cronDescription" from="cronExpression ? ec.service.getCronDescription(cronExpression, ec.user.getLocale(), true) : null"/>
             </row-actions>
 
             <field name="screenScheduledId"><default-field><hidden/></default-field></field>
 
             <field name="screenLink"><default-field title="">
-                <link text="View" url="${screenPath}" parameter-map="[formListFindId:formListFindId]"/></default-field></field>
+                <link text="View" url="${screenPath}" parameter-map="{formListFindId:formListFindId}"/></default-field></field>
 
             <field name="screenPath">
                 <header-field title="Screen"><text-find hide-options="true"/></header-field>

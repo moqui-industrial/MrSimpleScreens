@@ -1,0 +1,84 @@
+<style>
+@page mrss-PaymentCheck { size:8.5in 11in; margin:0in 0in 0in 0in; @top-center { content:none; } @bottom-center { content:none; } }
+.print-PaymentCheck { page:mrss-PaymentCheck; font:10pt Helvetica,Arial,sans-serif; }
+.print-PaymentCheck .page-header { position:relative; min-height:0in; }
+.print-PaymentCheck .page-footer { margin-top:.2in; }
+.print-PaymentCheck table { border-collapse:collapse; table-layout:fixed; }
+.print-PaymentCheck thead { display:table-header-group; }
+.print-PaymentCheck tbody tr { break-inside:avoid; }
+.print-PaymentCheck { margin:0; padding:0; }
+.check-page:last-child { break-after:auto !important; }
+</style>
+<section class="print-PaymentCheck">
+<#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal plus a Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<#-- Printed check layout for 3 part business check on 8.5x11" paper: 8.5x3.5" check on top with 3.5" and 4" stubs -->
+<#-- Adequate for QuickBooks/etc preprinted checks -->
+
+<#--
+    Data prepared by the mantle.account.PaymentServices.get#PaymentCheckInfo service, such as:
+
+    <set field="paymentIdList" from="paymentIds instanceof List ? paymentIds : paymentIds.split(',') as List"/>
+    <service-call name="mantle.account.PaymentServices.get#PaymentCheckInfo" out-map="context"
+            in-map="[paymentIdList:paymentIdList]"/>
+-->
+
+<#assign checkPosition = (checkPosition ?? "top")>
+<#assign topHeight = (topHeight ?? 3.5)>
+<#assign middleHeight = (middleHeight ?? 3.5)>
+<#assign bottomHeight = (bottomHeight ?? 4)>
+
+
+<#assign separatePayToLine = (separatePayToLine ?? true)>
+<#assign checkNumber = (checkNumber ?? false)>
+<#assign secondarySignature = (secondarySignature ?? false)>
+
+<#assign stubLines = (stubLines ?? false)>
+
+<#assign fontSize = "10pt">
+<#assign amountCharacters = 15><#-- enought for up to 999 million: 999,999,999.99 -->
+<#assign amountWordsCharacters = 84>
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+
+<#assign cellPadding = "1pt">
+<#assign tableFontSize = (tableFontSize ?? "9pt")>
+<#assign detailTableFontSize = (detailTableFontSize ?? "8pt")>
+
+
+
+
+
+<#list paymentInfoList as paymentInfo>
+        <div class="check-page" style="position:relative;width:8.5in;height:11in;break-after:page;font-family:Helvetica,sans-serif;font-size:${fontSize}">
+                <#-- Top Area -->
+                <div style="position:absolute;top:0;left:0;width:8.5in;height:${topHeight}in">
+                    <#if checkPosition == "top">${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
+                </div>
+
+                <#-- Middle Area -->
+                <div style="position:absolute;top:${topHeight}in;left:0;width:8.5in;height:${middleHeight}in;overflow:hidden;<#if stubLines>border:thin solid black</#if>">
+                    <#if checkPosition == "middle">${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
+                </div>
+
+                <#-- Bottom Area -->
+                <div style="position:absolute;top:${Number(topHeight)+Number(middleHeight)}in;left:0;width:8.5in;height:${bottomHeight}in;overflow:hidden">
+                    <#if checkPosition == "bottom">${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
+                </div>
+            </div>
+        </#list>
+
+</section>

@@ -43,7 +43,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <container style="row"><container style="col-lg-6">
-            <label text="${commEvent.subject ?: 'Message'}" type="h3"/>
+            <label text="${commEvent.subject || 'Message'}" type="h3"/>
 
             <link url="messageThread" text="Thread"/>
             <container-dialog id="ReplyDialog" button-text="Reply">
@@ -89,7 +89,7 @@ along with this software (see the LICENSE.md file). If not, see
             <section name="CommunicationEventPurposeSection"><actions>
                 <entity-find entity-name="mantle.party.communication.CommunicationEventPurpose" list="purposeList">
                     <econdition field-name="communicationEventId"/><order-by field-name="purposeEnumId"/></entity-find>
-                <set field="purposeEnumIds" from="purposeList*.purposeEnumId"/>
+                <set field="purposeEnumIds" from="purposeList.map(it => it.purposeEnumId)"/>
             </actions><widgets>
                 <container-box><box-header title="Purposes"/><box-toolbar>
                     <container-dialog id="AddPurposeDialog" button-text="Add Purpose">

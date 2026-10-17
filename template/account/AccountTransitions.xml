@@ -36,13 +36,12 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </else></if>
             <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+            <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
             <script>
-                def outList = []
-                for (gla in glaList) {
-                    Map glaMap = gla.getMap()
+                const outList = []
+                for (const gla of glaList) {
                     // GlAccountNameTemplate uses accountCodeFormatter if present so no need for explicit mask
-                    outList.add([value:gla.glAccountId, label:ec.resource.expand('GlAccountNameTemplate','',glaMap)])
+                    outList.push({value:gla.glAccountId, label:ec.resource.expand('GlAccountNameTemplate','',gla.getMap())})
                 }
                 ec.web.sendJsonResponse(outList)
             </script>
@@ -59,10 +58,10 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="term"/>
         <actions>
             <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
-            <set field="pageIndex" from="pageIndex ?: 0"/>
-            <set field="pageSize" from="pageSize ?: 20"/>
-            <set field="term" from="term ?: ''"/>
+            <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+            <set field="pageIndex" from="pageIndex || 0"/>
+            <set field="pageSize" from="pageSize || 20"/>
+            <set field="term" from="term || ''"/>
 
             <if condition="invoiceId &amp;&amp; !term">
                 <!-- get most frequently used override GL accounts for other party -->
@@ -77,14 +76,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="overrideGlAccountId" operator="is-not-null"/>
                     <select-field field-name="overrideGlAccountId,quantityTotal"/><order-by field-name="-quantityTotal,overrideGlAccountId"/>
                 </entity-find>
-                <if condition="itemSummaryList">
+                <if condition="(itemSummaryList?.length > 0)">
                     <set field="outList" from="[]"/>
                     <iterate list="itemSummaryList" entry="itemSummary">
                         <entity-find-one entity-name="mantle.ledger.account.GlAccount" value-field="glAccount" cache="true">
                             <field-map field-name="glAccountId" from="itemSummary.overrideGlAccountId"/></entity-find-one>
-                        <script>outList.add([value:glAccount.glAccountId, label:ec.resource.expand('GlAccountNameTemplate','',glAccount.getMap())])</script>
+                        <script>outList.push({value:glAccount.glAccountId, label:ec.resource.expand('GlAccountNameTemplate','',glAccount.getMap())})</script>
                     </iterate>
-                    <script>ec.web.sendJsonResponse([options:outList])</script>
+                    <script>ec.web.sendJsonResponse({options:outList})</script>
                     <return/>
                 </if>
             </if>
@@ -108,13 +107,12 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </else></if>
             <script>
-                def outList = []
-                for (gla in glaList) {
-                    Map glaMap = gla.getMap()
+                const outList = []
+                for (const gla of glaList) {
                     // GlAccountNameTemplate uses accountCodeFormatter if present so no need for explicit mask
-                    outList.add([value:gla.glAccountId, label:ec.resource.expand('GlAccountNameTemplate','',glaMap)])
+                    outList.push({value:gla.glAccountId, label:ec.resource.expand('GlAccountNameTemplate','',gla.getMap())})
                 }
-                ec.web.sendJsonResponse([options:outList, pageSize:pageSize, count:(glaListCount?:glaList.size())])
+                ec.web.sendJsonResponse({options:outList, pageSize:pageSize, count:(glaListCount || glaList.length)})
             </script>
         </actions>
         <default-response type="none"/>
@@ -138,10 +136,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>ec.web.sendTextResponse("No GL Account mapping found")</script><return/></if>
 
             <service-call name="mantle.ledger.InvoiceAutoPostServices.get#InvoiceItemGlAccount" out-map="glAccountOut"
-                    in-map="[organizationPartyId:organizationPartyId, itemTypeEnumId:itemTypeEnumId, productId:productId, direction:direction]"/>
+                    in-map="{organizationPartyId:organizationPartyId, itemTypeEnumId:itemTypeEnumId, productId:productId, direction:direction}"/>
             <if condition="glAccountOut.glAccount"><then>
                 <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-                <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+                <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
                 <script>ec.web.sendTextResponse(ec.resource.expand("GlAccountNameTemplate", '', glAccountOut.glAccount.getMap()))</script>
             </then><else><script>ec.web.sendTextResponse("No GL Account mapping found")</script></else></if>
         </actions>

@@ -37,7 +37,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="facilityId"/><econdition field-name="locationSeqId"/>
                 <select-field field-name="quantityOnHandTotal"/>
             </entity-find>
-            <set field="quantityOnHandTotal" from="locQtySummaryList ? locQtySummaryList[0].quantityOnHandTotal : 0.0"/>
+            <set field="quantityOnHandTotal" from="locQtySummaryList?.length ? locQtySummaryList[0].quantityOnHandTotal : toDecimal(0)"/>
         </if>
         <!-- Need Qty as quantity (Res Qty) - ATP in Pick Locations for Product and Facility -->
         <entity-find entity-name="mantle.product.asset.AssetLocationSummary" list="pickLocQtyList">
@@ -45,9 +45,9 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="locationTypeEnumId" value="FltPick"/>
             <select-field field-name="availableToPromiseTotal"/>
         </entity-find>
-        <set field="pickAtpTotal" from="pickLocQtyList ? (pickLocQtyList[0].availableToPromiseTotal ?: 0.0) : 0.0"/>
-        <set field="reservedQuantity" from="quantity ? new BigDecimal((String) quantity) : 0.0"/>
-        <set field="needQuantity" from="reservedQuantity &gt; pickAtpTotal ? (reservedQuantity - pickAtpTotal) : 0.0"/>
+        <set field="pickAtpTotal" from="pickLocQtyList?.length ? toDecimal(pickLocQtyList[0].availableToPromiseTotal ?? 0) : toDecimal(0)"/>
+        <set field="reservedQuantity" from="toDecimal(quantity ?? 0)"/>
+        <set field="needQuantity" from="toDecimal(reservedQuantity ?? 0).compare(pickAtpTotal) &gt; 0 ? toDecimal(reservedQuantity).subtract(pickAtpTotal) : toDecimal(0)"/>
     </actions>
     <widgets>
         <form-single name="ScanMoveAssetForm" transition="moveProduct" focus-field="scanLocation">
@@ -56,7 +56,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="facilityId"><default-field title="Facility">
                 <display-entity entity-name="mantle.facility.Facility" text="FacilityNameTemplate"/></default-field></field>
             <field name="locationSeqId"><default-field title="From Location">
-                <display text="${locationSeqId?:'N/A'} - ${description?:''} ${areaId?:' '}:${aisleId?:' '}:${sectionId?:' '}:${levelId?:' '}:${positionId?:' '} - QOH ${ec.l10n.format(quantityOnHandTotal, '#,##0.##')}" text-map="facilityLocation"/>
+                <display text="${locationSeqId||'N/A'} - ${description||''} ${areaId||' '}:${aisleId||' '}:${sectionId||' '}:${levelId||' '}:${positionId||' '} - QOH ${ec.l10n.format(quantityOnHandTotal, '#,##0.##')}" text-map="facilityLocation"/>
             </default-field></field>
             <field name="verifyLocationSeqId"><default-field title="Verify From Location">
                 <text-line size="20"/></default-field></field>

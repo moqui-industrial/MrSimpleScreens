@@ -29,7 +29,7 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
         <entity-find-one entity-name="mantle.account.method.PaymentMethodTrans" value-field="paymentMethodTrans"/>
 
-        <set field="instrumentByTransType" from="[PMTT_CHECK:'PiCompanyCheck', PMTT_PAYMENT:'PiAch', PMTT_OTHER:'PiOther']"/>
+        <set field="instrumentByTransType" from="{PMTT_CHECK:'PiCompanyCheck', PMTT_PAYMENT:'PiAch', PMTT_OTHER:'PiOther'}"/>
     </actions>
     <widgets>
         <label text="Name: ${paymentMethodTrans.transName}" type="p" condition="paymentMethodTrans.transName"/>
@@ -43,8 +43,8 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="pageIndex"><default-field><hidden/></default-field></field>
 
             <!-- if paymentMethodTrans.transAmount < 0.0 is an outgoing payment, from PM owner (withdrawal) -->
-            <field name="fromPartyId" from="paymentMethodTrans.transAmount &lt; 0.0 ? paymentMethod.ownerPartyId : null">
-                <conditional-field title="From" condition="paymentMethodTrans.transAmount &lt; 0.0">
+            <field name="fromPartyId" from="toDecimal(paymentMethodTrans.transAmount ?? 0).compare(0) &lt; 0 ? paymentMethod.ownerPartyId : null">
+                <conditional-field title="From" condition="toDecimal(paymentMethodTrans.transAmount ?? 0).compare(0) &lt; 0">
                     <drop-down><entity-options key="${partyId}" text="PartyNameTemplate">
                         <entity-find entity-name="mantle.party.PartyDetailAndRole">
                             <econdition field-name="partyId" from="activeOrgId" ignore="!activeOrgId"/>
@@ -58,8 +58,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </default-field>
             </field>
             <!-- if paymentMethodTrans.transAmount >= 0.0 is an incoming payment, to PM owner (deposit) -->
-            <field name="toPartyId" from="paymentMethodTrans.transAmount &gt;= 0.0 ? paymentMethod.ownerPartyId : null">
-                <conditional-field title="To" condition="paymentMethodTrans.transAmount &gt;= 0.0">
+            <field name="toPartyId" from="!(toDecimal(paymentMethodTrans.transAmount ?? 0).compare(0) &lt; 0) ? paymentMethod.ownerPartyId : null">
+                <conditional-field title="To" condition="!(toDecimal(paymentMethodTrans.transAmount ?? 0).compare(0) &lt; 0)">
                     <drop-down><entity-options key="${partyId}" text="PartyNameTemplate">
                         <entity-find entity-name="mantle.party.PartyDetailAndRole">
                             <econdition field-name="partyId" from="activeOrgId" ignore="!activeOrgId"/>
@@ -73,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </default-field>
             </field>
 
-            <field name="paymentInstrumentEnumId" from="instrumentByTransType.get(paymentMethodTrans.transType) ?: 'PiOther'"><default-field title="Instrument">
+            <field name="paymentInstrumentEnumId" from="instrumentByTransType[paymentMethodTrans.transType] || 'PiOther'"><default-field title="Instrument">
                 <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#enumDropDown">
                     <set field="enumTypeId" value="PaymentInstrument"/></widget-template-include>
             </default-field></field>

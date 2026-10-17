@@ -13,55 +13,29 @@ along with this software (see the LICENSE.md file). If not, see
 
 <#-- See the mantle.humanres.PayrollServices.get#CheckReceiptRegisterInfo service for data preparation -->
 
-<#assign cellPadding = "4pt">
-<#assign dateFormat = dateFormat!"dd MMM yyyy">
-<#assign dateTimeFormat = dateTimeFormat!"yyyy-MM-dd HH:mm">
-<#assign extraLines = extraLines!3>
-
-<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" font-family="Helvetica, sans-serif" font-size="10pt">
-    <fo:layout-master-set>
-        <fo:simple-page-master master-name="letter" page-width="11in" page-height="8.5in"
-                               margin-top="0.5in" margin-bottom="0.5in" margin-left="0.5in" margin-right="0.5in">
-            <fo:region-body margin-top="1.25in" margin-bottom="0.6in"/>
-            <fo:region-before extent="1.25in"/>
-            <fo:region-after extent="0.5in"/>
-        </fo:simple-page-master>
-    </fo:layout-master-set>
-
-    <fo:page-sequence master-reference="letter" initial-page-number="1" force-page-count="no-force">
-        <fo:static-content flow-name="xsl-region-before">
-        </fo:static-content>
-        <fo:static-content flow-name="xsl-region-after" font-size="8pt">
-        </fo:static-content>
-
-        <fo:flow flow-name="xsl-region-body">
-            <fo:table table-layout="fixed" width="10in" border-bottom="solid black">
-                <fo:table-header font-size="10pt" font-weight="bold" border-bottom="solid black">
-                    <fo:table-cell width="6in" padding="${cellPadding}"><fo:block text-align="left">Name</fo:block></fo:table-cell>
-                    <fo:table-cell width="1in" padding="${cellPadding}"><fo:block text-align="center">Check #</fo:block></fo:table-cell>
-                    <fo:table-cell width="1in" padding="${cellPadding}"><fo:block text-align="center">Amount</fo:block></fo:table-cell>
-                    <fo:table-cell width="2in" padding="${cellPadding}"><fo:block text-align="center">Signature</fo:block></fo:table-cell>
-                </fo:table-header>
-                <fo:table-body>
-                <#list paymentList as payment>
-                    <#assign person = ec.entity.find("mantle.party.Person").condition("partyId", payment.toPartyId).useCache(true).one()>
-                    <fo:table-row height="0.5in" font-size="9pt" border-top="solid black">
-                        <fo:table-cell padding="${cellPadding}" display-align="after"><fo:block text-align="left">${ec.resource.expand('PartyLastNameFirstTemplate', '', person)}</fo:block></fo:table-cell>
-                        <fo:table-cell padding="${cellPadding}" border-left="solid grey" display-align="after"><fo:block text-align="center">${payment.paymentRefNum!}</fo:block></fo:table-cell>
-                        <fo:table-cell padding="${cellPadding}" border-left="solid grey" display-align="after"><fo:block text-align="center">${ec.l10n.formatCurrency(payment.amount, payment.amountUomId)}</fo:block></fo:table-cell>
-                        <fo:table-cell padding="${cellPadding}" border-left="solid grey" display-align="after"><fo:block text-align="center"></fo:block></fo:table-cell>
-                    </fo:table-row>
-                </#list>
-                <#if !paymentList>
-                    <fo:table-row height="0.5in" font-size="9pt" border-top="solid black">
-                        <fo:table-cell padding="${cellPadding}" display-align="after"><fo:block text-align="left"></fo:block></fo:table-cell>
-                        <fo:table-cell padding="${cellPadding}" border-left="solid grey" display-align="after"><fo:block text-align="center"></fo:block></fo:table-cell>
-                        <fo:table-cell padding="${cellPadding}" border-left="solid grey" display-align="after"><fo:block text-align="center"></fo:block></fo:table-cell>
-                        <fo:table-cell padding="${cellPadding}" border-left="solid grey" display-align="after"><fo:block text-align="center"></fo:block></fo:table-cell>
-                    </fo:table-row>
-                </#if>
-                </fo:table-body>
-            </fo:table>
-        </fo:flow>
-    </fo:page-sequence>
-</fo:root>
+<style>
+    @page { size: letter landscape; margin: 1.75in .5in 1.1in; }
+    .check-receipt-register { width: 100%; border-collapse: collapse; table-layout: fixed; font: 10pt Helvetica, sans-serif; border-bottom: solid black; }
+    .check-receipt-register thead { display: table-header-group; }
+    .check-receipt-register tr { border-top: solid black; break-inside: avoid; }
+    .check-receipt-register tbody tr { height: .5in; font-size: 9pt; }
+    .check-receipt-register th, .check-receipt-register td { padding: 4pt; text-align: center; vertical-align: bottom; }
+    .check-receipt-register td + td { border-left: solid grey; }
+    .check-receipt-register th:first-child, .check-receipt-register td:first-child { text-align: left; }
+</style>
+<table class="check-receipt-register">
+    <colgroup><col style="width: 60%"/><col style="width: 10%"/><col style="width: 10%"/><col style="width: 20%"/></colgroup>
+    <thead><tr><th>Name</th><th>Check #</th><th>Amount</th><th>Signature</th></tr></thead>
+    <tbody>
+    <#list paymentList as payment>
+        <#assign person = ec.entity.find("mantle.party.Person").condition("partyId", payment.toPartyId).useCache(true).one()>
+        <tr>
+            <td>${WebUtilities.encodeHtml(ec.resource.expand('PartyLastNameFirstTemplate', '', person))}</td>
+            <td>${WebUtilities.encodeHtml(payment.paymentRefNum ?? "")}</td>
+            <td>${WebUtilities.encodeHtml(ec.l10n.formatCurrency(payment.amount, payment.amountUomId))}</td>
+            <td></td>
+        </tr>
+    </#list>
+    <#if !paymentList?.length><tr><td></td><td></td><td></td><td></td></tr></#if>
+    </tbody>
+</table>

@@ -32,13 +32,13 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <service-call name="mantle.product.ProductServices.find#ProductFeatures" out-map="selectableFeatureOut"
-                in-map="[productId:productId, applTypeEnumId:'PfatSelectable']"/>
+                in-map="{productId:productId, applTypeEnumId:'PfatSelectable'}"/>
         <set field="selectableFeatureList" from="selectableFeatureOut.productFeatureList"/>
         <order-map-list list="selectableFeatureList"><order-by field-name="sequenceNum"/>
             <order-by field-name="productFeatureTypeEnumId"/><order-by field-name="description"/></order-map-list>
 
         <service-call name="mantle.product.ProductServices.find#ProductFeatureGroups" out-map="context"
-                in-map="[productId:productId, applTypeEnumId:'PfatSelectable']"/>
+                in-map="{productId:productId, applTypeEnumId:'PfatSelectable'}"/>
 
         <entity-find entity-name="ProductAssocAndTo" list="paatList">
             <search-form-inputs default-order-by="productName"/>
@@ -73,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <form-list name="AssocToListForm" list="paatList" transition="updateProductAssoc" paginate="true">
                     <field name="productId"><default-field><hidden/></default-field></field>
                     <field name="toProductId"><default-field title="Product"><display text=" "/>
-                        <link url="editProduct" text="${productName} [${toProductId}]" parameter-map="[productId:toProductId]" link-type="anchor"/>
+                        <link url="editProduct" text="${productName} [${toProductId}]" parameter-map="{productId:toProductId}" link-type="anchor"/>
                     </default-field></field>
                     <field name="productTypeEnumId"><default-field title="Type">
                         <display-entity entity-name="moqui.basic.Enumeration"/>
@@ -85,9 +85,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="fromDate"><default-field><hidden/></default-field></field>
                     <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                     <field name="removeButton"><default-field title="">
-                        <link url="updateProductAssoc" text="X" parameter-map="[productId:productId,
+                        <link url="updateProductAssoc" text="X" parameter-map="{productId:productId,
                             toProductId:toProductId, productAssocTypeEnumId:productAssocTypeEnumId,
-                            fromDate:fromDate, thruDate:ec.user.nowTimestamp]" confirmation="Remove this association?"/>
+                            fromDate:fromDate, thruDate:ec.user.nowTimestamp}" confirmation="Remove this association?"/>
                     </default-field></field>
                 </form-list>
             </box-body></container-box>
@@ -95,7 +95,7 @@ along with this software (see the LICENSE.md file). If not, see
             <container-box><box-header title="Associated From"/><box-body>
                 <form-list name="AssocFromListForm" list="paafList" skip-form="true">
                     <field name="productId"><default-field title="Product">
-                        <link url="editProduct" text="${productName} [${pseudoId}]" parameter-map="[productId:productId]" link-type="anchor"/>
+                        <link url="editProduct" text="${productName} [${pseudoId}]" parameter-map="{productId:productId}" link-type="anchor"/>
                     </default-field></field>
                     <field name="productTypeEnumId"><default-field title="Type">
                         <display-entity entity-name="moqui.basic.Enumeration"/>
@@ -137,7 +137,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="productFeatureTypeEnumId"><default-field title="Type">
                         <display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
                     <field name="productFeatureId"><default-field title="Feature">
-                        <link url="editFeature" text="${description} [${abbrev ?: productFeatureId}]" link-type="anchor"/>
+                        <link url="editFeature" text="${description} [${abbrev || productFeatureId}]" link-type="anchor"/>
                     </default-field></field>
                     <field name="productFeatureGroupId">
                         <conditional-field condition="featureGroup">

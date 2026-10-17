@@ -48,7 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getContainerList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
 
     <actions>
-        <set field="facilityId" from="facilityId ?: ec.user.getPreference('FacilityActive') ?: ec.user.getPreference('FacilityGeneralDefault')"/>
+        <set field="facilityId" from="facilityId || ec.user.getPreference('FacilityActive') || ec.user.getPreference('FacilityGeneralDefault')"/>
 
         <!-- look up the basics if we have IDs -->
         <if condition="facilityId"><entity-find-one entity-name="mantle.facility.Facility" value-field="facility"/></if>
@@ -70,13 +70,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-layout><field-row-big><field-ref name="scanId"/><field-ref name="submitButton"/></field-row-big></field-layout>
             </form-single>
             <link url="." text="Reset Selections" condition="containerId || locationSeqId || productId"
-                    parameter-map="[containerId:null, locationSeqId:null, productId:null]"/>
+                    parameter-map="{containerId:null, locationSeqId:null, productId:null}"/>
         </row-col><row-col sm="7">
             <form-single name="ActiveFacilityForm" transition="setActiveFacility">
                 <field name="productId"><default-field><hidden/></default-field></field>
                 <field name="facilityId"><default-field title="Active Warehouse">
                     <drop-down><dynamic-options transition="getFacilityList" server-search="true" min-length="0"
-                            parameter-map="[facilityTypeEnumId:'FcTpWarehouse']"/></drop-down>
+                            parameter-map="{facilityTypeEnumId:'FcTpWarehouse'}"/></drop-down>
                 </default-field></field>
                 <field name="submitButton"><default-field title="Set WH"><submit/></default-field></field>
                 <field-layout><field-row-big><field-ref name="facilityId"/><field-ref name="submitButton"/></field-row-big></field-layout>
@@ -98,7 +98,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="receivedDate" from="ec.user.nowTimestamp"><default-field title="Received Date"><date-time/></default-field></field>
 
             <field name="mfgPartyId"><default-field title="Manufacturer"><drop-down allow-empty="true">
-                <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,Manufacturer']"/>
+                <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,Manufacturer'}"/>
             </drop-down></default-field></field>
             <field name="lotId"><default-field title="Lot" tooltip="Select an existing Lot, for new enter Lot Number (and Dates) below">
                 <drop-down allow-empty="true"><dynamic-options transition="getLotList" server-search="true" min-length="0">
@@ -113,7 +113,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="ownerPartyId"><default-field title="Owner">
                 <label text="Asset Owner will default to Facility owner" condition="!ownerPartyId"/>
                 <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true"
-                        min-length="0" parameter-map="[roleTypeId:'Supplier,OrgInternal']"/></drop-down>
+                        min-length="0" parameter-map="{roleTypeId:'Supplier,OrgInternal'}"/></drop-down>
             </default-field></field>
             <field name="assetPoolId"><default-field title="Pool"><drop-down allow-empty="true">
                 <dynamic-options transition="getAssetPoolList" server-search="true" min-length="0" depends-optional="true">

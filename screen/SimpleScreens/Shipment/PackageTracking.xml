@@ -25,27 +25,27 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="outgoingTypeOut"
-                in-map="[parentEnumId:'ShpTpOutgoing']"/>
+                in-map="{parentEnumId:'ShpTpOutgoing'}"/>
         <set field="shipmentTypeSet" from="outgoingTypeOut.enumIdSet"/>
 
         <set field="defaultFacilityId" from="ec.user.getPreference('FacilityGeneralDefault')"/>
 
-        <set field="hoursPastEta" from="hoursPastEta ?: '12'"/>
-        <set field="hoursPastEtaInt" from="hoursPastEta as int"/>
+        <set field="hoursPastEta" from="hoursPastEta || '12'"/>
+        <set field="hoursPastEtaInt" from="parseInt(hoursPastEta, 10)"/>
         <if condition="hoursPastEtaInt > 0">
-            <set field="etaLookBack" from="new Timestamp(java.time.ZonedDateTime.now().minusHours(hoursPastEtaInt).withMinute(0).withSecond(0).toInstant().toEpochMilli())"/>
+            <set field="etaLookBack" from="String(Math.floor((Date.now() - hoursPastEtaInt * 3600000) / 3600000) * 3600000)"/>
         </if>
 
-        <set field="daysSincePacked" from="daysSincePacked ?: '5'"/>
-        <set field="daysSincePackedInt" from="daysSincePacked as int"/>
+        <set field="daysSincePacked" from="daysSincePacked || '5'"/>
+        <set field="daysSincePackedInt" from="parseInt(daysSincePacked, 10)"/>
         <if condition="daysSincePackedInt > 0">
-            <set field="packedLookBack" from="new Timestamp(java.time.ZonedDateTime.now().minusDays(daysSincePackedInt).withMinute(0).withSecond(0).toInstant().toEpochMilli())"/>
+            <set field="packedLookBack" from="String(Math.floor((Date.now() - daysSincePackedInt * 86400000) / 3600000) * 3600000)"/>
         </if>
 
-        <set field="daysSinceLastTrack" from="daysSinceLastTrack ?: '0'"/>
-        <set field="daysSinceLastTrackInt" from="daysSinceLastTrack as int"/>
+        <set field="daysSinceLastTrack" from="daysSinceLastTrack || '0'"/>
+        <set field="daysSinceLastTrackInt" from="parseInt(daysSinceLastTrack, 10)"/>
         <if condition="daysSinceLastTrackInt > 0">
-            <set field="lastTrackLookBack" from="new Timestamp(java.time.ZonedDateTime.now().minusDays(daysSinceLastTrackInt).withMinute(0).withSecond(0).toInstant().toEpochMilli())"/>
+            <set field="lastTrackLookBack" from="String(Math.floor((Date.now() - daysSinceLastTrackInt * 86400000) / 3600000) * 3600000)"/>
         </if>
 
         <set field="summaryString" value=""/>
@@ -136,8 +136,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </header-field>
                 <default-field>
                     <link url="editCustomer" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                            link-type="anchor" parameter-map="[partyId:toPartyId]"/>
-                    <label text=" - ${custPcaaList*.description.join(', ')}" condition="custPcaaList"/>
+                            link-type="anchor" parameter-map="{partyId:toPartyId}"/>
+                    <label text=" - ${custPcaaList.map(it => it.description).join(', ')}" condition="(custPcaaList?.length > 0)"/>
                 </default-field>
             </field>
             <field name="originFacilityId">
@@ -145,7 +145,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </header-field>
                 <default-field><link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate"
-                        link-type="anchor" parameter-map="[facilityId:originFacilityId]"/></default-field>
+                        link-type="anchor" parameter-map="{facilityId:originFacilityId}"/></default-field>
             </field>
             <field name="findButton"><header-field title="Find"><submit/></header-field></field>
 

@@ -31,7 +31,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="${ec.web.getWebappRootUrl(false, null)}/fop/apps/${appRoot}/Accounting/Invoice/ReceivableStatement" url-type="plain">
             <parameter name="renderMode" value="xsl-fo"/><parameter name="pageNoLimit" value="true"/>
             <parameter name="toPartyId"/><parameter name="fromPartyId"/><parameter name="periodDays"/><parameter name="asOfDate"/>
-            <parameter name="filename" value="Statement-${toPartyId}-${asOfDate ?: ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')}.pdf"/>
+            <parameter name="filename" value="Statement-${toPartyId}-${asOfDate || ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')}.pdf"/>
         </default-response>
     </transition>
 
@@ -52,7 +52,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="timePeriodIdList"><default-field title="Time Periods">
                             <drop-down allow-multiple="true">
                                 <dynamic-options transition="getTimePeriodList" server-search="true" min-length="0"
-                                        parameter-map="[timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', pastOnly:'true']">
+                                        parameter-map="{timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', pastOnly:'true'}">
                                     <depends-on field="organizationPartyId" parameter="partyId"/></dynamic-options>
                             </drop-down>
                         </default-field></field>
@@ -147,7 +147,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </default-field></field>
                         <field name="timePeriodId"><default-field title="Time Period"><drop-down>
                             <dynamic-options transition="getTimePeriodList" server-search="true" min-length="0"
-                                    parameter-map="[timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', pastOnly:'true']">
+                                    parameter-map="{timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', pastOnly:'true'}">
                                 <depends-on field="organizationPartyId" parameter="partyId"/></dynamic-options>
                         </drop-down></default-field></field>
                         <field name="glAccountIdList"><default-field title="GL Accounts"><drop-down allow-multiple="true">
@@ -207,7 +207,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <field name="timePeriodId"><default-field title="Time Period">
                                 <drop-down>
                                     <dynamic-options transition="getTimePeriodList" server-search="true" min-length="0"
-                                            parameter-map="[timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', pastOnly:'true']">
+                                            parameter-map="{timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth', pastOnly:'true'}">
                                         <depends-on field="organizationPartyId" parameter="partyId"/></dynamic-options>
                                 </drop-down>
                             </default-field></field>

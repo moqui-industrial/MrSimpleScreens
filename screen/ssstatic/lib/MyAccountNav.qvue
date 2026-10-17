@@ -16,29 +16,19 @@ module.exports = {
     data: function() { return { notificationCount:0, messageCount:0, eventCount:0, taskCount:0, updateInterval:null, updateErrors:0 } },
     methods: {
         updateCounts: function() {
-            var lastNavDiff = Date.now() - this.$root.lastNavTime;
-            // NOTE DEJ 20201104 use 10 hour timeout instead of 1 hour, windows/tabs left open should stay logged in for a generous length working day
-            if (this.updateInterval && lastNavDiff > (10*60*60*1000)) {
-                console.log('No nav in ' + lastNavDiff + 'ms clearing updateCounts interval');
-                clearInterval(this.updateInterval); this.updateInterval = null;
-                return;
+            if (Date.now() - this.$root.lastNavTime > 10*60*60*1000) {
+                clearInterval(this.updateInterval); this.updateInterval = null; return;
             }
-
-            var vm = this; $.ajax({ type:'GET', url:(this.$root.appRootPath + '/rest/s1/mantle/my/noticeCounts'),
-                dataType:'json', headers:{Accept:'application/json'},
-                success: function(countObj) { if (countObj) {
-                    if (countObj.notificationCount) vm.notificationCount = countObj.notificationCount;
-                    if (countObj.messageCount) vm.messageCount = countObj.messageCount;
-                    if (countObj.eventCount) vm.eventCount = countObj.eventCount;
-                    if (countObj.taskCount) vm.taskCount = countObj.taskCount;
-                    vm.updateErrors = 0;
-                }},
-                error: function(jqXHR, textStatus, errorThrown) {
-                    vm.updateErrors++;
-                    console.log('updateCounts ' + textStatus + ' (' + jqXHR.status + '), message ' + errorThrown + ', ' + vm.updateErrors + '/5 errors so far, interval id ' + vm.updateInterval);
-                    if (vm.updateErrors > 4 && vm.updateInterval) { console.log('updateCounts clearing interval, too many errors');
-                        clearInterval(vm.updateInterval); vm.updateInterval = null; }
-                }
+            if (this.countRequest) this.countRequest.abort();
+            this.countRequest = new AbortController();
+            return moqui.request(this.$root.appRootPath + '/rest/s1/mantle/my/noticeCounts', {signal:this.countRequest.signal}).then(result => {
+                if (!result.json) throw new Error('Invalid notice counts response');
+                for (const key of ['notificationCount', 'messageCount', 'eventCount', 'taskCount']) this[key] = Number(result.json[key] || 0);
+                this.updateErrors = 0;
+            }).catch(error => {
+                if (error.aborted) return;
+                console.error('Load account notice counts', error);
+                if (++this.updateErrors >= 5) { clearInterval(this.updateInterval); this.updateInterval = null; }
             });
         },
         notificationListener: function(jsonObj, webSocket) {
@@ -49,7 +39,14 @@ module.exports = {
     mounted: function() {
         this.updateCounts();
         this.updateInterval = setInterval(this.updateCounts, 5*60*1000); /* update every 5 minutes, not generally looked at frequently */
-        this.$root.notificationClient.registerListener("ALL", this.notificationListener);
+        if (this.$root.notificationClient) this.$root.notificationClient.registerListener('ALL', this.notificationListener);
+    },
+    beforeUnmount: function() {
+        clearInterval(this.updateInterval);
+        if (this.countRequest) this.countRequest.abort();
+        const client = this.$root.notificationClient;
+        const listeners = client && client.topicListeners.ALL;
+        if (listeners) { const i = listeners.indexOf(this.notificationListener); if (i >= 0) listeners.splice(i, 1); }
     }
 };
 </script>

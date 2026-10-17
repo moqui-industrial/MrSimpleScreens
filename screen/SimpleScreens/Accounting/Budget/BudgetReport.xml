@@ -19,6 +19,8 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <service-call name="mantle.other.BudgetReportServices.run#BudgetExpenseReport" in-map="context" out-map="context"/>
+        <!-- the service returns the mask; the Java service returned the formatter -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/>
     </actions>
     <widgets>
         <form-list name="GlAccountBudgetList" list="glAccountInfoList" header-dialog="true" skip-form="true"
@@ -37,71 +39,71 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="actualMain" align="right">
                 <default-field title="Actual Year"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountMain" align="right">
-                <default-field title="Budget Year" container-style="${actualMain > amountMain ? 'text-danger' : 'text-success'}">
+                <default-field title="Budget Year" container-style="${toDecimal(actualMain ?? 0).compare(amountMain ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
 
             <field name="actualPer1" align="right">
                 <default-field title="Act P1"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer1" align="right">
-                <default-field title="Bgt P1" container-style="${actualPer1 > amountPer1 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P1" container-style="${toDecimal(actualPer1 ?? 0).compare(amountPer1 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer2" align="right" hide="subTimePeriodSize &lt; 2">
                 <default-field title="Act P2"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer2" align="right" hide="subTimePeriodSize &lt; 2">
-                <default-field title="Bgt P2" container-style="${actualPer2 > amountPer2 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P2" container-style="${toDecimal(actualPer2 ?? 0).compare(amountPer2 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer3" align="right" hide="subTimePeriodSize &lt; 3">
                 <default-field title="Act P3"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer3" align="right" hide="subTimePeriodSize &lt; 3">
-                <default-field title="Bgt P3" container-style="${actualPer3 > amountPer3 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P3" container-style="${toDecimal(actualPer3 ?? 0).compare(amountPer3 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
 
             <field name="actualPer4" align="right" hide="subTimePeriodSize &lt; 4">
                 <default-field title="Act P4"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer4" align="right" hide="subTimePeriodSize &lt; 4">
-                <default-field title="Bgt P4" container-style="${actualPer4 > amountPer4 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P4" container-style="${toDecimal(actualPer4 ?? 0).compare(amountPer4 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer5" align="right" hide="subTimePeriodSize &lt; 5">
                 <default-field title="Act P5"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer5" align="right" hide="subTimePeriodSize &lt; 5">
-                <default-field title="Bgt P5" container-style="${actualPer5 > amountPer5 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P5" container-style="${toDecimal(actualPer5 ?? 0).compare(amountPer5 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer6" align="right" hide="subTimePeriodSize &lt; 6">
                 <default-field title="Act P6"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer6" align="right" hide="subTimePeriodSize &lt; 6">
-                <default-field title="Bgt P6" container-style="${actualPer6 > amountPer6 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P6" container-style="${toDecimal(actualPer6 ?? 0).compare(amountPer6 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
 
             <field name="actualPer7" align="right" hide="subTimePeriodSize &lt; 7">
                 <default-field title="Act P7"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer7" align="right" hide="subTimePeriodSize &lt; 7">
-                <default-field title="Bgt P7" container-style="${actualPer7 > amountPer7 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P7" container-style="${toDecimal(actualPer7 ?? 0).compare(amountPer7 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer8" align="right" hide="subTimePeriodSize &lt; 8">
                 <default-field title="Act P8"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer8" align="right" hide="subTimePeriodSize &lt; 8">
-                <default-field title="Bgt P8" container-style="${actualPer8 > amountPer8 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P8" container-style="${toDecimal(actualPer8 ?? 0).compare(amountPer8 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer9" align="right" hide="subTimePeriodSize &lt; 9">
                 <default-field title="Act P9"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer9" align="right" hide="subTimePeriodSize &lt; 9">
-                <default-field title="Bgt P9" container-style="${actualPer9 > amountPer9 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P9" container-style="${toDecimal(actualPer9 ?? 0).compare(amountPer9 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
 
             <field name="actualPer10" align="right" hide="subTimePeriodSize &lt; 10">
                 <default-field title="Act P10"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer10" align="right" hide="subTimePeriodSize &lt; 10">
-                <default-field title="Bgt P10" container-style="${actualPer10 > amountPer10 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P10" container-style="${toDecimal(actualPer10 ?? 0).compare(amountPer10 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer11" align="right" hide="subTimePeriodSize &lt; 11">
                 <default-field title="Act P11"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer11" align="right" hide="subTimePeriodSize &lt; 11">
-                <default-field title="Bgt P11" container-style="${actualPer11 > amountPer11 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P11" container-style="${toDecimal(actualPer11 ?? 0).compare(amountPer11 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="actualPer12" align="right" hide="subTimePeriodSize &lt; 12">
                 <default-field title="Act P12"><display format="#,##0.00" text-format="0.00"/></default-field></field>
             <field name="amountPer12" align="right" hide="subTimePeriodSize &lt; 12">
-                <default-field title="Bgt P12" container-style="${actualPer12 > amountPer12 ? 'text-danger' : 'text-success'}">
+                <default-field title="Bgt P12" container-style="${toDecimal(actualPer12 ?? 0).compare(amountPer12 ?? 0) &gt; 0 ? 'text-danger' : 'text-success'}">
                     <display format="#,##0.00" text-format="0.00"/></default-field></field>
 
             <field name="findButton"><header-field title=""><submit text="Find"/></header-field>

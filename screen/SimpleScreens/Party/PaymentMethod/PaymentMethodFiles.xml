@@ -31,7 +31,7 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="paymentMethodFileId"/>
         <actions>
             <entity-find-one entity-name="mantle.account.method.PaymentMethodFile" value-field="paymentMethodFile"/>
-            <script>ec.web.sendTextResponse(paymentMethodFile.fileText, "text/plain", "PaymentFile${paymentMethodFileId}.txt")</script>
+            <script>ec.web.sendTextResponse(paymentMethodFile.fileText, "text/plain", `PaymentFile${paymentMethodFileId}.txt`)</script>
         </actions>
         <default-response type="none"/>
     </transition>
@@ -94,7 +94,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <search-form-inputs default-order-by="-fileDate"/><econdition field-name="paymentMethodId"/></entity-find>
 
             <row-actions>
-                <set field="methodFileType" from="allMethodFileTypeList.find({ it.fileTypeEnumId == fileTypeEnumId })"/>
+                <set field="methodFileType" from="allMethodFileTypeList.find(it => it.fileTypeEnumId == fileTypeEnumId)"/>
                 <set field="canSendSystemMessage" from="methodFileType?.systemMessageTypeId &amp;&amp; methodFileType?.systemMessageRemoteId"/>
                 <if condition="canSendSystemMessage">
                     <entity-find entity-name="moqui.service.message.SystemMessage" list="existingMessageList">
@@ -104,7 +104,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <!-- showing status so include all: <econdition field-name="statusId" operator="not-in" value="SmsgRejected,SmsgCancelled"/> -->
                         <select-field field-name="systemMessageId,statusId"/>
                     </entity-find>
-                    <if condition="existingMessageList.size() &gt; 0"><set field="canSendSystemMessage" from="false"/></if>
+                    <if condition="existingMessageList.length &gt; 0"><set field="canSendSystemMessage" from="false"/></if>
                 </if>
             </row-actions>
 
@@ -125,21 +125,21 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="creditAmountTotal"><header-field show-order-by="true"><range-find size="10"/></header-field>
                 <default-field><display format="#,##0.00"/></default-field></field>
             <field name="paymentsButton"><default-field title="">
-                <link url="findPayment" text="Payments" parameter-map="[paymentMethodFileId:paymentMethodFileId]"/>
+                <link url="findPayment" text="Payments" parameter-map="{paymentMethodFileId:paymentMethodFileId}"/>
             </default-field></field>
             <field name="isCancelled">
                 <conditional-field condition="isCancelled != 'Y'">
-                    <link url="cancelFile" text="Cancel" parameter-map="[paymentMethodFileId:paymentMethodFileId, partyId:partyId]"
+                    <link url="cancelFile" text="Cancel" parameter-map="{paymentMethodFileId:paymentMethodFileId, partyId:partyId}"
                             confirmation="Remove all payments from this file and cancel?" btn-type="danger"/>
                 </conditional-field>
                 <default-field title=""><display text="Cancelled"/></default-field>
             </field>
             <field name="messages">
                 <conditional-field condition="canSendSystemMessage &amp;&amp; isCancelled != 'Y'">
-                    <link url="sendSystemMessage" text="Send to Bank" parameter-map="[paymentMethodFileId:paymentMethodFileId]"/>
+                    <link url="sendSystemMessage" text="Send to Bank" parameter-map="{paymentMethodFileId:paymentMethodFileId}"/>
                 </conditional-field>
-                <conditional-field condition="existingMessageList">
-                    <label text="${existingMessageList.collect({it.systemMessageId + ' ' + it.statusId?.substring(4)}).join(', ')}"/>
+                <conditional-field condition="(existingMessageList?.length > 0)">
+                    <label text="${existingMessageList.map(it => it.systemMessageId + ' ' + it.statusId?.substring(4)).join(', ')}"/>
                 </conditional-field>
             </field>
             <field name="downloadButton"><header-field title="Find"><submit/></header-field>

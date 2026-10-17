@@ -1,0 +1,42 @@
+<#-- Comparison percentages use host decimal arithmetic; chart data is JSON, not evaluated Groovy. -->
+
+    <#assign chartId = title.replaceAll(" ", "_").replaceAll("-", "_") + "_Chart">
+    <div class="row q-col-gutter-sm"><div class="col-xs-5 text-right">
+        <div class="small text-muted">this</div>
+        <h6 class="text-primary">${ec.l10n.format(valThis, mainFormat)}</h6>
+    </div><div class="col-xs-7">
+        <div>
+            <i class="fa <#if (toDecimal(valThis).compare(valLast) < 0)>fa-caret-down text-danger<#else>fa-caret-up text-success</#if>"></i>
+            <span class="<#if (toDecimal(valThis).compare(valLast) < 0)>text-danger<#else>text-success</#if>"><#if toDecimal(valLast).compare(0) != 0>${ec.l10n.format(toDecimal(valThis).subtract(valLast).abs().divide(valLast).multiply(100), '00')}<#else>0</#if>%</span>
+            <span class="small">last (${ec.l10n.format(valLast, mainFormat)})</span>
+        </div>
+        <div>
+            <i class="fa <#if (toDecimal(valThis).compare(valAvg) < 0)>fa-caret-down text-danger<#else>fa-caret-up text-success</#if>"></i>
+            <span class="<#if (toDecimal(valThis).compare(valAvg) < 0)>text-danger<#else>text-success</#if>"><#if toDecimal(valAvg).compare(0) != 0>${ec.l10n.format(toDecimal(valThis).subtract(valAvg).abs().divide(valAvg).multiply(100), '00')}<#else>0</#if>%</span>
+            <span class="small">avg (${ec.l10n.format(valAvg, mainFormat)})</span>
+        </div>
+    </div></div>
+    <div class="row q-col-gutter-sm"><div class="col-xs-5 text-right">
+        <div class="small text-muted">last</div>
+        <h6 class="text-primary">${ec.l10n.format(valLast, mainFormat)}</h6>
+    </div><div class="col-xs-7">
+        <div>
+            <i class="fa <#if (toDecimal(valLast).compare(valPrior) < 0)>fa-caret-down text-danger<#else>fa-caret-up text-success</#if>"></i>
+            <span class="<#if (toDecimal(valLast).compare(valPrior) < 0)>text-danger<#else>text-success</#if>"><#if toDecimal(valPrior).compare(0) != 0>${ec.l10n.format(toDecimal(valLast).subtract(valPrior).abs().divide(valPrior).multiply(100), '00')}<#else>0</#if>%</span>
+            <span class="small">prev (${ec.l10n.format(valPrior, mainFormat)})</span>
+        </div>
+        <div>
+            <i class="fa <#if (toDecimal(valLast).compare(valAvg) < 0)>fa-caret-down text-danger<#else>fa-caret-up text-success</#if>"></i>
+            <span class="<#if (toDecimal(valLast).compare(valAvg) < 0)>text-danger<#else>text-success</#if>"><#if toDecimal(valAvg).compare(0) != 0>${ec.l10n.format(toDecimal(valLast).subtract(valAvg).abs().divide(valAvg).multiply(100), '00')}<#else>0</#if>%</span>
+            <span class="small">avg (${ec.l10n.format(valAvg, mainFormat)})</span>
+        </div>
+    </div></div>
+    <#if chartList?.length>
+        <#assign chartConfig = JSON.stringify({type:'line', data:{labels:labelList ?? [], datasets:[{backgroundColor:'rgba(49, 112, 143, 0.9)', borderColor:'rgba(49, 112, 143, 0.9)', fill:false, data:chartList}].concat((Number(maPeriods) > 0 && chartMaList?.length) ? [{backgroundColor:null, borderColor:'rgba(240, 173, 78, 0.5)', fill:false, data:chartMaList}] : [])}, options:{legend:{display:false}, scales:{xAxes:[{display:chartBig}]}, maintainAspectRatio:false}}).replace(/</g, "\\u003c")>
+        <#if sri.getRenderMode() == "vuet" || sri.getRenderMode() == "html">
+            <div class="chart-container" style="position:relative; height:<#if chartBig>500px<#else>90px</#if>; width:100%;"><canvas id="${chartId}"></canvas></div>
+            <script>var ${chartId} = new Chart(document.getElementById("${chartId}"), ${raw(chartConfig)});</script>
+        <#elseif sri.getRenderMode() == "qvt">
+            <m-chart height="<#if chartBig>500px<#else>90px</#if>" :config="${chartConfig}"></m-chart>
+        </#if>
+    </#if>

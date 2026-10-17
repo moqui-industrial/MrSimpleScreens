@@ -38,11 +38,11 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
     <transition name="getShippingOptions"><actions>
         <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentShippingOptions" out-map="shipOptsOut"
-                in-map="[shipmentId:shipmentId, getRates:true]"/>
+                in-map="{shipmentId:shipmentId, getRates:true}"/>
         <script>
             outList = []
-            for (sop in shipOptsOut.shippingOptions) outList.add([value:"${sop.carrierPartyId}:${sop.shipmentMethodEnumId}".toString(),
-                    label:"${sop.description ? sop.description : (sop.carrierPartyId != '_NA_' ? (sop.carrierName + ' - ') : '') + sop.shipmentMethodDescription}${sop.shippingTotal != null ? ' ' + ec.l10n.format(sop.shippingTotal, '#,##0.00') : ''}".toString()])
+            for (sop in shipOptsOut.shippingOptions) outList.add({value:`${sop.carrierPartyId}:${sop.shipmentMethodEnumId}`.toString(),
+                    label:`${sop.description ? sop.description : (sop.carrierPartyId != '_NA_' ? (sop.carrierName + ' - ') : '') + sop.shipmentMethodDescription}${sop.shippingTotal != null ? ' ' + ec.l10n.format(sop.shippingTotal, '#,##0.00') : ''}`.toString()})
             ec.web.sendJsonResponse(outList)
         </script>
     </actions><default-response type="none"/></transition>
@@ -66,12 +66,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="sprs?.returnLabelUrl"><then>
                         <script>ec.web.sendResourceResponse(sprs.returnLabelUrl)</script>
                     </then><else-if condition="sprs?.returnLabelImage">
-                        <script>
-                            byte[] returnLabelImage = sprs.getBytes("returnLabelImage")
-                            ec.web.response.setHeader("Content-Disposition", "inline")
-                            OutputStream os = ec.web.response.outputStream
-                            try { os.write(returnLabelImage) } finally { os.close() }
-                        </script>
+                        <script>ec.web.sendBytesResponse(sprs.returnLabelImage, null, true)</script>
                     </else-if><else>
                         <script>ec.web.sendError(404, 'No returnLabelUrl or returnLabelImage', null)</script>
                     </else></if>
@@ -81,13 +76,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="sprs?.internationalInvoiceUrl"><then>
                         <script>ec.web.sendResourceResponse(sprs.internationalInvoiceUrl)</script>
                     </then><else-if condition="sprs?.internationalInvoice">
-                        <script>
-                            byte[] internationalInvoice = sprs.getBytes("internationalInvoice")
-                            // handle content type somehow, really needed? ec.web.response.setContentType("application/pdf")
-                            ec.web.response.setHeader("Content-Disposition", "inline")
-                            OutputStream os = ec.web.response.outputStream
-                            try { os.write(internationalInvoice) } finally { os.close() }
-                        </script>
+                        <script>ec.web.sendBytesResponse(sprs.internationalInvoice, null, true)</script>
                     </else-if><else>
                         <script>ec.web.sendError(404, 'No internationalInvoiceUrl or internationalInvoice', null)</script>
                     </else></if>
@@ -95,13 +84,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="sprs?.labelUrl"><then>
                         <script>ec.web.sendResourceResponse(sprs.labelUrl)</script>
                     </then><else-if condition="sprs?.labelImage">
-                        <script>
-                            byte[] labelImage = sprs.getBytes("labelImage")
-                            // handle content type somehow, really needed? ec.web.response.setContentType("application/pdf")
-                            ec.web.response.setHeader("Content-Disposition", "inline")
-                            OutputStream os = ec.web.response.outputStream
-                            try { os.write(labelImage) } finally { os.close() }
-                        </script>
+                        <script>ec.web.sendBytesResponse(sprs.labelImage, null, true)</script>
                     </else-if><else>
                         <script>ec.web.sendError(404, 'No labelUrl or labelImage', null)</script>
                     </else></if>

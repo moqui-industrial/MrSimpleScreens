@@ -1,0 +1,65 @@
+<#-- Ported from the original FreeMarker template; HTML interpolation is escaped.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+<table border="0" cellpadding="8px" cellspacing="0" width="100%"><tr>
+    <td width="50%">
+        <h1>Invoice ${invoiceId}</h1><br/>
+        <#if (finalizedStatusHistoryList.length> 1)>
+            <h4>AMENDED ${ec.l10n.format(finalizedStatusHistoryList[0].changedDate, dateFormat)} (previous ${ec.l10n.format(finalizedStatusHistoryList[1].changedDate, dateFormat)})</h4>
+        </#if>
+        <#if has(detailLinkPath)>
+            <#list orderIdSet as orderId>
+            <strong><a href="<#if detailLinkPath.startsWith("http")>${detailLinkPath}<#else>http://${storeDomain}/${detailLinkPath}</#if>?orderId=${orderId}">For Order ${orderId}</a></strong><br/>
+            </#list>
+        <#else>
+            <#list orderIdSet as orderId><strong>For Order ${orderId}</strong><br/></#list>
+        </#if>
+        <strong>Invoice Date</strong> ${ec.l10n.format(invoice.invoiceDate, dateFormat)}<br/>
+        <strong>Customer #</strong> ${toParty.pseudoId}<br/>
+        <#if has(invoice?.referenceNumber)><strong>Ref #</strong> ${invoice.referenceNumber}<br/></#if>
+        <#if has(invoice?.otherPartyOrderId)><strong>Your Order</strong> ${invoice.otherPartyOrderId}<br/></#if>
+        <br/>
+        <#if toDecimal(unpaidTotal ?? 0).compare(0) == 0>
+            <strong>PAID IN FULL</strong><br/>
+        <#else>
+            <strong>Balance Due</strong> ${ec.l10n.formatCurrency(unpaidTotal, invoice.currencyUomId)}<br/>
+        </#if>
+        <#if toDecimal(unpaidTotal ?? 0).compare(0) != 0>
+            <#if (invoice.dueDate != null)>
+                <strong>Due Date</strong> ${ec.l10n.format(invoice.dueDate, dateFormat)}<br/>
+            </#if>
+            <#if has(settlementTerm)>
+                <strong>Term</strong> ${settlementTerm.description}<br/>
+            </#if>
+        </#if>
+    </td>
+    <td width="50%">
+    <#if has(fromContactInfo?.postalAddress)>
+        <#if has(fromContactInfo?.postalAddress?.toName) || has(fromContactInfo?.postalAddress?.attnName)>
+            <#if has(fromContactInfo?.postalAddress?.toName)><strong>To: ${fromContactInfo.postalAddress.toName}</strong><br/></#if>
+            <#if has(fromContactInfo?.postalAddress?.attnName)><strong>Attn: ${fromContactInfo.postalAddress.attnName}</strong><br/></#if>
+        <#else>
+            <strong>${(fromParty?.organizationName ?? "")} ${(fromParty?.firstName ?? "")} ${(fromParty?.middleName ?? "")} ${(fromParty?.lastName ?? "")}</strong><br/>
+        </#if>
+    ${(fromContactInfo?.postalAddress?.address1 ?? "")}<#if has(fromContactInfo?.postalAddress?.unitNumber)> #${fromContactInfo.postalAddress.unitNumber}</#if><br/>
+        <#if has(fromContactInfo?.postalAddress?.address2)>${fromContactInfo.postalAddress.address2}<br/></#if>
+    ${(fromContactInfo.postalAddress.city ?? "")}, ${(fromContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(fromContactInfo.postalAddress.postalCode ?? "")}<#if has(fromContactInfo?.postalAddress?.postalCodeExt)>-${fromContactInfo.postalAddress.postalCodeExt}</#if><#if has(fromContactInfo?.postalAddress?.countryGeoId)> ${fromContactInfo.postalAddress.countryGeoId}</#if><br/>
+    </#if>
+    <#if has(fromContactInfo?.telecomNumber)>
+        <#if has(fromContactInfo?.telecomNumber?.countryCode)>Tel: ${fromContactInfo.telecomNumber.countryCode}-</#if><#if has(fromContactInfo?.telecomNumber?.areaCode)>${fromContactInfo.telecomNumber.areaCode}-</#if>${(fromContactInfo.telecomNumber.contactNumber ?? "")}<br/>
+    </#if>
+    <#if has(fromContactInfo?.faxTelecomNumber)>
+        <#if has(fromContactInfo?.faxTelecomNumber?.countryCode)>Fax: ${fromContactInfo.faxTelecomNumber.countryCode}-</#if><#if has(fromContactInfo?.faxTelecomNumber?.areaCode)>${fromContactInfo.faxTelecomNumber.areaCode}-</#if>${(fromContactInfo.faxTelecomNumber.contactNumber ?? "")}<br/>
+    </#if>
+    <#if has(fromContactInfo?.emailAddress)>
+        ${fromContactInfo.emailAddress}<br/>
+    </#if>
+    </td>
+</tr></table>
+
+<strong>See details in attachment.</strong><br/><br/>
+
+<#if has(invoice?.invoiceMessage)>
+    ${invoice.invoiceMessage}<br/>
+</#if>

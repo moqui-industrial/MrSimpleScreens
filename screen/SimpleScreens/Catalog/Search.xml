@@ -33,9 +33,9 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
 
     <actions>
-        <set field="pageSize" from="pageSize ?: 50"/>
-        <set field="indexName" from="searchIndexName ?: 'mantle'"/>
-        <set field="documentType" from="searchProductDocType ?: 'MantleProduct'"/>
+        <set field="pageSize" from="pageSize || 50"/>
+        <set field="indexName" from="searchIndexName || 'mantle'"/>
+        <set field="documentType" from="searchProductDocType || 'MantleProduct'"/>
 
         <set field="originalQueryString" from="queryString"/>
 
@@ -61,9 +61,9 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
         <!-- <log level="warn" message="Doing product search with activeOrgId ${activeOrgId} filterOrgIds ${filterOrgIds} entityFilterSetId ${entityFilterSetId}"/> -->
         <script><![CDATA[
-            if ('MANTLE_USER_ORG'.equals(entityFilterSetId)) {
+            if ('MANTLE_USER_ORG' === entityFilterSetId) {
                 queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + filterOrgIds.join(' OR ') + ')'
-            } else if ('MANTLE_ACTIVE_ORG'.equals(entityFilterSetId) && activeOrgId) {
+            } else if (('MANTLE_ACTIVE_ORG' === entityFilterSetId) && activeOrgId) {
                 queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + activeOrgId + ' OR _NA_)'
             }
         ]]></script>
@@ -71,20 +71,20 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="orderByField"><set field="orderByFields" from="[orderByField]"/></if>
         <if condition="queryString">
             <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
-                    in-map="context + [indexName:indexName, documentType:documentType]"/>
+                    in-map="Object.assign({}, context, {indexName:indexName, documentType:documentType})"/>
         </if>
 
-        <set field="productIds" from="documentList ? documentList*._id : null"/>
+        <set field="productIds" from="documentList?.length ? documentList.map(it => it._id) : null"/>
 
         <entity-find entity-name="mantle.product.Product" list="amountUomList" distinct="true">
             <select-field field-name="amountUomId"/></entity-find>
         <set field="amountUomIds" from="amountUomList.amountUomId"/>
     </actions>
     <widgets>
-        <container-dialog id="AddCategoryContainer" button-text="Add All to Category" condition="productIds">
+        <container-dialog id="AddCategoryContainer" button-text="Add All to Category" condition="productIds?.length">
             <form-single name="AddCategoryForm" transition="addProductCategory">
                 <field name="queryString"><default-field><hidden/></default-field></field>
-                <field name="productInfo"><default-field><display text="${productIds?.size() ?: '0'} Products"/></default-field></field>
+                <field name="productInfo"><default-field><display text="${productIds?.length || '0'} Products"/></default-field></field>
                 <field name="productCategoryId"><default-field title="Category">
                     <drop-down><dynamic-options transition="getCategoryList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
@@ -92,10 +92,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="productIdList" from="productIds.join(',')"><default-field><hidden/></default-field></field>
             </form-single>
         </container-dialog>
-        <container-dialog id="RemoveCategoryContainer" button-text="Remove All from Category" condition="productIds">
+        <container-dialog id="RemoveCategoryContainer" button-text="Remove All from Category" condition="productIds?.length">
             <form-single name="RemoveCategoryForm" transition="removeProductCategory">
                 <field name="queryString"><default-field><hidden/></default-field></field>
-                <field name="productInfo"><default-field><display text="${productIds?.size() ?: '0'} Products"/></default-field></field>
+                <field name="productInfo"><default-field><display text="${productIds?.length || '0'} Products"/></default-field></field>
                 <field name="productCategoryId"><default-field title="Category">
                     <drop-down><dynamic-options transition="getCategoryList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
@@ -104,10 +104,10 @@ along with this software (see the LICENSE.md file). If not, see
             </form-single>
         </container-dialog>
 
-        <container-dialog id="AddFeatureContainer" button-text="Add Feature to All" condition="productIds">
+        <container-dialog id="AddFeatureContainer" button-text="Add Feature to All" condition="productIds?.length">
             <form-single name="AddFeatureForm" transition="addProductFeature">
                 <field name="queryString"><default-field><hidden/></default-field></field>
-                <field name="productInfo"><default-field><display text="${productIds?.size() ?: '0'} Products"/></default-field></field>
+                <field name="productInfo"><default-field><display text="${productIds?.length || '0'} Products"/></default-field></field>
                 <field name="productFeatureId"><default-field title="Feature">
                     <drop-down allow-empty="true"><dynamic-options transition="getFeatureList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
@@ -122,10 +122,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="productIdList" from="productIds.join(',')"><default-field><hidden/></default-field></field>
             </form-single>
         </container-dialog>
-        <container-dialog id="RemoveFeatureContainer" button-text="Remove Feature from All" condition="productIds">
+        <container-dialog id="RemoveFeatureContainer" button-text="Remove Feature from All" condition="productIds?.length">
             <form-single name="RemoveFeatureForm" transition="removeProductFeature">
                 <field name="queryString"><default-field><hidden/></default-field></field>
-                <field name="productInfo"><default-field><display text="${productIds?.size() ?: '0'} Products"/></default-field></field>
+                <field name="productInfo"><default-field><display text="${productIds?.length || '0'} Products"/></default-field></field>
                 <field name="productFeatureId"><default-field title="Feature">
                     <drop-down allow-empty="true"><dynamic-options transition="getFeatureList" server-search="true" min-length="0"/></drop-down>
                 </default-field></field>
@@ -141,7 +141,7 @@ along with this software (see the LICENSE.md file). If not, see
                 select-columns="true" show-page-size="true">
             <row-actions>
                 <set field="productId" from="document?._id"/>
-                <script>if (document) context.putAll(document)</script>
+                <script>if (document) ec.context.putAll(document)</script>
             </row-actions>
 
             <row-selection id-field="productId" parameter="productIdList" list-mode="true">
@@ -236,7 +236,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <order-by field-name="description"/></entity-find>
                     </entity-options></drop-down>
                 </header-field>
-                <default-field><display-entity entity-name="moqui.basic.Uom" text="${amountFixed?:''} ${description}"/></default-field>
+                <default-field><display-entity entity-name="moqui.basic.Uom" text="${amountFixed ?? ''} ${description}"/></default-field>
             </field>
 
             <field name="productFeatureId"><header-field title="Feature">
@@ -251,6 +251,6 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="submitButton"><header-field title="Find"><submit/></header-field></field>
         </form-list>
-        <label text="Full search string: ${queryString?:''}" type="p"/>
+        <label text="Full search string: ${queryString||''}" type="p"/>
     </widgets>
 </screen>

@@ -1,0 +1,136 @@
+<style>
+@page mrss-TeamTimesheet { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
+.print-TeamTimesheet { page:mrss-TeamTimesheet; font:10pt Helvetica,Arial,sans-serif; }
+.print-TeamTimesheet .page-header { position:relative; min-height:1.25in; }
+.print-TeamTimesheet .page-footer { margin-top:.2in; }
+.print-TeamTimesheet table { border-collapse:collapse; table-layout:fixed; }
+.print-TeamTimesheet thead { display:table-header-group; }
+.print-TeamTimesheet tbody tr { break-inside:avoid; }
+</style>
+<section class="print-TeamTimesheet">
+<#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal plus a Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<#-- See the mantle.work.TimeServices.get#TeamTimesheetInfo service for data preparation -->
+
+<#assign cellPadding = "4pt">
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+<#assign dateTimeFormat = (dateTimeFormat ?? "yyyy-MM-dd HH:mm")>
+<#assign extraLines = (extraLines ?? 3)>
+
+<div class="page-header">
+            <table style="width:7.5in;border:none"><tbody>
+                <tr>
+                    <td style="width:3in;padding:2pt;border:solid black">
+                        <div style="font-size:8pt;text-align:center">Team</div>
+                        <div style="font-size:12pt;text-align:center">${ec.resource.expand('PartyNameTemplate', '', teamDetail)}</div>
+                    </td>
+                    <td style="width:3in;padding:2pt;border:solid black">
+                        <div style="font-size:8pt;text-align:center">Company</div>
+                        <div style="font-size:12pt;text-align:center"><#if (clientDetail != null)>${ec.resource.expand('PartyNameTemplate', '', clientDetail)}<#else>&#8199;</#if></div>
+                    </td>
+                    <td style="width:1.5in;padding:2pt;border:solid black">
+                        <div style="font-size:8pt;text-align:center">Date</div>
+                        <div style="font-size:12pt;text-align:center"><#if (workEffort != null)>${ec.l10n.format(workEffort.actualStartDate, "dd MMM yyyy")}<#else>&#8199;</#if></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td rowspan="2" style="padding:2pt;border:solid black">
+                        <div style="font-size:8pt;text-align:center">Team</div>
+                        <div style="text-align:center">
+                            ${raw(ec.resource.code128Svg(partyId, {height: '0.5in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
+                        </div>
+                    </td>
+                    <td style="padding:2pt;border:solid black">
+                        <div style="font-size:8pt;text-align:center">Location</div>
+                        <div style="font-size:12pt;text-align:center"><#if (facility != null)>${ec.resource.expand('FacilityNameTemplate', '', facility)}<#else>&#8199;</#if></div>
+                    </td>
+                    <td rowspan="2" style="padding:2pt;border:solid black">
+                        <div style="font-size:8pt;text-align:center">Event</div>
+                        <#if has(workEffortId)>
+                        <div style="text-align:center">
+                            ${raw(ec.resource.code128Svg(workEffortId, {height: '0.5in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
+                        </div>
+                        </#if>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:2pt;border:solid black">
+                        <div style="font-size:8pt;text-align:center">Notes</div>
+                        <div style="font-size:12pt;text-align:center">&#8199;</div>
+                    </td>
+                </tr>
+            </tbody></table>
+        </div>
+        
+
+        <div class="page-body">
+            <table style="width:7.5in;border-bottom:solid black">
+                <thead style="font-size:10pt;font-weight:bold;border-bottom:solid black"><tr>
+                    <td style="width:3in;padding:${cellPadding}"><div style="text-align:left">Team Member</div></td>
+                    <td style="width:1.5in;padding:${cellPadding}"><div style="text-align:center">Work Type</div></td>
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">Start</div></td>
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">End</div></td>
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">Hours</div></td>
+                    <#-- <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">Break</div></td> -->
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">Pieces</div></td>
+                </tr></thead>
+                <tbody>
+                <#if (workEffort != null)>
+                <tr style="font-size:9pt;border-bottom:solid black;color:grey">
+                    <td style="padding:${cellPadding}"><div style="text-align:left">Default (event #${workEffortId})</div></td>
+                    <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">${workTypeEnum?.description ?? '\u2007'}</div></td>
+                    <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">${ec.l10n.format(workEffort.actualStartDate, "HH:mm")}</div></td>
+                    <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>
+                    <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">${ec.l10n.format(workEffort.actualWorkDuration, "0.00")}</div></td>
+                    <#-- <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">${ec.l10n.format(workEffort.actualBreakDuration, "0.00")}</div></td> -->
+                    <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>
+                </tr>
+                </#if>
+                <#list teamMemberInfoList as teamMemberInfo>
+                    <#assign timeEntry = teamMemberInfo.timeEntry ?? null>
+                    <#assign teWorkTypeEnum = (teamMemberInfo.teWorkTypeEnum ?? '')>
+                    <tr style="font-size:9pt;border-top:solid black">
+                        <td style="padding:${cellPadding}"><div style="text-align:left">${ec.resource.expand('PartyNameTemplate', '', teamMemberInfo)}</div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center"><#if (timeEntry != null)>${teWorkTypeEnum?.description ?? '\u2007'}</#if></div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center"><#if (timeEntry != null)>${ec.l10n.format(timeEntry.fromDate, "HH:mm")}</#if></div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center"><#if (timeEntry != null)>${ec.l10n.format(timeEntry.thruDate, "HH:mm")}</#if></div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center"><#if (timeEntry != null)>${ec.l10n.format(timeEntry.hours, "0.00")}</#if></div></td>
+                        <#-- <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center"><#if (timeEntry != null)>${ec.l10n.format(timeEntry.breakHours, "0.00")}</#if></div></td> -->
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center"><#if (timeEntry != null)>${ec.l10n.format(timeEntry.pieceCount, "0")}</#if></div></td>
+                    </tr>
+                </#list>
+                <#list Array.from({length: Math.max(0, Number(extraLines))}, (_, i) => i + 1) as extraLine>
+                    <tr style="font-size:9pt;border-top:solid black">
+                        <td style="padding:${cellPadding}"><div style="text-align:left">&#8199;</div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>
+                        <#-- <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td> -->
+                        <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>
+                    </tr>
+                </#list>
+                </tbody>
+            </table>
+        </div>
+    
+<div class="page-footer" style="font-size:8pt">
+            <div style="border-top:thin solid black">
+                <div style="text-align:center">Timesheet for ${teamDetail.pseudoId}<#if (clientDetail != null)> -- ${clientDetail.pseudoId}</#if><#if (facility != null)> -- ${facility.pseudoId}</#if><#if (workEffort != null)> -- ${ec.l10n.format(workEffort.actualStartDate, "dd MMM yyyy")}</#if> -- Printed ${ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat)}</div>
+            </div>
+        </div>
+</section>

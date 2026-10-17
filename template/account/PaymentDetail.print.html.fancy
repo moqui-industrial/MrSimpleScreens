@@ -1,0 +1,150 @@
+<style>
+@page mrss-PaymentDetail { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
+.print-PaymentDetail { page:mrss-PaymentDetail; font:10pt Helvetica,Arial,sans-serif; }
+.print-PaymentDetail .page-header { position:relative; min-height:0in; }
+.print-PaymentDetail .page-footer { margin-top:.2in; }
+.print-PaymentDetail table { border-collapse:collapse; table-layout:fixed; }
+.print-PaymentDetail thead { display:table-header-group; }
+.print-PaymentDetail tbody tr { break-inside:avoid; }
+</style>
+<#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal plus a Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<#--
+    Data prepared by the mantle.account.PaymentServices.get#PaymentCheckInfo service, such as:
+
+    <set field="paymentIdList" from="paymentIds instanceof List ? paymentIds : paymentIds.split(',') as List"/>
+    <service-call name="mantle.account.PaymentServices.get#PaymentCheckInfo" out-map="context"
+            in-map="[paymentIdList:paymentIdList]"/>
+-->
+
+<#assign fontSize = "10pt">
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+
+<#assign cellPadding = "1pt">
+<#assign tableFontSize = (tableFontSize ?? "10pt")>
+
+
+<#list paymentInfoList as paymentInfo>
+<section class="print-PaymentDetail" style="break-after:page">
+        
+
+            <div class="page-body">
+                <div>
+                    <div style="font-size:14pt;text-align:center;margin-bottom:0">${((paymentInfo.fromPartyDetail.organizationName ?? ""))}</div>
+                    <div style="font-size:13pt;text-align:center;margin-bottom:0.1in">Payment Detail</div>
+
+                    <table style="width:7.5in"><tbody><tr style="font-size:10pt">
+                        <td style="padding:0.05in;width:3.5in">
+                            <#assign contactInfo = paymentInfo.toBillingContactInfo>
+                            <div style="text-align:left">${((paymentInfo.toPartyDetail.organizationName ?? ""))}${((paymentInfo.toPartyDetail.firstName ?? ""))} ${((paymentInfo.toPartyDetail.lastName ?? ""))}</div>
+                            <#if has(contactInfo?.postalAddress?.address1)><div style="text-align:left">${contactInfo.postalAddress.address1}<#if has(contactInfo?.postalAddress?.unitNumber)> #${contactInfo.postalAddress.unitNumber}</#if></div></#if>
+                            <#if has(contactInfo?.postalAddress?.address2)><div style="text-align:left">${contactInfo.postalAddress.address2}</div></#if>
+                            <#if has(contactInfo?.postalAddress)><div style="text-align:left">${((contactInfo.postalAddress.city ?? ""))}<#if has(contactInfo?.postalAddressStateGeo?.geoCodeAlpha2)>, ${contactInfo.postalAddressStateGeo.geoCodeAlpha2} </#if>${(contactInfo.postalAddress.postalCode ?? '')}<#if has(contactInfo?.postalAddress?.postalCodeExt)>-${contactInfo.postalAddress.postalCodeExt}</#if><#if has(contactInfo?.postalAddressCountryGeo?.geoCodeAlpha3)> ${contactInfo.postalAddressCountryGeo.geoCodeAlpha3}</#if></div></#if>
+                            <#if has(contactInfo?.telecomNumber)><div style="text-align:left"><#if has(contactInfo?.telecomNumber?.countryCode)>${contactInfo.telecomNumber.countryCode}-</#if><#if has(contactInfo?.telecomNumber?.areaCode)>${contactInfo.telecomNumber.areaCode}-</#if>${(contactInfo.telecomNumber.contactNumber ?? '')}</div></#if>
+                        </td>
+                        <td style="padding:0.05in;width:2in">
+                            <#if has(paymentInfo?.payment?.paymentRefNum)>
+                                <div style="text-align:left;font-weight:bold">Check #</div>
+                                <div style="text-align:left">${paymentInfo.payment.paymentRefNum}</div>
+                            </#if>
+                            <div style="text-align:left;font-weight:bold">Payment Ref #</div>
+                            <div style="text-align:left">${paymentInfo.payment.paymentId}</div>
+                        </td>
+                        <td style="padding:0.05in;width:1.5in">
+                            <div style="text-align:left;font-weight:bold">Amount</div>
+                            <div style="text-align:left">${ec.l10n.formatCurrency(paymentInfo.payment.amount, paymentInfo.payment.amountUomId)}</div>
+                            <div style="text-align:left;font-weight:bold">Date</div>
+                            <div style="text-align:left">${ec.l10n.format(paymentInfo.payment.effectiveDate, dateFormat)}</div>
+                        </td>
+                    </tr></tbody></table>
+                    <#if has(paymentInfo?.payment?.memo)>
+                        <div style="text-align:left;margin-bottom:0.1in">${paymentInfo.payment.memo}</div>
+                    </#if>
+
+                    <#if has(paymentInfo?.invoiceList)>
+                        <#list paymentInfo.invoiceList as invoice>
+                            <#assign invoiceItemList = ec.entity.find("mantle.account.invoice.InvoiceItem").condition("invoiceId", invoice.invoiceId).list()>
+                            <#assign invoiceTotals = ec.service.sync().name("mantle.account.InvoiceServices.get#InvoiceTotal").parameter("invoiceId", invoice.invoiceId).call()>
+                            <table style="width:7.5in">
+                                <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black"><tr>
+                                    <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:left">Our Ref #</div></td>
+                                    <td style="width:2.0in;padding:${cellPadding}"><div style="text-align:left">Your Ref #</div></td>
+                                    <td style="width:1.3in;padding:${cellPadding}"><div style="text-align:left">Invoice Date</div></td>
+                                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Invoice Amount</div></td>
+                                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Amount Paid</div></td>
+                                </tr></thead>
+                                <tbody>
+                                    <tr style="font-size:${tableFontSize};border-bottom:thin solid black">
+                                        <td style="padding:${cellPadding}"><div style="text-align:left">${invoice.invoiceId}</div></td>
+                                        <td style="padding:${cellPadding}"><div style="text-align:left">${((invoice.referenceNumber ?? ""))}<#if has(invoice?.otherPartyOrderId)> - PO ${invoice.otherPartyOrderId}</#if></div></td>
+                                        <td style="padding:${cellPadding}"><div style="text-align:left">${ec.l10n.format(invoice.invoiceDate, dateFormat)}</div></td>
+                                        <td style="padding:${cellPadding}"><div style="text-align:right;font-family:Courier, monospace">${ec.l10n.formatCurrency(invoiceTotals.invoiceTotal, invoice.currencyUomId)}</div></td>
+                                        <td style="padding:${cellPadding}"><div style="text-align:right;font-family:Courier, monospace">${ec.l10n.formatCurrency(invoice.amountApplied, invoice.currencyUomId)}</div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table style="width:7.5in">
+                                <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black;border-top:solid black"><tr>
+                                    <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:left">Item</div></td>
+                                    <td style="width:3.3in;padding:${cellPadding}"><div style="text-align:left">Description</div></td>
+                                    <td style="width:0.7in;padding:${cellPadding}"><div style="text-align:right">Qty</div></td>
+                                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td>
+                                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Total</div></td>
+                                </tr></thead>
+                                <tbody>
+                                    <#list invoiceItemList as invoiceItem>
+                                        <#assign itemTypeEnum = (invoiceItem.type ?? '')>
+                                        <tr style="font-size:${tableFontSize}">
+                                            <td style="padding:${cellPadding}"><div style="text-align:left">${invoiceItem.invoiceItemSeqId}</div></td>
+                                            <td style="padding:${cellPadding}"><div style="text-align:left">${(invoiceItem?.description ?? itemTypeEnum?.description ?? "")}</div></td>
+                                            <td style="padding:${cellPadding}"><div style="text-align:right">${(invoiceItem.quantity ?? "1")}</div></td>
+                                            <td style="padding:${cellPadding}"><div style="text-align:right;font-family:Courier, monospace">${ec.l10n.formatCurrency(invoiceItem.amount, invoice.currencyUomId, 3)}</div></td>
+                                            <td style="padding:${cellPadding}"><div style="text-align:right;font-family:Courier, monospace">${ec.l10n.formatCurrency(toDecimal(invoiceItem.quantity ?? 1).multiply(invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>
+                                        </tr>
+                                    </#list>
+                                </tbody>
+                            </table>
+                        </#list>
+                    </#if>
+
+                    <#if (paymentInfo.financialAccountTrans != null)>
+                        <table style="width:7in">
+                            <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black"><tr>
+                                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">Account #</div></td>
+                                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">TX #</div></td>
+                                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">TX Date</div></td>
+                                <td style="width:2in;padding:${cellPadding}"><div style="text-align:right">TX Amount</div></td>
+                            </tr></thead>
+                            <tbody>
+                                <tr style="font-size:${tableFontSize};border-bottom:thin solid black">
+                                    <td style="padding:${cellPadding}"><div style="text-align:left">${(paymentInfo.financialAccount.finAccountCode ?? paymentInfo.financialAccount.finAccountId)}</div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:left">${paymentInfo.financialAccountTrans.finAccountTransId}</div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:left">${ec.l10n.format(paymentInfo.financialAccountTrans.transactionDate, dateFormat)}</div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:right;font-family:Courier, monospace">${ec.l10n.formatCurrency(paymentInfo.financialAccountTrans.amount, paymentInfo.financialAccount.currencyUomId)}</div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </#if>
+                </div>
+            </div>
+        <div class="page-footer" style="font-size:8pt">
+                <div style="border-top:thin solid black">
+                    <div style="text-align:center"><#if has(paymentInfo?.payment?.paymentRefNum)>Check #${paymentInfo.payment.paymentRefNum} -- </#if>Payment #${paymentInfo.payment.paymentId} -- ${ec.l10n.format(paymentInfo.payment.effectiveDate, dateFormat)} -- ${ec.l10n.formatCurrency(paymentInfo.payment.amount, paymentInfo.payment.amountUomId)}<#-- Page numbers are supplied by the html-print page footer. --></div>
+                </div>
+            </div>
+</section>
+</#list>

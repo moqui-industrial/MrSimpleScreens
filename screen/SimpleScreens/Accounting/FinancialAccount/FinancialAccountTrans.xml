@@ -34,7 +34,7 @@ along with this software (see the LICENSE.md file). If not, see
             <search-form-inputs default-order-by="-transactionDate"/><econdition field-name="finAccountId"/></entity-find>
     </actions>
     <widgets>
-        <section name="AdjustSection" condition="financialAccount.statusId in ['FaNegPendRepl', 'FaActive']">
+        <section name="AdjustSection" condition="['FaNegPendRepl', 'FaActive'].includes(financialAccount.statusId)">
             <widgets>
                 <container-dialog id="AdjustDialog" button-text="Add Adjustment" width="700">
                     <form-single name="AdjustFinancialAccount" transition="adjustFinancialAccount">
@@ -74,18 +74,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="From"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><display-entity entity-name="mantle.party.PartyDetail"
-                        text="${organizationName?:''}${firstName?:''} ${lastName?:''} [${pseudoId}]"/></default-field>
+                        text="${organizationName||''}${firstName||''} ${lastName||''} [${pseudoId}]"/></default-field>
             </field>
             <field name="toPartyId">
                 <header-field title="To"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><display-entity entity-name="mantle.party.PartyDetail"
-                        text="${organizationName?:''}${firstName?:''} ${lastName?:''} [${pseudoId}]"/></default-field>
+                        text="${organizationName||''}${firstName||''} ${lastName||''} [${pseudoId}]"/></default-field>
             </field>
             <field name="performedByUserId">
                 <header-field title="Performed By"/>
                 <default-field><display-entity entity-name="mantle.party.PersonAndUserAccount"
-                        text="${username} - ${firstName?:''} ${lastName?:''}"/></default-field>
+                        text="${username} - ${firstName||''} ${lastName||''}"/></default-field>
             </field>
             <field name="amount"><default-field>
                 <display currency-unit-field="financialAccount.currencyUomId"/></default-field></field>

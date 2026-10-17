@@ -102,7 +102,7 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="description"/></entity-find>
         <entity-find entity-name="mantle.product.ProductIdentification" list="productIdentificationList">
             <econdition field-name="productId"/></entity-find>
-        <set field="productIdTypeEnumIds" from="productIdentificationList*.productIdTypeEnumId"/>
+        <set field="productIdTypeEnumIds" from="productIdentificationList.map(it => it.productIdTypeEnumId)"/>
 
         <entity-find entity-name="mantle.product.store.ProductStore" limit="200" cache="true" list="productStoreList">
             <order-by field-name="storeName"/></entity-find>
@@ -110,9 +110,9 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="description"/></entity-find>
         <entity-find entity-name="mantle.product.ProductOtherIdentification" list="productOtherIdentificationList">
             <econdition field-name="productId"/></entity-find>
-        <set field="productIdOtherTypeEnumIds" from="productOtherIdentificationList*.productIdTypeEnumId"/>
+        <set field="productIdOtherTypeEnumIds" from="productOtherIdentificationList.map(it => it.productIdTypeEnumId)"/>
 
-        <set field="isEquipment" from="product.assetTypeEnumId in ['AstTpEquipment', 'AstTpRental']"/>
+        <set field="isEquipment" from="['AstTpEquipment', 'AstTpRental'].includes(product.assetTypeEnumId)"/>
         <set field="isInventory" from="product.assetTypeEnumId == 'AstTpInventory'"/>
     </actions>
     <widgets>
@@ -144,7 +144,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="submitButton"><default-field title="Clone"><submit/></default-field></field>
                 </form-single>
             </container-dialog>
-            <link url="findAssetSummary" text="Find Assets" parameter-map="[productId:productId]"/>
+            <link url="findAssetSummary" text="Find Assets" parameter-map="{productId:productId}"/>
 
             <form-single name="EditProductForm" map="product" transition="updateProduct">
                 <field name="productId"><default-field><hidden/></default-field></field>
@@ -161,11 +161,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#enumDropDown">
                         <set field="enumTypeId" value="ProductClass"/><set field="allowEmpty" value="true"/></widget-template-include>
                 </default-field></field>
-                <field name="assetTypeEnumId"><conditional-field title="Asset Type" condition="productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly']">
+                <field name="assetTypeEnumId"><conditional-field title="Asset Type" condition="['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'].includes(productTypeEnumId)">
                     <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#enumDropDown">
                         <set field="enumTypeId" value="AssetType"/><set field="allowEmpty" value="true"/></widget-template-include>
                 </conditional-field></field>
-                <field name="assetClassEnumId"><conditional-field title="Asset Class" condition="productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly']">
+                <field name="assetClassEnumId"><conditional-field title="Asset Class" condition="['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'].includes(productTypeEnumId)">
                     <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#enumDropDown">
                         <set field="enumTypeId" value="AssetClass"/><set field="allowEmpty" value="true"/></widget-template-include>
                 </conditional-field></field>
@@ -245,7 +245,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <form-single name="AddIdentificationForm" transition="createProductIdentification">
                         <field name="productId"><default-field><hidden/></default-field></field>
                         <field name="productIdTypeEnumId"><default-field title="ID Type">
-                            <drop-down><list-options list="productIdentificationTypeList.findAll{!productIdTypeEnumIds.contains(it.enumId)}" key="${enumId}" text="${description}"/></drop-down>
+                            <drop-down><list-options list="productIdentificationTypeList.filter(it => !productIdTypeEnumIds.includes(it.enumId))" key="${enumId}" text="${description}"/></drop-down>
                         </default-field></field>
                         <field name="idValue"><default-field><text-line size="20"/></default-field></field>
                         <field name="submitButton"><default-field title="Add"><submit/></default-field></field>
@@ -268,7 +268,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="productId"><default-field><hidden/></default-field></field>
                     <field name="productName" from="product?.productName"><default-field><hidden/></default-field></field>
                     <field name="submitButton"><conditional-field title="Generate Url Slug" tooltip="Generate Url Slug from the Product's Name"
-                        condition="productOtherIdentificationList?.findAll{it.productIdTypeEnumId == 'PidtUrlSlug' }?.size() == 0">
+                        condition="!productOtherIdentificationList?.some(it => it.productIdTypeEnumId == 'PidtUrlSlug')">
                         <submit/></conditional-field></field></form-single>
                 <container-dialog id="AddOtherIdentificationDialog" button-text="Add Other Identification">
                     <form-single name="AddOtherIdentificationForm" transition="createProductOtherIdentification">
@@ -374,7 +374,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <field name="removeButton"><default-field title="">
                         <link url="updateProductFeatureAppl" icon="fa fa-trash" btn-type="danger" confirmation="Remove this feature?"
-                                parameter-map="[productId:productId, productFeatureId:productFeatureId, fromDate:fromDate, thruDate:ec.user.nowTimestamp]"/>
+                                parameter-map="{productId:productId, productFeatureId:productFeatureId, fromDate:fromDate, thruDate:ec.user.nowTimestamp}"/>
                     </default-field></field>
                     <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                 </form-list>
@@ -417,7 +417,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </default-field></field>
                     <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                     <field name="deleteButton"><default-field title=""><link url="deleteProductDimension" confirmation="Remove dimension?"
-                            icon="fa fa-trash" btn-type="danger" parameter-map="[productId:productId, dimensionTypeId:dimensionTypeId]"/></default-field></field>
+                            icon="fa fa-trash" btn-type="danger" parameter-map="{productId:productId, dimensionTypeId:dimensionTypeId}"/></default-field></field>
                 </form-list>
             </box-body-nopad></container-box>
 
@@ -458,7 +458,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </default-field></field>
                     <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                     <field name="deleteButton"><default-field title=""><link url="deleteProductUomDimension" confirmation="Remove dimension?"
-                            icon="fa fa-trash" btn-type="danger" parameter-map="[productId:productId, productUomDimensionId:productUomDimensionId]"/></default-field></field>
+                            icon="fa fa-trash" btn-type="danger" parameter-map="{productId:productId, productUomDimensionId:productUomDimensionId}"/></default-field></field>
                 </form-list>
             </box-body-nopad></container-box>
 
@@ -507,7 +507,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                         <field name="deleteButton"><default-field title=""><link url="deleteProductLocation" confirmation="Remove location?"
-                                icon="fa fa-trash" btn-type="danger" parameter-map="[productId:productId, facilityId:facilityId, locationSeqId:locationSeqId]"/></default-field></field>
+                                icon="fa fa-trash" btn-type="danger" parameter-map="{productId:productId, facilityId:facilityId, locationSeqId:locationSeqId}"/></default-field></field>
                     </form-list>
                 </box-body-nopad></container-box>
             </widgets></section>
@@ -561,7 +561,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                         <field name="deleteButton"><default-field title=""><link url="deleteProductMeter" confirmation="Remove meter?"
-                                icon="fa fa-trash" btn-type="danger" parameter-map="[productMeterId:productMeterId]"/></default-field></field>
+                                icon="fa fa-trash" btn-type="danger" parameter-map="{productMeterId:productMeterId}"/></default-field></field>
                     </form-list>
                 </box-body-nopad></container-box>
             </widgets></section>
@@ -634,7 +634,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                     <field name="deleteButton"><default-field title=""><link url="deleteProductMaintenance" confirmation="Remove scheduled maintenance?"
-                            icon="fa fa-trash" btn-type="danger" parameter-map="[productMaintenanceId:productMaintenanceId]"/></default-field></field>
+                            icon="fa fa-trash" btn-type="danger" parameter-map="{productMaintenanceId:productMaintenanceId}"/></default-field></field>
                 </form-list>
             </box-body-nopad></container-box>
         </widgets></section>

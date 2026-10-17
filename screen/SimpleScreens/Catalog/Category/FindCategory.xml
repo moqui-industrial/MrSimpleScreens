@@ -78,7 +78,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-options>
                 </drop-down></header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                        link-type="anchor" parameter-map="[partyId:ownerPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:ownerPartyId}"/></default-field>
             </field>
 
             <field name="submitButton"><header-field title="Find"><submit/></header-field>

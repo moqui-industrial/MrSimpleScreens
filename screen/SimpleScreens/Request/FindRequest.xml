@@ -28,14 +28,14 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
 
     <actions>
-        <set field="partyId" from="partyId ?: findPartyId"/>
+        <set field="partyId" from="partyId || findPartyId"/>
     </actions>
     <widgets>
         <container-dialog id="NewRequestContainer" button-text="New Request">
             <form-single name="NewRequestForm" transition="createRequest">
                 <field name="customerPartyId"><default-field title="Customer">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Customer']"/></drop-down>
+                            parameter-map="{roleTypeId:'Customer'}"/></drop-down>
                 </default-field></field>
                 <field name="productStoreId"><default-field title="Store">
                     <drop-down allow-empty="true">
@@ -104,8 +104,8 @@ along with this software (see the LICENSE.md file). If not, see
             <row-actions>
                 <entity-find entity-name="mantle.request.RequestParty" list="partyList">
                     <date-filter/><econdition field-name="requestId"/></entity-find>
-                <set field="customerRp" from="partyList.find({ it.roleTypeId == 'Customer' })"/>
-                <set field="assigneeRp" from="partyList.find({ it.roleTypeId == 'Assignee' })"/>
+                <set field="customerRp" from="partyList.find(it => it.roleTypeId == 'Customer')"/>
+                <set field="assigneeRp" from="partyList.find(it => it.roleTypeId == 'Assignee')"/>
             </row-actions>
             <!-- called findPartyId instead of partyId so form-list.entity-find doesn't automatically select partyId
                 (don't want unless querying by partyId to avoid duplicate records from the RequestParty join) -->

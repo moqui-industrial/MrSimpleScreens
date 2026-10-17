@@ -23,7 +23,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort">
                 <field-map field-name="workEffortId" from="term"/></entity-find-one>
             <if condition="workEffort != null">
-                <script>outList.add([value:workEffort.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", workEffort)])</script>
+                <script>outList.push({value:workEffort.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", workEffort)})</script>
             </if>
 
             <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="projectList" limit="50">
@@ -39,8 +39,8 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
 
             <script>
-                for (def project in projectList)
-                    outList.add([value:project.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", project)])
+                for (const project of projectList)
+                    outList.push({value:project.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", project)})
                 ec.web.sendJsonResponse(outList)
             </script>
         </actions>
@@ -55,7 +55,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort">
                 <field-map field-name="workEffortId" from="term"/></entity-find-one>
             <if condition="workEffort != null">
-                <script>outList.add([value:workEffort.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", workEffort)])</script>
+                <script>outList.push({value:workEffort.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", workEffort)})</script>
             </if>
 
             <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="projectList" limit="50">
@@ -75,8 +75,8 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
 
             <script>
-                for (def project in projectList)
-                    outList.add([value:project.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", project)])
+                for (const project of projectList)
+                    outList.push({value:project.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", project)})
                 ec.web.sendJsonResponse(outList)
             </script>
         </actions>
@@ -84,7 +84,7 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
     <transition name="getProjectParties">
         <service-call name="mantle.work.ProjectServices.get#ProjectParties" out-map="context"
-                in-map="[rootWorkEffortId:workEffortId, addOptional:'false']" web-send-json-response="resultList"/>
+                in-map="{rootWorkEffortId:workEffortId, addOptional:'false'}" web-send-json-response="resultList"/>
         <default-response type="none"/>
     </transition>
     <transition name="getProjectMilestones">
@@ -99,8 +99,8 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="indexName"/>
         <parameter name="documentType"/>
         <actions>
-            <set field="indexName" from="searchIndexName ?: 'mantle'"/>
-            <set field="documentType" from="searchTaskDocType ?: 'MantleTask'"/>
+            <set field="indexName" from="searchIndexName || 'mantle'"/>
+            <set field="documentType" from="searchTaskDocType || 'MantleTask'"/>
             <!-- <log message="====== getTaskList indexName=${indexName}, documentType=${documentType}, term=${term}, rootWorkEffortId=${rootWorkEffortId}"/> -->
 
             <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort">
@@ -108,23 +108,19 @@ along with this software (see the LICENSE.md file). If not, see
 
             <if condition="workEffort"><then>
                 <script>
-                    def outList = [[value:workEffort.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", workEffort)]]
-                    ec.web.sendJsonResponse(outList)
+                    ec.web.sendJsonResponse([{value:workEffort.workEffortId, label:ec.resource.expand("WorkEffortNameTemplate", "", workEffort)}])
                 </script>
             </then><else>
                 <script><![CDATA[
-                    StringBuilder termSb = new StringBuilder()
-                    termSb.append(term).append('*')
-                    if (rootWorkEffortId) termSb.append(' AND project:').append(rootWorkEffortId)
-                    if (assignedPartyId) termSb.append(' AND parties.partyId:').append(assignedPartyId)
+                    termText = term + '*'
+                    if (rootWorkEffortId) termText += ' AND project:' + rootWorkEffortId
+                    if (assignedPartyId) termText += ' AND parties.partyId:' + assignedPartyId
                     ]]></script>
                 <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
-                        in-map="[queryString:termSb.toString(), indexName:indexName, documentType:documentType]"/>
+                        in-map="{queryString:termText, indexName:indexName, documentType:documentType}"/>
                 <script>
-                    def outList = []
-                    for (def document in documentList)
-                        outList.add([value:document._id, label:ec.resource.expand("WorkEffortNameTemplate", "", [workEffortName:document.name,workEffortId:document._id])])
-                    ec.web.sendJsonResponse(outList)
+                    ec.web.sendJsonResponse((documentList ?? []).map(document => ({value:document._id,
+                        label:ec.resource.expand("WorkEffortNameTemplate", "", {workEffortName:document.name, workEffortId:document._id})})))
                 </script>
             </else></if>
         </actions>
@@ -138,12 +134,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <date-filter/><econdition field-name="workEffortId"/>
                 <econdition field-name="roleTypeId" operator="in" value="Customer,CustomerBillTo"/>
             </entity-find>
-            <set field="billToWep" from="billToList ? billToList[0] : null"/>
+            <set field="billToWep" from="billToList?.length ? billToList[0] : null"/>
             <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="billFromList">
                 <date-filter/><econdition field-name="workEffortId"/>
                 <econdition field-name="roleTypeId" operator="in" value="Vendor,VendorBillFrom"/>
             </entity-find>
-            <set field="billFromWep" from="billFromList ? billFromList[0] : null"/>
+            <set field="billFromWep" from="billFromList?.length ? billFromList[0] : null"/>
 
             <entity-find entity-name="mantle.account.invoice.Invoice" list="invoiceList">
                 <econdition field-name="invoiceTypeEnumId" value="InvoiceSales"/>
@@ -151,9 +147,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="toPartyId" from="billToWep?.partyId" ignore-if-empty="true"/>
                 <econdition field-name="fromPartyId" from="billFromWep?.partyId" ignore-if-empty="true"/>
             </entity-find>
-            <set field="resultList" from="[[invoiceId:'', label:'New']]"/>
+            <set field="resultList" from="[{invoiceId:'', label:'New'}]"/>
             <iterate list="invoiceList" entry="invoice">
-                <script>resultList.add([invoiceId:invoice.invoiceId, label:"#${invoice.invoiceId}: ${invoice.invoiceDate}".toString()])</script>
+                <script>resultList.push({invoiceId:invoice.invoiceId, label:`#${invoice.invoiceId}: ${ec.l10n.format(invoice.invoiceDate, 'yyyy-MM-dd HH:mm:ss')}`})</script>
             </iterate>
             <script>ec.web.sendJsonResponse(resultList)</script>
         </actions>
@@ -169,7 +165,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="resultList" from="[]"/>
             <iterate list="invoiceList" entry="invoice">
-                <script>resultList.add([invoiceId:invoice.invoiceId, label:"#${invoice.invoiceId}: ${invoice.invoiceDate}".toString()])</script>
+                <script>resultList.push({invoiceId:invoice.invoiceId, label:`#${invoice.invoiceId}: ${ec.l10n.format(invoice.invoiceDate, 'yyyy-MM-dd HH:mm:ss')}`})</script>
             </iterate>
             <script>ec.web.sendJsonResponse(resultList)</script>
         </actions>

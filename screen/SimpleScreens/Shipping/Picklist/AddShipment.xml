@@ -32,22 +32,22 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
 
     <actions>
-        <set field="excludeOnPicklist" from="excludeOnPicklist ?: 'true'"/>
+        <set field="excludeOnPicklist" from="excludeOnPicklist || 'true'"/>
         <set field="includeOnPicklist" from="excludeOnPicklist == 'false'"/>
 
         <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
         <entity-find-related-one value-field="workEffort" relationship-name="mantle.facility.Facility" to-value-field="facility"/>
-        <set field="originFacilityId" from="originFacilityId != null ? originFacilityId : (facility?.parentFacilityId ?: facility?.facilityId)"/>
+        <set field="originFacilityId" from="originFacilityId != null ? originFacilityId : (facility?.parentFacilityId || facility?.facilityId)"/>
 
         <!-- hard override for fromPartyId if workEffort.ownerPartyId -->
         <if condition="workEffort.ownerPartyId"><set field="fromPartyId" from="workEffort.ownerPartyId"/></if>
         <!-- hard override for productStoreId if workEffort.productStoreId -->
         <if condition="workEffort.productStoreId"><set field="productStoreId" from="workEffort.productStoreId"/></if>
 
-        <set field="statusId" from="statusId ?: 'ShipInput,ShipScheduled,ShipPicked'"/>
+        <set field="statusId" from="statusId || 'ShipInput,ShipScheduled,ShipPicked'"/>
         <set field="statusId_op" value="in"/>
 
-        <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="shipmentTypeOut" in-map="[parentEnumId:'ShpTpOutgoing']"/>
+        <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="shipmentTypeOut" in-map="{parentEnumId:'ShpTpOutgoing'}"/>
     </actions>
     <widgets>
         <form-list name="AddShipmentList" list="shipmentList" transition="addShipmentToLoad" multi="true"
@@ -72,12 +72,12 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="shipmentId"/><select-field field-name="orderId"/></entity-find>
                 <!-- Orders -->
                 <entity-find entity-name="mantle.order.OrderHeader" list="orderHeaderList">
-                    <econdition field-name="orderId" operator="in" from="sisList*.orderId"/>
+                    <econdition field-name="orderId" operator="in" from="sisList.map(it => it.orderId)"/>
                     <select-field field-name="orderId,salesChannelEnumId"/>
                 </entity-find>
                 <!-- Order Other Parties -->
                 <entity-find entity-name="mantle.order.OrderPartPartyDetail" list="orderPartyList">
-                    <econdition field-name="orderId" operator="in" from="sisList*.orderId"/>
+                    <econdition field-name="orderId" operator="in" from="sisList.map(it => it.orderId)"/>
                     <select-field field-name="partyId,pseudoId,firstName,lastName,organizationName,description"/>
                 </entity-find>
                 <!-- Shipment Quantities - single value, could be optimized with sub-select -->
@@ -85,16 +85,16 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="shipmentId"/>
                     <select-field field-name="quantity,quantityNotHandled"/>
                 </entity-find>
-                <set field="quantityTotal" from="sisSummaryList.first()?.quantity ?: 0.0"/>
-                <set field="quantityNotHandled" from="sisSummaryList.first()?.quantityNotHandled ?: 0.0"/>
+                <set field="quantityTotal" from="sisSummaryList[0]?.quantity ?? 0"/>
+                <set field="quantityNotHandled" from="sisSummaryList[0]?.quantityNotHandled ?? 0"/>
                 <!-- Pick vs other location reservations - single value, could be optimized with sub-select -->
                 <entity-find entity-name="mantle.product.issuance.AssetAndReservationSummary" list="resPickLocList">
                     <econdition field-name="shipmentId"/>
                     <econdition field-name="locationTypeEnumId" value="FltPick"/>
                     <select-field field-name="quantity"/>
                 </entity-find>
-                <set field="resPickLocQuantity" from="resPickLocList.first()?.quantity ?: 0.0"/>
-                <set field="_rowSubmit" from="(resPickLocQuantity == quantityTotal) ? 'true' : 'false'"/>
+                <set field="resPickLocQuantity" from="resPickLocList[0]?.quantity ?? 0"/>
+                <set field="_rowSubmit" from="(toDecimal(resPickLocQuantity ?? 0).compare(quantityTotal ?? 0) == 0) ? 'true' : 'false'"/>
             </row-actions>
 
             <hidden-parameters><parameter name="workEffortId"/></hidden-parameters>
@@ -111,7 +111,7 @@ along with this software (see the LICENSE.md file). If not, see
             </header-field></field>
             <field name="shipmentMethodSequenceNum">
                 <header-field title="Ship Method" show-order-by="true"/>
-                <default-field><display text="${shipmentMethodSequenceNum != null ? shipmentMethodSequenceNum + ' - ' : ''}${shipMethEnum?.description ?: ''}"/></default-field>
+                <default-field><display text="${shipmentMethodSequenceNum != null ? shipmentMethodSequenceNum + ' - ' : ''}${shipMethEnum?.description || ''}"/></default-field>
             </field>
             <field name="shipmentId">
                 <header-field title="Shipment" show-order-by="case-insensitive"><text-find size="10" hide-options="true"/></header-field>
@@ -138,7 +138,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="Picklist" show-order-by="true"><text-find size="15" hide-options="true"/></header-field>
                 <default-field><link url="picklistDetail" text="${shipWorkEffortId}" link-type="anchor"
                         style="${workEffortId == shipWorkEffortId ? 'text-success' : 'text-danger'}"
-                        parameter-map="[workEffortId:shipWorkEffortId]" condition="shipWorkEffortId"/></default-field>
+                        parameter-map="{workEffortId:shipWorkEffortId}" condition="shipWorkEffortId"/></default-field>
             </field>
             <field name="excludeOnPicklist"><header-field title="Exclude On Picklist">
                 <radio><option key="true" text="Yes"/><option key="false" text="No"/></radio>
@@ -149,7 +149,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"/></drop-down>
                 </header-field>
                 <default-field><link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate"
-                        link-type="anchor" parameter-map="[facilityId:originFacilityId]"/></default-field>
+                        link-type="anchor" parameter-map="{facilityId:originFacilityId}"/></default-field>
             </field>
             <field name="productStoreId">
                 <header-field title="Store">
@@ -162,10 +162,10 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="fromPartyId">
                 <header-field title="From Party">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                            parameter-map="[roleTypeId:'Supplier,Vendor,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Supplier,Vendor,OrgInternal'}"/></drop-down>
                 </header-field>
                 <default-field><link url="editSupplier" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                        link-type="anchor" parameter-map="[partyId:vendorPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:vendorPartyId}"/></default-field>
             </field>
 
             <field name="toPartyId">
@@ -174,8 +174,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </header-field>
                 <default-field>
                     <link url="editCustomer" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                            link-type="anchor" parameter-map="[partyId:toPartyId]"/>
-                    <label text=" - ${custPcaaList*.description.join(', ')}" condition="custPcaaList"/>
+                            link-type="anchor" parameter-map="{partyId:toPartyId}"/>
+                    <label text=" - ${custPcaaList.map(it => it.description).join(', ')}" condition="(custPcaaList?.length > 0)"/>
                 </default-field>
             </field>
             <field name="customerClassificationId"><header-field title="Customer Class">
@@ -199,8 +199,8 @@ along with this software (see the LICENSE.md file). If not, see
             </header-field></field>
             <field name="orderParties"><default-field>
                 <section-iterate name="OtherPartyListSection" list="orderPartyList" entry="partParty"><widgets><container>
-                    <link url="editParty" link-type="anchor" text="${ec.resource.expand('PartyNameTemplate','',partParty)} - ${partParty.description?:'N/A'}"
-                            parameter-map="[partyId:partParty.partyId]"/>
+                    <link url="editParty" link-type="anchor" text="${ec.resource.expand('PartyNameTemplate','',partParty)} - ${partParty.description||'N/A'}"
+                            parameter-map="{partyId:partParty.partyId}"/>
                 </container></widgets></section-iterate>
             </default-field></field>
 
@@ -213,8 +213,8 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="orderIds"><default-field title="Orders">
                 <section-iterate name="OrderSisList" list="orderHeaderList" entry="orderHeader"><widgets>
                     <link url="orderDetail" text="${orderHeader.orderId}" link-type="anchor" condition="orderHeader.orderId"
-                            parameter-map="[orderId:orderHeader.orderId]"/>
-                    <label text=" - ${orderHeader.salesChannel?.description?:''}" condition="orderHeader.salesChannelEnumId"/>
+                            parameter-map="{orderId:orderHeader.orderId}"/>
+                    <label text=" - ${orderHeader.salesChannel?.description||''}" condition="orderHeader.salesChannelEnumId"/>
                 </widgets></section-iterate>
             </default-field></field>
 
@@ -229,7 +229,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="quantityTotal" align="right">
                 <default-field title="Quantity Total"><display/></default-field></field>
             <field name="resPickLocQuantity" align="right">
-                <default-field title="Pick Loc Qty"><display style="text-strong ${(resPickLocQuantity == quantityTotal) ? 'text-success' : 'text-danger'}"/></default-field></field>
+                <default-field title="Pick Loc Qty"><display style="text-strong ${(toDecimal(resPickLocQuantity ?? 0).compare(quantityTotal ?? 0) == 0) ? 'text-success' : 'text-danger'}"/></default-field></field>
 
             <field name="submitButton">
                 <header-field title="Find"><submit/></header-field>

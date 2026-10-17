@@ -37,12 +37,12 @@ along with this software (see the LICENSE.md file). If not, see
             <box-header title="Runs"/>
             <box-toolbar>
                 <container-dialog id="NewRunContainer" button-text="New Production Run">
-                    <label text="Warehouse: ${warehouseFacility?.facilityName ?: ''}" condition="warehouseFacility" type="strong"/>
+                    <label text="Warehouse: ${warehouseFacility?.facilityName || ''}" condition="warehouseFacility" type="strong"/>
                     <form-single name="NewRunForm" transition="createProductionRun">
                         <field name="workEffortName"><default-field title="Name"><text-line size="60"/></default-field></field>
                         <field name="facilityId"><default-field title="WH/Line">
                             <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"
-                                    parameter-map="[facilityTypeEnumId:'FcTpLine,FcTpPlant,FcTpWarehouse', parentFacilityId:parentFacilityId]"/></drop-down>
+                                    parameter-map="{facilityTypeEnumId:'FcTpLine,FcTpPlant,FcTpWarehouse', parentFacilityId:parentFacilityId}"/></drop-down>
                         </default-field></field>
                         <field name="estimatedStartDate"><default-field title="Run Date"><date-time/></default-field></field>
                         <field name="estimatedWorkDuration"><default-field title="Est. Hours"><text-line size="8"/></default-field></field>
@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </field>
                     <field name="facilityId">
                         <header-field title="WH/Line" show-order-by="true"><drop-down allow-empty="true">
-                            <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="[facilityTypeEnumId:'FcTpLine,FcTpPlant,FcTpWarehouse']"/>
+                            <dynamic-options transition="getFacilityList" server-search="true" min-length="0" parameter-map="{facilityTypeEnumId:'FcTpLine,FcTpPlant,FcTpWarehouse'}"/>
                         </drop-down></header-field>
                         <default-field><link url="editFacility" text="FacilityNameTemplate" entity-name="mantle.facility.Facility" link-type="anchor"/></default-field>
                     </field>
@@ -101,7 +101,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <dynamic-options transition="getProductList" server-search="true" min-length="0"/></drop-down></header-field>
                         <default-field>
                             <section-iterate name="ProduceList" list="produceList" entry="product"><widgets>
-                                <link url="editProduct" text="${product.pseudoId}" link-type="anchor" parameter-map="[productId:product.productId]"/>
+                                <link url="editProduct" text="${product.pseudoId}" link-type="anchor" parameter-map="{productId:product.productId}"/>
                                 <label text="${product.productName}" type="p" style="no-margin"/>
                                 <label text="${ec.l10n.format(product.estimatedQuantity, null)} ${ec.resource.expand('ProductAmountNameTemplate', '', product)}" type="p"/>
                             </widgets></section-iterate>
@@ -112,7 +112,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <dynamic-options transition="getProductList" server-search="true" min-length="0"/></drop-down></header-field>
                         <default-field>
                             <section-iterate name="ConsumeList" list="consumeList" entry="product"><widgets>
-                                <link url="editProduct" text="${product.pseudoId}" link-type="anchor" parameter-map="[productId:product.productId]"/>
+                                <link url="editProduct" text="${product.pseudoId}" link-type="anchor" parameter-map="{productId:product.productId}"/>
                                 <label text="${product.productName}" type="p" style="no-margin"/>
                                 <label text="${ec.l10n.format(product.estimatedQuantity, null)} ${ec.resource.expand('ProductAmountNameTemplate', '', product)}" type="p"/>
                             </widgets></section-iterate>

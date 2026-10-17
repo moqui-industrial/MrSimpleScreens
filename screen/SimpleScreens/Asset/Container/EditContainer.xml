@@ -15,22 +15,22 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Container">
 
-    <parameter name="containerId" required="true" from="containerId ?: toContainerId"/>
+    <parameter name="containerId" required="true" from="containerId || toContainerId"/>
     <parameter name="toContainerId"/>
 
     <transition name="updateContainer"><service-call name="update#mantle.product.asset.Container"/>
         <default-response url="."/></transition>
     <transition name="addAssetToContainer">
-        <service-call name="update#mantle.product.asset.Asset" in-map="[assetId:assetId, containerId:containerId]"/>
+        <service-call name="update#mantle.product.asset.Asset" in-map="{assetId:assetId, containerId:containerId}"/>
         <default-response url="."/>
     </transition>
     <transition name="removeAssetFromContainer">
-        <service-call name="update#mantle.product.asset.Asset" in-map="[assetId:assetId, containerId:null]"/>
+        <service-call name="update#mantle.product.asset.Asset" in-map="{assetId:assetId, containerId:null}"/>
         <default-response url="."/>
     </transition>
 
     <transition name="pickMoveProductToContainer">
-        <service-call name="mantle.shipment.ShipmentServices.pickMove#ProductToContainer" in-map="context + [containerId:null]"/>
+        <service-call name="mantle.shipment.ShipmentServices.pickMove#ProductToContainer" in-map="Object.assign({}, context, {containerId:null})"/>
         <default-response url="."/>
     </transition>
 
@@ -54,7 +54,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <order-by field-name="shipmentId"/>
                 </entity-find>
             </actions><widgets>
-                <container-dialog id="PickScanDialog" button-text="Pick &amp; Move to Container" condition="shipmentList">
+                <container-dialog id="PickScanDialog" button-text="Pick &amp; Move to Container" condition="(shipmentList?.length > 0)">
                     <form-single name="PickScanForm" transition="pickMoveProductToContainer">
                         <field name="toContainerId" from="containerId"><default-field><hidden/></default-field></field>
                         <field name="quantity" from="1"><default-field><text-line size="4"/></default-field></field>
@@ -63,7 +63,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="shipmentId"><default-field title="Shipment">
                             <drop-down allow-empty="true"><list-options list="shipmentList" key="${shipmentId}" text="${shipmentId}"/></drop-down>
                         </default-field></field>
-                        <field name="pickButton"><default-field title=""><submit text="Pick${pickContainer ? ' and Move to Container ' + (pickContainer.serialNumber ?: pickContainer.containerId) : ''}"/></default-field></field>
+                        <field name="pickButton"><default-field title=""><submit text="Pick${pickContainer ? ' and Move to Container ' + (pickContainer.serialNumber || pickContainer.containerId) : ''}"/></default-field></field>
                     </form-single>
                 </container-dialog>
             </widgets></section>
@@ -97,7 +97,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="containerId"><default-field><hidden/></default-field></field>
                         <field name="assetId"><default-field title="Asset">
                             <drop-down allow-empty="true"><dynamic-options transition="getAssetList" server-search="true"
-                                    min-length="0" parameter-map="[excludeZeroQoh:'true']"/></drop-down>
+                                    min-length="0" parameter-map="{excludeZeroQoh:'true'}"/></drop-down>
                         </default-field></field>
                         <field name="submitButton"><default-field title="Add"><submit/></default-field></field>
                     </form-single>
@@ -115,7 +115,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="quantityOnHandTotal"><default-field title="QOH"><display/></default-field></field>
                     <field name="product"><default-field><link url="editProduct" text="ProductNameTemplate" link-type="anchor"/></default-field></field>
                     <field name="removeLink" align="right"><default-field title="">
-                        <link url="removeAssetFromContainer" icon="fa fa-trash" parameter-map="[assetId:assetId, containerId:containerId]"/>
+                        <link url="removeAssetFromContainer" icon="fa fa-trash" parameter-map="{assetId:assetId, containerId:containerId}"/>
                     </default-field></field>
                 </form-list>
             </box-body></container-box>

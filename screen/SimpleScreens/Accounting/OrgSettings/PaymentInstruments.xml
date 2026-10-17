@@ -39,8 +39,8 @@ along with this software (see the LICENSE.md file). If not, see
             <row-actions>
                 <filter-map-list list="allConfigList" to-list="configList">
                     <field-map field-name="paymentInstrumentEnumId" from="typeEnum.enumId"/></filter-map-list>
-                <set field="configItem" from="configList?.getAt(0)"/>
-                <script>if (configItem) context.putAll(configItem)</script>
+                <set field="configItem" from="configList?.[0]"/>
+                <script>if (configItem) ec.context.putAll(configItem)</script>
             </row-actions>
 
             <field name="partyId"><default-field><hidden/></default-field></field>

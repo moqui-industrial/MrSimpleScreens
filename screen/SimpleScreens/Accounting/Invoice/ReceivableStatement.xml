@@ -26,7 +26,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <render-mode>
-            <text type="xsl-fo" location="component://SimpleScreens/template/account/ReceivableStatement.xsl-fo.ftl"
+            <text type="html-print" location="component://SimpleScreens/template/account/ReceivableStatement.print.html.fancy"
                     template="true" encode="false" no-boundary-comment="true"/>
         </render-mode>
     </widgets>

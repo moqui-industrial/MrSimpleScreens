@@ -23,7 +23,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="mantle.facility.Facility" value-field="facility">
                 <field-map field-name="facilityId" from="term"/></entity-find-one>
             <if condition="facility != null">
-                <script>ec.web.sendJsonResponse([[value:facility.facilityId, label:"${ec.resource.expand('FacilityNameTemplate','',facility)}".toString()]])</script>
+                <script>ec.web.sendJsonResponse([{value:facility.facilityId, label:`${ec.resource.expand('FacilityNameTemplate','',facility)}`.toString()}])</script>
                 <return/>
             </if>
             <entity-find entity-name="mantle.facility.Facility" list="facilityList" limit="20">
@@ -38,9 +38,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="pseudoId,facilityName"/>
             </entity-find>
             <script>
-                def outList = []
-                for (def facility in facilityList)
-                    outList.add([value:facility.facilityId, label:"${ec.resource.expand('FacilityNameTemplate','',facility)}".toString()])
+                const outList = []
+                for (const facility of facilityList)
+                    outList.push({value:facility.facilityId, label:`${ec.resource.expand('FacilityNameTemplate','',facility)}`.toString()})
                 ec.web.sendJsonResponse(outList)
             </script>
         </actions>
@@ -65,14 +65,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="areaId,aisleId,sectionId,levelId,positionId,description"/>
             </entity-find>
             <script>
-                def outList = []
-                for (def facLoc in locList) {
+                const outList = []
+                for (let facLoc of locList) {
                     if (facLoc.locationTypeEnumId) {
-                        def locType = facLoc.type
-                        facLoc = facLoc.getMap()
-                        facLoc.put("type", locType)
+                        const locType = facLoc.type
+                        facLoc = Object.assign({}, facLoc, {type: locType})
                     }
-                    outList.add([value:facLoc.locationSeqId, label:ec.resource.expand('FacilityLocationNameTemplate','',facLoc?:[:])])
+                    outList.push({value:facLoc.locationSeqId, label:ec.resource.expand('FacilityLocationNameTemplate','',facLoc||{})})
                 }
                 ec.web.sendJsonResponse(outList)
             </script>
@@ -105,9 +104,9 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
             </else></if>
             <script>
-                def outList = []
-                for (def container in containerList)
-                    outList.add([value:container.containerId, label:ec.resource.expand('ContainerNameTemplate','',container?:[:])])
+                const outList = []
+                for (const container of containerList)
+                    outList.push({value:container.containerId, label:ec.resource.expand('ContainerNameTemplate','',container||{})})
                 ec.web.sendJsonResponse(outList)
             </script>
         </actions>

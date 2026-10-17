@@ -29,11 +29,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="workEffortName"><default-field title="Project Name"><text-line/></default-field></field>
                 <field name="clientPartyId"><default-field title="Client">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                            parameter-map="[roleTypeId:'Customer,CustomerBillTo,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Customer,CustomerBillTo,OrgInternal'}"/></drop-down>
                 </default-field></field>
                 <field name="vendorPartyId"><default-field title="Vendor">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="0"
-                            parameter-map="[roleTypeId:'Vendor,VendorBillFrom,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Vendor,VendorBillFrom,OrgInternal'}"/></drop-down>
                 </default-field></field>
                 <field name="purposeEnumId"><default-field title="Purpose">
                     <drop-down allow-empty="true">

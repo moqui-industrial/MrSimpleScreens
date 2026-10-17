@@ -48,7 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <label text="${childCe.body}" type="pre" encode="false"/>
 
                     <!-- any nested child comments? -->
-                    <section name="ChildNestedComments" condition="childFilteredCeList">
+                    <section name="ChildNestedComments" condition="childFilteredCeList?.length">
                         <actions><set field="currentCe" from="childCe"/></actions>
                         <widgets><include-screen location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest/RequestCommentNested.xml"/></widgets>
                     </section>

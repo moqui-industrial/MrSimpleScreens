@@ -18,16 +18,16 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="paymentIds" required="true"/>
 
     <actions>
-        <set field="paymentIdList" from="paymentIds instanceof List ? paymentIds : paymentIds.split(',') as List"/>
+        <set field="paymentIdList" from="typeof paymentIds === 'string' ? paymentIds.split(',') : Array.from(paymentIds)"/>
         <service-call name="mantle.account.PaymentServices.get#PaymentCheckInfo" out-map="context"
-                in-map="[paymentIdList:paymentIdList, templateSettingSuffix:'TemplatePaymentCheck']"/>
+                in-map="{paymentIdList:paymentIdList, templateSettingSuffix:'TemplatePaymentCheck'}"/>
 
         <if condition="!templateLocation">
             <set field="templateLocation" value="component://SimpleScreens/template/account/PaymentCheck.xsl-fo.ftl"/></if>
     </actions>
     <widgets>
         <render-mode>
-            <text type="xsl-fo" location="${templateLocation}" template="true" encode="false" no-boundary-comment="true"/>
+            <text type="html-print" location="${templateLocation.startsWith('component://SimpleScreens/') &amp;&amp; templateLocation.endsWith('.xsl-fo.ftl') ? templateLocation.slice(0, -11) + '.print.html.fancy' : templateLocation}" template="true" encode="false" no-boundary-comment="true"/>
         </render-mode>
     </widgets>
 </screen>

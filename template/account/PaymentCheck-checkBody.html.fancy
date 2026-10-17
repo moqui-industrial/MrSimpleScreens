@@ -1,0 +1,89 @@
+<#-- Shared print fragment, extracted from PaymentCheck.print.html.fancy. -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#assign checkPosition = (checkPosition ?? "top")>
+<#assign topHeight = (topHeight ?? 3.5)>
+<#assign middleHeight = (middleHeight ?? 3.5)>
+<#assign bottomHeight = (bottomHeight ?? 4)>
+<#assign separatePayToLine = (separatePayToLine ?? true)>
+<#assign checkNumber = (checkNumber ?? false)>
+<#assign secondarySignature = (secondarySignature ?? false)>
+<#assign stubLines = (stubLines ?? false)>
+<#assign fontSize = "10pt">
+<#assign amountCharacters = 15>
+<#assign amountWordsCharacters = 84>
+<#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
+<#assign cellPadding = "1pt">
+<#assign tableFontSize = (tableFontSize ?? "9pt")>
+<#assign detailTableFontSize = (detailTableFontSize ?? "8pt")>
+
+    <#-- Check number, if populated -->
+    <#if has(checkNumber) && has(paymentInfo?.payment?.paymentRefNum)>
+    <div style="position:absolute;top:0.25in;right:0.5in;width:1.5in">
+        <div style="text-align:right;font-size:12pt;font-family:Courier, monospace">${(paymentInfo.payment.paymentRefNum ?? " ")}</div>
+    </div>
+    </#if>
+
+    <#-- Date -->
+    <div style="position:absolute;top:0.85in;right:0.6in;width:1in">
+        <div style="text-align:right">${ec.l10n.format(paymentInfo.payment.effectiveDate, dateFormat)}</div>
+    </div>
+
+    <#-- Pay to line -->
+    <#if separatePayToLine>
+    <div style="position:absolute;top:1.35in;left:1.1in">
+        <div style="text-align:left">${(paymentInfo?.toPartyDetail?.organizationName ?? "")}${(paymentInfo?.toPartyDetail?.firstName ?? "")} ${(paymentInfo?.toPartyDetail?.lastName ?? "")}</div>
+    </div>
+    </#if>
+
+    <#-- Amount - numeric -->
+    <div style="position:absolute;top:1.35in;right:0.35in;width:1.3in">
+        <#-- 1.2in seems to fit 14 Courier characters at 10pt just right -->
+        <#assign amountString = ec.l10n.format(paymentInfo.payment.amount, "#,##0.00")>
+        <#assign asterisks = amountCharacters - amountString.length>
+        <div style="text-align:right;font-family:Courier, monospace">${"*".repeat(Math.max(0, asterisks))}${amountString}</div>
+    </div>
+
+    <#-- Amount - text -->
+    <div style="position:absolute;top:1.65in;left:0.3in">
+        <#assign asterisks = amountWordsCharacters - paymentInfo.amountWords.length>
+        <div style="text-align:left;font-family:Courier, monospace">${paymentInfo.amountWords}${"*".repeat(Math.max(0, asterisks))}</div>
+    </div>
+
+    <#-- Mailing name and address -->
+    <div style="position:absolute;top:2in;left:1.1in;width:4in;height:0.8in">
+        <#assign contactInfo = paymentInfo.toBillingContactInfo>
+        <#if has(contactInfo?.postalAddress?.toName) || has(contactInfo?.postalAddress?.attnName)>
+            <#if has(contactInfo?.postalAddress?.toName)><div style="text-align:left">${contactInfo.postalAddress.toName}</div></#if>
+            <#if has(contactInfo?.postalAddress?.attnName)><div style="text-align:left">Attn: ${contactInfo.postalAddress.attnName}</div></#if>
+        <#else>
+            <div style="text-align:left">${(paymentInfo?.toPartyDetail?.organizationName ?? "")}${(paymentInfo?.toPartyDetail?.firstName ?? "")} ${(paymentInfo?.toPartyDetail?.lastName ?? "")}</div>
+        </#if>
+        <#if has(contactInfo?.postalAddress?.address1)><div style="text-align:left">${contactInfo.postalAddress.address1}<#if has(contactInfo?.postalAddress?.unitNumber)> #${contactInfo.postalAddress.unitNumber}</#if></div></#if>
+        <#if has(contactInfo?.postalAddress?.address2)><div style="text-align:left">${contactInfo.postalAddress.address2}</div></#if>
+        <#if has(contactInfo?.postalAddress)><div style="text-align:left">${((contactInfo.postalAddress.city ?? ""))}<#if has(contactInfo?.postalAddressStateGeo?.geoCodeAlpha2)>, ${contactInfo.postalAddressStateGeo.geoCodeAlpha2} </#if>${(contactInfo.postalAddress.postalCode ?? '')}<#if has(contactInfo?.postalAddress?.postalCodeExt)>-${contactInfo.postalAddress.postalCodeExt}</#if><#if has(contactInfo?.postalAddressCountryGeo?.geoCodeAlpha3)> ${contactInfo.postalAddressCountryGeo.geoCodeAlpha3}</#if></div></#if>
+        <#-- <#if has(contactInfo?.telecomNumber)><div style="text-align:left"><#if has(contactInfo?.telecomNumber?.countryCode)>${contactInfo.telecomNumber.countryCode}-</#if><#if has(contactInfo?.telecomNumber?.areaCode)>${contactInfo.telecomNumber.areaCode}-</#if>${(contactInfo.telecomNumber.contactNumber ?? '')}</div></#if> -->
+        <#-- <#if has(contactInfo?.emailAddress)><div style="text-align:left">${contactInfo.emailAddress}</div></#if> -->
+    </div>
+
+    <#-- Memo -->
+    <div style="position:absolute;top:2.75in;left:0.8in;width:4in">
+        <div style="text-align:left">${((paymentInfo.payment.memo ?? " "))}</div>
+    </div>
+
+    <#-- Primary Signature image -->
+    <#if has(paymentInfo?.paymentSignaturePrimaryLocation)>
+    <div style="position:absolute;bottom:0.65in;right:1in;width:2in;height:0.4in">
+        <div style="text-align:center;vertical-align:bottom">
+            <img src="${paymentInfo.paymentSignaturePrimaryLocation}" style="height:0.33in;object-fit:contain">
+        </div>
+    </div>
+    </#if>
+    <#-- Secondary Signature image -->
+    <#if secondarySignature && has(paymentInfo?.paymentSignatureSecondaryLocation)>
+    <div style="position:absolute;bottom:0.3in;right:1in;width:2in;height:0.4in">
+        <div style="text-align:center;vertical-align:bottom">
+            <img src="${paymentInfo.paymentSignatureSecondaryLocation}" style="height:0.33in;object-fit:contain">
+        </div>
+    </div>
+    </#if>
+

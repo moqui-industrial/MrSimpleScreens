@@ -22,9 +22,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
 
     <actions>
-        <set field="invoiceType" from="invoiceType ?: 'Receivable'"/>
-        <if condition="'payable'.equalsIgnoreCase(invoiceType)"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
-            <else-if condition="'receivable'.equalsIgnoreCase(invoiceType)"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
+        <set field="invoiceType" from="invoiceType || 'Receivable'"/>
+        <if condition="invoiceType?.toLowerCase() === 'payable'"><then><set field="toRoleTypeId" value="OrgInternal"/></then>
+            <else-if condition="invoiceType?.toLowerCase() === 'receivable'"><set field="fromRoleTypeId" value="OrgInternal"/></else-if></if>
     </actions>
     <widgets>
         <form-list name="InvoiceItemSummary" list="summaryList" skip-form="true" header-dialog="true"
@@ -47,13 +47,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="From"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><link url="editParty" text="PartyNameTemplate" entity-name="mantle.party.PartyDetail"
-                        link-type="anchor" parameter-map="[partyId:fromPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:fromPartyId}"/></default-field>
             </field>
             <field name="toPartyId">
                 <header-field title="To"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
                 <default-field><link url="editParty" text="PartyNameTemplate" entity-name="mantle.party.PartyDetail"
-                        link-type="anchor" parameter-map="[partyId:toPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:toPartyId}"/></default-field>
             </field>
 
             <field name="receivableStatuses"><header-field title="Receivable"><display text="In-Process, Finalized, Sent, Acknowledged, Payment Received"/></header-field></field>

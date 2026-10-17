@@ -33,17 +33,17 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getFacilityList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
 
     <actions>
-        <set field="excludeOnPicklist" from="excludeOnPicklist ?: 'true'"/>
-        <set field="excludeNotPickLoc" from="excludeNotPickLoc ?: 'true'"/>
+        <set field="excludeOnPicklist" from="excludeOnPicklist || 'true'"/>
+        <set field="excludeNotPickLoc" from="excludeNotPickLoc || 'true'"/>
 
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
             <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-        <set field="itemTypeEnumIdList" from="productItemTypeEgms*.enumId"/>
+        <set field="itemTypeEnumIdList" from="productItemTypeEgms.map(it => it.enumId)"/>
 
-        <set field="facilityId" from="facilityId ?: ec.user.getPreference('FacilityActive') ?: ec.user.getPreference('FacilityGeneralDefault')"/>
+        <set field="facilityId" from="facilityId || ec.user.getPreference('FacilityActive') || ec.user.getPreference('FacilityGeneralDefault')"/>
 
         <service-call name="mantle.work.ShipmentWorkServices.make#ShipmentLoadOrderConditions" out-map="context"
-                in-map="[excludeOnPicklist:excludeOnPicklist, inventoryCategoryId:inventoryCategoryId]"/>
+                in-map="{excludeOnPicklist:excludeOnPicklist, inventoryCategoryId:inventoryCategoryId}"/>
     </actions>
     <widgets>
         <label text="Use Find Options to search for orders and when you have the set you want use the form to create picklists." type="p"/>

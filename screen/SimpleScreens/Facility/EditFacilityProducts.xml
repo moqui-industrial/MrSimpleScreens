@@ -15,7 +15,7 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Products" default-menu-index="4">
 
-    <parameter name="facilityId" required="true" from="facilityId ?: facilityId_0"/>
+    <parameter name="facilityId" required="true" from="facilityId || facilityId_0"/>
 
     <transition name="createProductFacility"><service-call name="create#mantle.facility.ProductFacility"/>
         <default-response url="."/></transition>

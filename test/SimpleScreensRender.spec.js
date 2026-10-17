@@ -1,0 +1,138 @@
+// Port of PopCommerce's PopcAdminScreenTests.groovy, the test of these screens upstream (PopcAdmin mounts SimpleScreens):
+// no-required-parameter screens except the exclusions below, then real demo/flow-data renders. The root is
+// SimpleScreens.xml, so the paths are those under apps/PopcAdmin.
+let screens
+
+spec({
+    // the whole MantleUslSuite ran before PopcAdminScreenTests: orders 55400 and 55401, invoices 55100 and 55400,
+    // payment 55400, financial account 55700 and transaction 55700 come from these flows
+    dependsOn: ["AccountingActivities", "AssetReservationMultipleThreads", "OrderProcureToPayBasicFlow", "OrderToCashBasicFlow",
+        "OrderToCashTime", "ReturnToResponseBasicFlow", "WorkPlanToCashBasicFlow", "RestApiTests"],
+    tempSequences: { start: 63100, banks: { "mantle.order.OrderHeader": 10, "mantle.work.effort.WorkEffort": 10 } },
+    setupSpec() {
+        login("john.doe")
+        screens = ec.screen.makeTest().rootScreen("component://SimpleScreens/screen/SimpleScreens.xml")
+    },
+    cleanupSpec() {
+        log.info(`Rendered ${screens.renderCount} screens (${screens.errorCount} errors) in ${(Date.now() - screens.startTime) / 1000}s, output ${Math.round(screens.renderTotalChars / 1000)}k chars`)
+    },
+    setup() { ec.artifactExecution.disableAuthz() },
+    cleanup() { ec.artifactExecution.enableAuthz() },
+})
+
+feature("render Simple Screens with no required parameters", {
+    expect() {
+        // Wiki needs page/space fixtures; SalesSummary has a targeted data-backed render below.
+        const screensToSkip = ['wiki', 'ViewWikiPage', 'EditWikiPage', 'WikiCommentNested', 'WikiCommentReply', 'SalesSummary']
+        const failed = []
+        for (const screenPath of screens.getNoRequiredParameterPaths(screensToSkip)) {
+            const str = screens.render(screenPath, { lastStandalone: "-2" }, null)
+            log.info(`Rendered ${screenPath} in ${str.renderTime}ms, ${str.output?.length} characters`)
+            if (str.errorMessages.length || str.status != 200 || !str.output?.length)
+                failed.push(`${screenPath}: HTTP ${str.status}, ${str.errorMessages.join('; ')}`)
+        }
+        if (failed.length) log.warn(`Screens with errors (${failed.length}):\n${failed.join('\n')}`)
+
+        failed.length == 0
+    },
+})
+
+feature("party autocomplete resolves the requested demo party, not unrelated rows", {
+    where: [
+        { screenPath: "Customer/FindCustomer/searchPartyList", partyId: "CustJqp", name: "Joe" },
+        { screenPath: "Supplier/FindSupplier/searchPartyList", partyId: "ZiddlemanInc", name: "Ziddleman" },
+    ],
+    expect({ screenPath, partyId, name }) {
+        const str = screens.render(screenPath, { term: partyId }, null)
+        !str.errorMessages.length
+        str.status == 200
+        const rows = str.jsonObject
+        Array.isArray(rows)
+        rows.length == 1
+        rows[0].value == partyId
+        rows[0].label.includes(name)
+    },
+})
+
+feature("render Simple Screens screen (#screenPath, #containsTextList)", {
+    where: [
+        // Search screens: use real demo parties, not an injected documentList.
+        { screenPath: "Customer/FindCustomer?pseudoId=CustJqp", containsTextList: ['Joe', 'Public', 'Sales Orders'] },
+        { screenPath: "Supplier/FindSupplier?pseudoId=ZiddlemanInc", containsTextList: ['Ziddleman', 'Purchase Orders'] },
+        // Top products defaults to the previous complete period. January 2 stays in next year even west of UTC.
+        { screenPath: `Accounting/Reports/SalesSummary?interval=y&intervalCount=2&vendorPartyIds=ORG_ZIZI_RETAIL&thruDate=${new Date().getUTCFullYear() + 1}-01-02`, containsTextList: ['Sales Summary', 'Ziziwork Retail', 'Top Products Ordered', 'Picker Bot 2000'] },
+        // Supplier
+        { screenPath: "Supplier/EditSupplier?partyId=ZiddlemanInc", containsTextList: ['Ziddleman &amp; Sons Suppliers', 'Supplier', '1-702-987-6543', '1350 E. Flamingo Rd. #9876'] },
+        // Customer
+        { screenPath: "Customer/EditCustomer?partyId=CustJqp", containsTextList: ['Joe', 'joe@public.com', 'Visa ************1111', '1-702-234-5678', '1350 E. Flamingo Rd. #2345'] },
+        // Party
+        { screenPath: "Party/EditParty?partyId=EX_JOHN_DOE", containsTextList: ['john.doe@moqui.org', 'John'] },
+        { screenPath: "Party/PartyEmails?partyId=CustJqp", containsTextList: ['joe@public.com', 'Order Placed'] },
+        { screenPath: "Party/FinancialInfo?partyId=CustJqp", containsTextList: ['ZIRET', 'Invoice Payment', 'Placed', 'Payment Received'] },
+        { screenPath: "Party/PaymentMethod/EditPaymentMethod?partyId=CustJqp&paymentMethodId=CustJqpCc", containsTextList: ['1111', 'Visa',
+            ...Array.from({length: 10}, (_, i) => `value="${new Date().getFullYear() + i}"`)] },
+        // Catalog
+        { screenPath: "Catalog/Category/EditCategory?productCategoryId=DEMO_ONE", containsTextList: ['Demo Category One'] },
+        { screenPath: "Catalog/Category/EditProducts?productCategoryId=DEMO_ONE", containsTextList: ['Demo Product One-One', 'Asset (Good)'] },
+        { screenPath: "Catalog/Product/EditProduct?productId=DEMO_1_1", containsTextList: ['Demo Product One-One', 'Shipping Weight'] },
+        { screenPath: "Catalog/Product/EditCategories?productId=DEMO_1_1", containsTextList: ['Demo Category One', 'Catalog'] },
+        { screenPath: "Catalog/Product/EditAssocs?productId=DEMO_1_1", containsTextList: [] },
+        { screenPath: "Catalog/Product/EditPrices?productId=DEMO_1_1", containsTextList: ['ZiddlemanInc', '16.99'] },
+        // Order
+        { screenPath: "Order/OrderDetail?orderId=55400", containsTextList: ['$23,795.00', 'Shipment 55400', 'Demo Product One-One'] }, // Purchase Order
+        { screenPath: "Order/PrintOrder?orderId=55400&renderMode=xsl-fo", containsTextList: ['Ziziwork Retail', 'Demo Product', '$23,795.00'] },
+        { screenPath: "Order/OrderDetail?orderId=55401", containsTextList: ['$9,000.00', 'Shipment 55401', 'Picker Bot 2000'] }, // Sales Order
+        // Shipment
+        { screenPath: "Shipment/ShipmentDetail?shipmentId=55400", containsTextList: ['Invoice 55400', 'Demo Product One-One'] }, // Incoming Shipment
+        { screenPath: "Shipment/ShipmentDetail?shipmentId=55401", containsTextList: ['Order 55401', 'Picker Bot 2000'] }, // Outgoing Shipment
+        // Facility
+        { screenPath: "Facility/EditFacility?facilityId=ZIRET_WH", containsTextList: ['Ziziwork Retail Warehouse', '51 W. Center St.'] },
+        { screenPath: "Facility/EditFacilityLocations?facilityId=ZIRET_WH", containsTextList: [] },
+        { screenPath: "Facility/FacilityCalendar?facilityId=ZIRET_WH", containsTextList: [] },
+        // Asset
+        { screenPath: "Asset/Asset/AssetDetail?assetId=55400", containsTextList: ['DEMO_1_1', 'ORG_ZIZI_RETAIL', 'Available'] },
+        { screenPath: "Asset/Asset/AssetCalendar?assetId=55400", containsTextList: [] },
+        // Accounting/Invoice
+        { screenPath: "Accounting/Invoice/FindInvoice?statusId_op=in&statusId=InvoiceReceived,InvoiceApproved&toPartyId=ORG_ZIZI_RETAIL", containsTextList: ['Ziddleman', 'Ziziwork Retail', 'Sales/Purchase'] },
+        { screenPath: "Accounting/Invoice/EditInvoice?invoiceId=55100", containsTextList: ['Approved', 'Unpaid $1,824.25', 'ORG_ZIZI_RETAIL'] },
+        { screenPath: "Accounting/Invoice/EditInvoice?invoiceId=55400", containsTextList: ['ORG_ZIZI_RETAIL', 'Payment Sent', 'Applied Payments $23,830.00'] },
+        { screenPath: "Accounting/Invoice/EditInvoiceItems?invoiceId=55400", containsTextList: ['Demo Product One-One', 'Shipping and Handling'] },
+        { screenPath: "Accounting/Invoice/PrintInvoice?invoiceId=55400&renderMode=xsl-fo", containsTextList: ['1350 E. Flamingo Rd. #9876, Las Vegas, NV 89119-5263', 'Asset - Inventory'] },
+        // Accounting/Payment
+        { screenPath: "Accounting/Payment/EditPayment?paymentId=55400", containsTextList: ['ORG_ZIZI_RETAIL', 'Applied $24,000.00', 'Delivered'] },
+        { screenPath: "Accounting/Payment/PaymentCheck?paymentIds=55400&renderMode=xsl-fo", containsTextList: ['Ziddleman', 'Twenty four thousand and 00/100', 'Picker Bot 2000'] },
+        { screenPath: "Accounting/Payment/PaymentDetail?paymentIds=55400&renderMode=xsl-fo", containsTextList: ['Ziddleman', '$23,830.00', 'Picker Bot 2000'] },
+        // Accounting Other
+        { screenPath: "Accounting/FinancialAccount/EditFinancialAccount?finAccountId=55700", containsTextList: ['Ziziwork Retail', 'Joe Public', 'Active'] },
+        { screenPath: "Accounting/FinancialAccount/FinancialAccountTrans?finAccountId=55700", containsTextList: ['Customer Service Credit', 'Ziziwork Retail '] },
+        { screenPath: "Accounting/Transaction/EditTransaction?acctgTransId=55700", containsTextList: ['Joe Public', '430000000', 'Customer Service Credits'] },
+        { screenPath: "Accounting/GlAccount/EditGlAccount?glAccountId=110000000", containsTextList: ['Cash and Equivalent Asset', 'Ziziwork Industries'] },
+        { screenPath: "Accounting/OrgSettings/AcctgPreference?partyId=ORG_ZIZI_RETAIL", containsTextList: ['Ziziwork Industries', 'Clone Accounting Settings'] },
+        // Accounting/Reports
+        // NOTE: these are designed to handle account masks of ###-###-### or even down to the 5 digit ###-##
+        { screenPath: "Accounting/Reports/BalanceSheet?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100&detail=true", containsTextList: ["Finished Good Inventory", "212-00"] },
+        { screenPath: "Accounting/Reports/IncomeStatement?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100&detail=true", containsTextList: ["Product Sales", "614-20"] },
+        { screenPath: "Accounting/Reports/CashFlowStatement?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100&detail=true", containsTextList: ["Finished Good Inventory", "111-10"] },
+        { screenPath: "Accounting/Reports/RetainedEarningsStatement?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100", containsTextList: ["Net Earnings", "ZIRET F"] },
+        { screenPath: "Accounting/Reports/FinancialRatios?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100", containsTextList: ["Total Assets", "Accounts Receivable"] },
+        { screenPath: "Accounting/Reports/PostedAmountSummary?organizationPartyId=ORG_ZIZI_RETAIL&dateRange_poffset=0&dateRange_period=Year", containsTextList: ["Accounts Payable", "Depreciation - Equipment"] },
+        { screenPath: "Accounting/Reports/PostedBalanceSummary?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodId=55100", containsTextList: ["Customer Service Credits (Discounts and Write-downs)", "Net Income"] },
+        // Vendor
+        { screenPath: "Party/EditParty?partyId=ORG_ZIZI_RETAIL", containsTextList: ['Ziziwork Retail', 'Internal', 'payment.biziwork.retail@test.com'] },
+    ],
+    expect({ screenPath, containsTextList }) {
+        const str = screens.render(screenPath, { lastStandalone: "-2" }, null)
+        let containsAll = true
+        for (const containsText of containsTextList) {
+            if (containsText && !str.assertContains(containsText)) {
+                log.info(`In ${screenPath} text [${containsText}] not found:\n${str.output}`)
+                containsAll = false
+            }
+        }
+
+        !str.errorMessages.length
+        str.status == 200
+        str.output.length > 0
+        containsAll
+    },
+})

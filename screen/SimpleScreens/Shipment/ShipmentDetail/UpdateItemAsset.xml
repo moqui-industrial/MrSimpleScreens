@@ -34,13 +34,13 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getContainerList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
 
     <actions>
-        <service-call name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo" in-map="[shipmentId:shipmentId]" out-map="context"/>
-        <service-call name="org.moqui.impl.BasicServices.find#Enumeration" in-map="[enumTypeId:'RejectionReason']" out-map="reasonOut"/>
+        <service-call name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>
+        <service-call name="org.moqui.impl.BasicServices.find#Enumeration" in-map="{enumTypeId:'RejectionReason'}" out-map="reasonOut"/>
         <set field="facilityId" from="shipmentRouteSegmentList?.first?.destinationFacilityId"/>
 
         <set field="passedStatusId" from="statusId"/>
         <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset"/>
-        <script>context.putAll(asset)</script>
+        <script>Object.assign(context, asset)</script>
         <set field="statusId" from="passedStatusId"/>
         <if condition="lotId">
             <entity-find-one entity-name="mantle.product.asset.Lot" value-field="lot"><field-map field-name="lotId"/></entity-find-one>
@@ -55,7 +55,7 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="assetReceiptId"/>
         </entity-find>
         <set field="originalAssetReceipt" from="assetReceiptList?.first"/>
-        <script>if (originalAssetReceipt) context.putAll(originalAssetReceipt)</script>
+        <script>if (originalAssetReceipt) Object.assign(context, originalAssetReceipt)</script>
         <set field="rejectionReasonEnumId" from="originalAssetReceipt?.rejectionReasonEnumId"/>
     </actions>
     <widgets>

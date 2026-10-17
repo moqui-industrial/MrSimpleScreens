@@ -24,7 +24,7 @@ along with this software (see the LICENSE.md file). If not, see
         <container-dialog id="CreateLotDialog" button-text="Create Lot">
             <form-single name="CreateLot" transition="createLot">
                 <field name="mfgPartyId"><default-field title="Manufacturer"><drop-down>
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,Manufacturer']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,Manufacturer'}"/>
                 </drop-down></default-field></field>
                 <field name="lotNumber"><default-field><text-line size="20"/></default-field></field>
                 <field name="manufacturedDate"><default-field><date-time/></default-field></field>
@@ -43,10 +43,10 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="mfgPartyId">
                 <header-field title="Manufacturer"><drop-down allow-empty="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,Manufacturer']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,Manufacturer'}"/>
                 </drop-down></header-field>
                 <default-field><drop-down>
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="[roleTypeId:'Supplier,Manufacturer']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="0" parameter-map="{roleTypeId:'Supplier,Manufacturer'}"/>
                 </drop-down></default-field>
             </field>
             <field name="lotNumber">
@@ -62,7 +62,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="submitButton"><header-field title="Find"><submit/></header-field>
                 <default-field title="Update"><submit/></default-field></field>
             <field name="assetsLink"><default-field title="">
-                <link url="../Asset/FindAsset" text="Assets" parameter-map="[lotId:lotId]"/></default-field></field>
+                <link url="../Asset/FindAsset" text="Assets" parameter-map="{lotId:lotId}"/></default-field></field>
         </form-list>
     </widgets>
 </screen>

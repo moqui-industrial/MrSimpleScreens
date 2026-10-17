@@ -41,7 +41,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="unremoveLink"><default-field title="">
                 <link url="unremoveContactInfo" text="Restore" confirmation="Restore address?"
-                        parameter-map="[partyId:partyId, contactMechId:contactMechId, contactMechPurposeId:contactMechPurposeId, fromDate:fromDate]"/>
+                        parameter-map="{partyId:partyId, contactMechId:contactMechId, contactMechPurposeId:contactMechPurposeId, fromDate:fromDate}"/>
             </default-field></field>
 
             <form-list-column><field-ref name="fromDate"/><field-ref name="thruDate"/></form-list-column>
@@ -70,7 +70,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="unremoveLink"><default-field title="">
                 <link url="unremoveContactInfo" text="Restore" confirmation="Restore phone number?"
-                        parameter-map="[partyId:partyId, contactMechId:contactMechId, contactMechPurposeId:contactMechPurposeId, fromDate:fromDate]"/>
+                        parameter-map="{partyId:partyId, contactMechId:contactMechId, contactMechPurposeId:contactMechPurposeId, fromDate:fromDate}"/>
             </default-field></field>
 
             <form-list-column><field-ref name="fromDate"/><field-ref name="thruDate"/></form-list-column>

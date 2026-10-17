@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createPerson"><service-call name="mantle.party.PartyServices.create#Person"/>
         <default-response url="../EditCustomer"/></transition>
     <transition name="createPersonCustomer">
-        <service-call name="mantle.party.PartyServices.create#PersonCustomer" in-map="context + [groupTypeEnumIdList:appUserGroupTypeEnumId]"/>
+        <service-call name="mantle.party.PartyServices.create#PersonCustomer" in-map="Object.assign({}, context, {groupTypeEnumIdList:appUserGroupTypeEnumId})"/>
         <default-response url="../EditCustomer"/>
     </transition>
     <transition name="createOrganization"><service-call name="mantle.party.PartyServices.create#Organization"/>
@@ -38,7 +38,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <pre-actions><set field="roleTypeId" value="Customer"/></pre-actions>
     <actions>
-        <set field="disabled" from="disabled ?: 'N'"/>
+        <set field="disabled" from="disabled || 'N'"/>
 
         <service-call name="mantle.party.PartyServices.search#Party" in-map="context" out-map="context"/>
     </actions>
@@ -77,12 +77,12 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="combinedName"><default-field><link url="editCustomer" text="PartyNameOnlyTemplate" text-map="party" link-type="anchor"/></default-field></field>
             <field name="submitButton">
                 <header-field title="Find"><submit/></header-field>
-                <default-field><link url="findOrder" text="Sales Orders" parameter-map="[customerPartyId:partyId]"
+                <default-field><link url="findOrder" text="Sales Orders" parameter-map="{customerPartyId:partyId}"
                         link-type="anchor"/></default-field>
             </field>
         </form-list>
 
         <container-row><row-col md="2" style="text-right"><label text="Current Search String" type="strong"/></row-col>
-            <row-col><label text="${queryString?:'No Current Search'}"/></row-col></container-row>
+            <row-col><label text="${queryString||'No Current Search'}"/></row-col></container-row>
     </widgets>
 </screen>

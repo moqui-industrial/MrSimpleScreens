@@ -34,14 +34,14 @@ along with this software (see the LICENSE.md file). If not, see
 
     <pre-actions>
         <set field="partyId" from="ec.user.userAccount.partyId"/>
-        <set field="invoiceId" from="invoiceId ?: invoiceId_0"/>
+        <set field="invoiceId" from="invoiceId || invoiceId_0"/>
         <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="invoice"/>
         <if condition="invoice.fromPartyId != partyId">
-            <script>throw new IllegalArgumentException("You may not view or edit Invoice #${invoiceId}")</script>
+            <script>throw new Error(`You may not view or edit Invoice #${invoiceId}`)</script>
         </if>
     </pre-actions>
     <actions>
-        <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal" in-map="[invoiceId:invoiceId]" out-map="context"/>
+        <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal" in-map="{invoiceId:invoiceId}" out-map="context"/>
         <entity-find entity-name="mantle.account.invoice.InvoiceItem" list="invoiceItemList">
             <econdition field-name="invoiceId"/>
         </entity-find>
@@ -95,11 +95,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <conditional-field condition="invoice.statusId == 'InvoiceIncoming'"><text-line size="8"/></conditional-field>
                 <default-field><display currency-unit-field="invoice.currencyUomId"/></default-field>
             </field>
-            <field name="total" from="((quantity?:0.0) * (amount?:0.0))"><default-field><display currency-unit-field="invoice.currencyUomId"/></default-field></field>
+            <field name="total" from="toDecimal(quantity ?? 0).multiply(amount ?? 0)"><default-field><display currency-unit-field="invoice.currencyUomId"/></default-field></field>
 
             <field name="delete">
                 <conditional-field condition="invoice.statusId == 'InvoiceIncoming'">
-                    <link url="deleteInvoiceItem" text="Delete Item" parameter-map="[invoiceId:invoiceId, invoiceItemSeqId:invoiceItemSeqId]"/>
+                    <link url="deleteInvoiceItem" text="Delete Item" parameter-map="{invoiceId:invoiceId, invoiceItemSeqId:invoiceItemSeqId}"/>
                 </conditional-field>
                 <default-field><ignored/></default-field>
             </field>

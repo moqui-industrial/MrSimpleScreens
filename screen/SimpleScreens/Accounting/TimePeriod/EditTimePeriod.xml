@@ -24,16 +24,16 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="deleteTimePeriod">
         <service-call name="mantle.party.TimeServices.delete#TimePeriod"/>
-        <actions><set field="timePeriodId" from="parentPeriodId ?: previousPeriodId"/></actions>
+        <actions><set field="timePeriodId" from="parentPeriodId || previousPeriodId"/></actions>
         <conditional-response url="."><condition><expression>timePeriodId</expression></condition></conditional-response>
         <default-response url="../FindTimePeriod"/>
     </transition>
     <transition name="createNextTimePeriod">
-        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="[previousPeriodId:previousPeriodId, thruDate:thruDate]"/>
+        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="{previousPeriodId:previousPeriodId, thruDate:thruDate}"/>
         <default-response url="."/>
     </transition>
     <transition name="createPreviousTimePeriod">
-        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="[nextPeriodId:nextPeriodId, fromDate:fromDate]"/>
+        <service-call name="mantle.party.TimeServices.create#TimePeriod" in-map="{nextPeriodId:nextPeriodId, fromDate:fromDate}"/>
         <default-response url="."/>
     </transition>
 
@@ -49,7 +49,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find entity-name="mantle.party.time.TimePeriod" list="nextTimePeriodList">
             <econdition field-name="previousPeriodId" from="timePeriodId"/></entity-find>
-        <set field="nextPeriod" from="nextTimePeriodList ? nextTimePeriodList[0] : null"/>
+        <set field="nextPeriod" from="nextTimePeriodList?.length ? nextTimePeriodList[0] : null"/>
 
         <entity-find entity-name="mantle.party.time.TimePeriod" list="childTimePeriodList">
             <econdition field-name="parentPeriodId" from="timePeriodId"/>
@@ -62,28 +62,28 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="description"/>
         </entity-find>
         <entity-find entity-name="mantle.party.time.TimePeriodType" list="grandchildTypeFindList">
-            <econdition field-name="parentPeriodTypeId" operator="in" from="childTypeFindList*.timePeriodTypeId"/>
+            <econdition field-name="parentPeriodTypeId" operator="in" from="childTypeFindList.map(it => it.timePeriodTypeId)"/>
             <order-by field-name="description"/>
         </entity-find>
-        <set field="childPeriodTypeList" from="new ArrayList(childTypeFindList)"/>
-        <script>childPeriodTypeList.addAll(grandchildTypeFindList)</script>
+        <set field="childPeriodTypeList" from="Array.from(childTypeFindList)"/>
+        <script>childPeriodTypeList.push(...Array.from(grandchildTypeFindList))</script>
     </actions>
     <widgets>
         <!-- Parent and Previous -->
         <link url="editTimePeriod" text="Parent: ${parentPeriod.periodName}"
-                parameter-map="[timePeriodId:parentPeriod.timePeriodId]" condition="parentPeriod != null"/>
+                parameter-map="{timePeriodId:parentPeriod.timePeriodId}" condition="parentPeriod != null"/>
         <link url="editTimePeriod" text="Previous: ${previousPeriod.periodName}"
-                parameter-map="[timePeriodId:previousPeriod.timePeriodId]" condition="previousPeriod != null"/>
+                parameter-map="{timePeriodId:previousPeriod.timePeriodId}" condition="previousPeriod != null"/>
 
         <!-- Next period link or create -->
         <link url="editTimePeriod" text="Next: ${nextPeriod.periodName}"
-                parameter-map="[timePeriodId:nextPeriod.timePeriodId]" condition="nextPeriod != null"/>
+                parameter-map="{timePeriodId:nextPeriod.timePeriodId}" condition="nextPeriod != null"/>
         <container-dialog id="CreateNextDialog" button-text="Create Next Period" condition="nextPeriod == null">
             <form-single name="CreateNextPeriod" transition="createNextTimePeriod">
                 <field name="previousPeriodId" from="timePeriodId"><default-field><hidden/></default-field></field>
                 <field name="timePeriodTypeId"><default-field title="Type">
                     <display text="${description}" text-map="timePeriodType"/></default-field></field>
-                <field name="fromDate" from="timePeriod.thruDate + 1"><default-field><display/></default-field></field>
+                <field name="fromDate" from="String(Number(timePeriod.thruDate) + 1 * 86400000)"><default-field><display format="yyyy-MM-dd"/></default-field></field>
                 <field name="thruDate"><default-field tooltip="Optional, leave empty to calculate with from date and period type">
                     <date-time type="date"/></default-field></field>
                 <field name="createBtn"><default-field title="Create"><submit/></default-field></field>
@@ -93,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <!-- Previous period link or create -->
         <link url="editTimePeriod" text="Previous: ${previousPeriod.periodName}"
-                parameter-map="[timePeriodId:previousPeriod.timePeriodId]" condition="previousPeriod != null"/>
+                parameter-map="{timePeriodId:previousPeriod.timePeriodId}" condition="previousPeriod != null"/>
         <container-dialog id="CreatePreviousDialog" button-text="Create Previous Period" condition="previousPeriod == null">
             <form-single name="CreatePreviousPeriod" transition="createPreviousTimePeriod">
                 <field name="nextPeriodId" from="timePeriodId"><default-field><hidden/></default-field></field>
@@ -101,15 +101,15 @@ along with this software (see the LICENSE.md file). If not, see
                     <display text="${description}" text-map="timePeriodType"/></default-field></field>
                 <field name="fromDate"><default-field tooltip="Optional, leave empty to calculate with thru date and period type">
                     <date-time type="date"/></default-field></field>
-                <field name="thruDate" from="timePeriod.fromDate - 1"><default-field>
-                    <display/></default-field></field>
+                <field name="thruDate" from="String(Number(timePeriod.fromDate) - 1 * 86400000)"><default-field>
+                    <display format="yyyy-MM-dd"/></default-field></field>
                 <field name="createBtn"><default-field title="Create"><submit/></default-field></field>
             </form-single>
         </container-dialog>
 
         <link url="deleteTimePeriod" text="Delete Period" btn-type="danger" confirmation="Delete period ${timePeriod.periodName}?"
-                parameter-map="[timePeriodId:timePeriodId, parentPeriodId:timePeriod.parentPeriodId, previousPeriodId:timePeriod.previousPeriodId]"
-                condition="nextPeriod == null &amp;&amp; !childTimePeriodList &amp;&amp; timePeriod.isClosed != 'Y'"/>
+                parameter-map="{timePeriodId:timePeriodId, parentPeriodId:timePeriod.parentPeriodId, previousPeriodId:timePeriod.previousPeriodId}"
+                condition="nextPeriod == null &amp;&amp; !childTimePeriodList?.length &amp;&amp; timePeriod.isClosed != 'Y'"/>
 
 
         <container-row><row-col md="5">
@@ -117,7 +117,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="partyId">
                     <default-field>
                         <display-entity entity-name="mantle.party.PartyDetail" also-hidden="false" key-field-name="partyId"
-                                text="${organizationName?:''} ${firstName?:''} ${lastName?:''} [${pseudoId}]"/>
+                                text="${organizationName||''} ${firstName||''} ${lastName||''} [${pseudoId}]"/>
                     </default-field>
                 </field>
                 <field name="periodName"><default-field><display/></default-field></field>
@@ -130,7 +130,7 @@ along with this software (see the LICENSE.md file). If not, see
             </form-single>
         </row-col><row-col md="7">
             <container-box><box-header title="Child Periods"/><box-toolbar>
-                <container-dialog id="CreateChildDialog" button-text="Create First Child" condition="!childTimePeriodList &amp;&amp; childPeriodTypeList">
+                <container-dialog id="CreateChildDialog" button-text="Create First Child" condition="!childTimePeriodList?.length &amp;&amp; childPeriodTypeList?.length">
                     <form-single name="CreateChild" transition="createTimePeriod">
                         <field name="parentPeriodId" from="timePeriodId"><default-field><hidden/></default-field></field>
                         <field name="partyId" from="timePeriod.partyId"><default-field><hidden/></default-field></field>

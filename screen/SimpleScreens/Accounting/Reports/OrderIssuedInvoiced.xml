@@ -25,7 +25,7 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
             <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-        <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+        <set field="productItemTypes" from="productItemTypeEgms.map(it => it.enumId)"/>
     </actions>
     <widgets>
         <form-list name="OrderIssuedInvoiced" list="oisbsList" skip-form="true" header-dialog="true"
@@ -66,10 +66,10 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="customerPartyId">
                 <header-field title="Customer" show-order-by="true">
                     <drop-down allow-empty="true"><dynamic-options transition="searchPartyList" server-search="true" min-length="2"
-                            parameter-map="[roleTypeId:'Customer,OrgInternal']"/></drop-down>
+                            parameter-map="{roleTypeId:'Customer,OrgInternal'}"/></drop-down>
                 </header-field>
                 <default-field><link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                        link-type="anchor" parameter-map="[partyId:customerPartyId]"/></default-field>
+                        link-type="anchor" parameter-map="{partyId:customerPartyId}"/></default-field>
             </field>
 
             <field name="productId">
@@ -87,17 +87,17 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="quantity" align="right" show-total="sum"><header-field show-order-by="true"><range-find size="15"/></header-field>
                 <default-field><display format="#,##0"/></default-field></field>
-            <field name="itemTotal" from="quantity * unitAmount" align="right" show-total="sum">
+            <field name="itemTotal" from="toDecimal(quantity ?? 0).multiply(unitAmount ?? 0)" align="right" show-total="sum">
                 <default-field><display format="#,##0.00"/></default-field></field>
 
             <field name="issuedQuantity" align="right" show-total="sum"><header-field title="Issued" show-order-by="true"><range-find size="15"/></header-field>
                 <default-field><display format="#,##0"/></default-field></field>
-            <field name="issuedTotal" from="(issuedQuantity?:0.0) * unitAmount" align="right" show-total="sum">
+            <field name="issuedTotal" from="toDecimal(issuedQuantity ?? 0).multiply(unitAmount ?? 0)" align="right" show-total="sum">
                 <default-field><display format="#,##0.00"/></default-field></field>
 
             <field name="billedQuantity" align="right" show-total="sum"><header-field title="Billed" show-order-by="true"><range-find size="15"/></header-field>
                 <default-field><display format="#,##0"/></default-field></field>
-            <field name="billedTotal" from="(billedQuantity?:0.0) * unitAmount" align="right" show-total="sum">
+            <field name="billedTotal" from="toDecimal(billedQuantity ?? 0).multiply(unitAmount ?? 0)" align="right" show-total="sum">
                 <default-field><display format="#,##0.00"/></default-field></field>
 
             <field name="find"><header-field title="Find"><submit/></header-field></field>

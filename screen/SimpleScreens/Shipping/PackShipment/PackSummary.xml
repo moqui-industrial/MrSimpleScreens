@@ -75,15 +75,15 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
 
     <actions>
-        <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentDisplayInfo" in-map="[shipmentId:shipmentId]" out-map="context"/>
+        <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>
         <if condition="!isOutgoing &amp;&amp; !isTransfer"><return error="true" message="Shipment ${shipmentId} is not an outgoing or transfer shipment"/></if>
-        <set field="statusPrePacked" from="shipment.statusId in ['ShipInput', 'ShipScheduled', 'ShipPicked']"/>
+        <set field="statusPrePacked" from="['ShipInput', 'ShipScheduled', 'ShipPicked'].includes(shipment.statusId)"/>
 
         <entity-find entity-name="mantle.facility.FacilityBoxTypeDetail" list="boxTypeList">
             <econdition field-name="facilityId" from="firstRouteSegment.originFacilityId"/>
             <order-by field-name="description"/>
         </entity-find>
-        <if condition="!boxTypeList">
+        <if condition="!boxTypeList?.length">
             <entity-find entity-name="mantle.shipment.ShipmentBoxType" list="boxTypeList">
                 <order-by field-name="description"/></entity-find>
         </if>
@@ -91,23 +91,23 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="shippingPostalAddressList" from="[]"/>
         <if condition="isOutgoing &amp;&amp; toPartyId">
             <service-call name="mantle.party.ContactServices.get#PartyContactInfoList" out-map="toPartyShippingInfo"
-                    in-map="[partyId:toPartyId, postalContactMechPurposeId:'PostalShippingDest']"/>
-            <set field="shippingPostalAddressList" from="toPartyShippingInfo.postalAddressList ?: []"/>
+                    in-map="{partyId:toPartyId, postalContactMechPurposeId:'PostalShippingDest'}"/>
+            <set field="shippingPostalAddressList" from="toPartyShippingInfo.postalAddressList || []"/>
 
             <if condition="lastRouteSegment.destPostalContactMechId">
                 <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="curDestPaInfo"
-                        in-map="[partyId:toPartyId, postalContactMechId:lastRouteSegment.destPostalContactMechId]"/>
-                <if condition="!(lastRouteSegment.destPostalContactMechId in shippingPostalAddressList*.postalContactMechId)">
-                    <script>shippingPostalAddressList.add(0, curDestPaInfo)</script></if>
+                        in-map="{partyId:toPartyId, postalContactMechId:lastRouteSegment.destPostalContactMechId}"/>
+                <if condition="!shippingPostalAddressList.some(it => it.postalContactMechId == lastRouteSegment.destPostalContactMechId)">
+                    <script>shippingPostalAddressList = [curDestPaInfo].concat(Array.from(shippingPostalAddressList))</script></if>
             </if>
         </if>
 
         <!-- maybe improve; session maintained active (or first package with no box/weight?) -->
-        <set field="activePackage" from="shipmentPackageList?.find({ it.weight == null || it.shipmentBoxTypeId == null })"/>
+        <set field="activePackage" from="shipmentPackageList?.find(it => it.weight == null || it.shipmentBoxTypeId == null)"/>
         <set field="activePackageSeqId" from="activePackage?.shipmentPackageSeqId"/>
         <if condition="activePackage != null">
-            <set field="activePackageRouteSeg" from="packageRouteSegList.find({ it.shipmentPackageSeqId == activePackage.shipmentPackageSeqId &amp;&amp; it.shipmentRouteSegmentSeqId == firstRouteSegment.shipmentRouteSegmentSeqId })"/>
-            <script>activePackageAndRouteSeg = new HashMap(activePackage); activePackageAndRouteSeg.putAll(activePackageRouteSeg)</script>
+            <set field="activePackageRouteSeg" from="packageRouteSegList.find(it => it.shipmentPackageSeqId == activePackage.shipmentPackageSeqId &amp;&amp; it.shipmentRouteSegmentSeqId == firstRouteSegment.shipmentRouteSegmentSeqId)"/>
+            <script>activePackageAndRouteSeg = Object.assign({}, activePackage, activePackageRouteSeg)</script>
         </if>
 
         <!-- check for unauthorized CC and other payments -->
@@ -118,18 +118,18 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find>
 
         <!-- check packages to see if we have box type and weight for non-empty packages -->
-        <set field="packagesComplete" from="shipmentPackageList" type="Boolean"/>
+        <set field="packagesComplete" from="shipmentPackageList?.length &gt; 0"/>
         <iterate list="shipmentPackageList" entry="shipmentPackage">
-            <set field="shipmentPackageContentList" from="allShipmentPackageContentList.findAll({ it.shipmentPackageSeqId == shipmentPackage.shipmentPackageSeqId })"/>
-            <if condition="shipmentPackageContentList &amp;&amp; (!shipmentPackage.shipmentBoxTypeId || !shipmentPackage.weight)">
+            <set field="shipmentPackageContentList" from="allShipmentPackageContentList.filter(it => it.shipmentPackageSeqId == shipmentPackage.shipmentPackageSeqId)"/>
+            <if condition="shipmentPackageContentList.length &amp;&amp; (!shipmentPackage.shipmentBoxTypeId || !toNumber(shipmentPackage.weight))">
                 <set field="packagesComplete" from="false"/><break/></if>
         </iterate>
 
         <!-- only local print (after Pack Completed dialog) if ('qzPackShipment' + shipmentId) session attribute is true, then set to false to avoid printing again -->
         <set field="localPrintAllLabels" from="false"/>
-        <if condition="ec.web.sessionAttributes.get('qzPackShipment' + shipmentId)">
+        <if condition="ec.web.sessionAttributes['qzPackShipment' + shipmentId] === 'true'">
             <set field="localPrintAllLabels" from="true"/>
-            <script>ec.web.sessionAttributes.put('qzPackShipment' + shipmentId, false)</script>
+            <script>ec.web.sessionAttributes['qzPackShipment' + shipmentId] = 'false'</script>
         </if>
 
         <set field="getShipmentLabelPath" from="sri.buildUrl('getShipmentLabel').path"/>
@@ -154,11 +154,11 @@ along with this software (see the LICENSE.md file). If not, see
         <container-row><row-col md="6">
             <container-box><box-header title="Pack Shipment ${shipmentId}"/><box-toolbar>
                 <container-dialog id="CancelDialog" button-text="Cancel" type="danger"
-                        condition="!(shipment.statusId in ['ShipDelivered', 'ShipRejected', 'ShipCancelled'])">
+                        condition="!(['ShipDelivered', 'ShipRejected', 'ShipCancelled'].includes(shipment.statusId))">
                     <label text="Invoices associated with this shipment will be CANCELLED: ${invoiceIdSet.join(', ')}"
-                            condition="isOutgoing &amp;&amp; invoiceIdSet" type="p" style="text-danger"/>
-                    <label text="Invoices (found ${invoiceIdSet.size()} associated with this shipment) will not be changed, must be cancelled manually"
-                            condition="!isOutgoing &amp;&amp; invoiceIdSet" type="p" style="text-warning"/>
+                            condition="isOutgoing &amp;&amp; invoiceIdSet?.length" type="p" style="text-danger"/>
+                    <label text="Invoices (found ${invoiceIdSet.length} associated with this shipment) will not be changed, must be cancelled manually"
+                            condition="!isOutgoing &amp;&amp; invoiceIdSet?.length" type="p" style="text-warning"/>
                     <label text="Items have been packed/issued, these will be un-packed and returned to inventory" condition="anyItemPacked" type="p" style="text-danger"/>
                     <label text="Items have been received, all receipt quantities will be set to zero" condition="anyReceived" type="p" style="text-danger"/>
                     <label text="Labels will not be refunded automatically, refund manually if needed" condition="hasAnyLabels" type="p" style="text-warning"/>
@@ -170,7 +170,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </container-dialog>
 
                 <!-- <link url="ShipmentByPackage.pdf" text="Package PDF" style="${shipment.statusId in ['ShipScheduled', 'ShipPicked'] ? 'btn-info' : ''}"/> -->
-                <link url="ShipmentInsert.pdf" text="Insert" style="${shipment.statusId in ['ShipShipped', 'ShipPacked'] ? 'btn-info' : ''}" icon="fa fa-download"/>
+                <link url="ShipmentInsert.pdf" text="Insert" style="${['ShipShipped', 'ShipPacked'].includes(shipment.statusId) ? 'btn-info' : ''}" icon="fa fa-download"/>
                 <!-- TODO qvt -->
                 <render-mode><text type="vuet"><![CDATA[<button v-if="$root.qzVue" class="btn btn-default btn-sm" onclick="moqui.printUrlMain('/fop/apps/${appRoot}/Shipment/ShipmentInsert?shipmentId=${shipmentId}')"><i class="fa fa-print"></i> Insert</button>]]></text></render-mode>
 
@@ -181,7 +181,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <label text="Not all quantity of all items packed" condition="anyItemPacked &amp;&amp; !allItemsPacked" style="text-warning" type="p"/>
                     <section-iterate name="PackComplShipmentPackageList" list="shipmentPackageList" entry="shipmentPackage"><widgets>
                         <label text="Package ${shipmentPackage.shipmentPackageSeqId} missing box type" condition="!shipmentPackage.shipmentBoxTypeId" style="text-danger" type="p"/>
-                        <label text="Package ${shipmentPackage.shipmentPackageSeqId} missing weight" condition="!shipmentPackage.weight" style="text-danger" type="p"/>
+                        <label text="Package ${shipmentPackage.shipmentPackageSeqId} missing weight" condition="!toNumber(shipmentPackage.weight)" style="text-danger" type="p"/>
                     </widgets></section-iterate>
                 </container-dialog>
 
@@ -199,11 +199,11 @@ along with this software (see the LICENSE.md file). If not, see
                 </container-dialog>
                 -->
 
-                <container-dialog id="PrintLabelsDialog" button-text="Net Print" condition="hasAnyLabels &amp;&amp; networkPrinterList">
+                <container-dialog id="PrintLabelsDialog" button-text="Net Print" condition="hasAnyLabels &amp;&amp; (networkPrinterList?.length > 0)">
                     <form-single name="PrintAllShipmentLabels" transition="printShipmentLabels">
                         <field name="shipmentId"><default-field><hidden/></default-field></field>
                         <field name="networkPrinterId" from="defaultNetworkPrinterId"><default-field title="Printer"><drop-down>
-                            <list-options list="networkPrinterList" key="${networkPrinterId}" text="${description ?: printerName} (${serverHost})"/>
+                            <list-options list="networkPrinterList" key="${networkPrinterId}" text="${description || printerName} (${serverHost})"/>
                         </drop-down></default-field></field>
                         <field name="makeDefaultPrinter"><default-field title="Make Default"><check><option key="true" text=" "/></check></default-field></field>
                         <field name="returnLabels"><default-field title=""><radio no-current-selected-key="false">
@@ -271,13 +271,13 @@ along with this software (see the LICENSE.md file). If not, see
                 </widgets></section>
 
                 <section name="PackedSummarySection"><actions>
-                    <set field="quantityTotal" from="shipmentItemSourceList*.quantity.sum()"/>
-                    <set field="quantityNotHandledTotal" from="shipmentItemSourceList*.quantityNotHandled.sum({ it ?: 0.0 })"/>
-                    <set field="quantityHandledTotal" from="quantityTotal - quantityNotHandledTotal"/>
+                    <set field="quantityTotal" from="shipmentItemSourceList.reduce((sum, it) => sum.add(it.quantity ?? 0), toDecimal(0))"/>
+                    <set field="quantityNotHandledTotal" from="shipmentItemSourceList.reduce((sum, it) => sum.add(it.quantityNotHandled ?? 0), toDecimal(0))"/>
+                    <set field="quantityHandledTotal" from="toDecimal(quantityTotal ?? 0).subtract(quantityNotHandledTotal ?? 0)"/>
                 </actions><widgets>
                     <container style="text-center">
                         <label text="Packed ${ec.l10n.format(quantityHandledTotal, '#,##0.##')} of ${ec.l10n.format(quantityTotal, '#,##0.##')}"
-                                type="h3" style="${quantityHandledTotal ? (quantityHandledTotal == quantityTotal ? 'text-success' : 'text-warning') : 'text-danger'}"/>
+                                type="h3" style="${!quantityHandledTotal.isZero() ? (quantityHandledTotal.compare(quantityTotal ?? 0) == 0 ? 'text-success' : 'text-warning') : 'text-danger'}"/>
                     </container>
                 </widgets></section>
             </box-body></container-box>
@@ -288,7 +288,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- clears active package (if box type and weight specified) so next item scan goes in new package -->
             <!-- NOTE: don't auto package for this screen, should be store level setting or something; maybe even kill package contents records if there are any? solution for now is Reset button on Package -->
             <section name="ActivePackageSection" condition="activePackageAndRouteSeg"><actions>
-                <set field="shipmentPackageContentList" from="allShipmentPackageContentList.findAll({ activePackageSeqId.equals(it.shipmentPackageSeqId) })"/>
+                <set field="shipmentPackageContentList" from="allShipmentPackageContentList.filter(it => activePackageSeqId == it.shipmentPackageSeqId)"/>
             </actions><widgets>
                 <container-box><box-header title="Active Package ${activePackageAndRouteSeg.shipmentPackageSeqId}"/><box-body>
                     <form-single name="ClosePackageForm" map="activePackageAndRouteSeg" transition="updatePackageAndRouteSeg">
@@ -300,11 +300,11 @@ along with this software (see the LICENSE.md file). If not, see
                             <list-options list="boxTypeList" key="${shipmentBoxTypeId}" text="${pseudoId}: ${description}"/>
                         </drop-down></default-field></field>
                         <field name="weight"><default-field><text-line size="4" default-transition="getPackageWeight"
-                                parameter-map="[shipmentId:shipmentId, shipmentPackageSeqId:shipmentPackageSeqId]">
+                                parameter-map="{shipmentId:shipmentId, shipmentPackageSeqId:shipmentPackageSeqId}">
                             <depends-on field="shipmentBoxTypeId"/><depends-on field="weightUomId"/>
                         </text-line></default-field></field>
-                        <field name="weightUomId" from="weightUomId ?: 'WT_lb'"><default-field title="">
-                            <display-entity entity-name="moqui.basic.Uom" text="${abbreviation ?: description}"/></default-field></field>
+                        <field name="weightUomId" from="weightUomId || 'WT_lb'"><default-field title="">
+                            <display-entity entity-name="moqui.basic.Uom" text="${abbreviation || description}"/></default-field></field>
 
                         <field name="submitButton"><default-field title="Close Pkg ${shipmentPackageSeqId}"><submit/></default-field></field>
                         <field-layout><field-row-big><field-ref name="shipmentPackageSeqId"/><field-ref name="shipmentBoxTypeId"/>
@@ -335,8 +335,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <entity-find-one entity-name="moqui.basic.Enumeration" value-field="pmntInstrumentEnum">
                         <field-map field-name="enumId" from="shipmentPayment.paymentInstrumentEnumId"/></entity-find-one>
                 </actions><widgets>
-                    <label text="Payment ${shipmentPayment.paymentId} - ${pmntInstrumentEnum?.description ?: 'Unknown Type'} - ${pmntStatus?.description}" type="p"
-                            style="text-strong ${shipmentPayment.statusId in ['PmntAuthorized', 'PmntDelivered', 'PmntConfirmed'] ? 'text-success' : (shipmentPayment.paymentInstrumentEnumId == 'PiCreditCard' ? 'text-danger' : 'text-warning')}"/>
+                    <label text="Payment ${shipmentPayment.paymentId} - ${pmntInstrumentEnum?.description || 'Unknown Type'} - ${pmntStatus?.description}" type="p"
+                            style="text-strong ${['PmntAuthorized', 'PmntDelivered', 'PmntConfirmed'].includes(shipmentPayment.statusId) ? 'text-success' : (shipmentPayment.paymentInstrumentEnumId == 'PiCreditCard' ? 'text-danger' : 'text-warning')}"/>
                 </widgets></section-iterate>
 
                 <!-- shipment info like address, etc -->
@@ -347,8 +347,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <row-col xs="9"><label text="${orderCarrierShipmentMethod?.description ? orderCarrierShipmentMethod.description : (orderCarrierDetail ? orderCarrierDetail.pseudoId : 'N/A') + ' ' + (orderShipmentMethodEnum ? orderShipmentMethodEnum.description : 'None')}"/></row-col></container-row>
                     <section name="ShippedShippingInfo" condition="curDestPaInfo"><actions><set field="contactInfo" from="curDestPaInfo"/></actions><widgets>
                         <container-row><row-col xs="3" style="text-right"><label text="Dest" type="strong"/></row-col><row-col xs="9">
-                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.gstring"/></render-mode>
-                            <container><label text="Trust: ${contactInfo.postalTrustLevelEnum?.description ?: 'New'}" type="strong"/></container>
+                            <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                            <container><label text="Trust: ${contactInfo.postalTrustLevelEnum?.description || 'New'}" type="strong"/></container>
                         </row-col></container-row>
                     </widgets></section>
                 </row-col><row-col md="6">

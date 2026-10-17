@@ -21,15 +21,15 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <if condition="classAndDescendants">
             <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="descOut"
-                    in-map="[parentEnumId:classAndDescendants, includeNested:true]"/>
+                    in-map="{parentEnumId:classAndDescendants, includeNested:true}"/>
             <set field="glAccountClassEnumId" from="descOut.enumIdSet"/>
             <set field="glAccountClassEnumId_op" value="in"/>
         </if>
 
         <if condition="organizationPartyId"><service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
-                in-map="[organizationPartyId:organizationPartyId]"/></if>
-        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+                in-map="{organizationPartyId:organizationPartyId}"/></if>
+        <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask || ec.user.getPreference('GlAccountCodeMask')"/>
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <form-list name="AccountBalanceHistory" list="resultList" skip-form="true" header-dialog="true" select-columns="true"
@@ -74,7 +74,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="timePeriodId">
                 <header-field title="Period"><drop-down allow-empty="true">
                     <dynamic-options transition="getTimePeriodList" server-search="true" min-length="0"
-                            parameter-map="[timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth']">
+                            parameter-map="{timePeriodTypeId:'FiscalYear,FiscalQuarter,FiscalMonth'}">
                         <depends-on field="organizationPartyId" parameter="partyId"/></dynamic-options>
                 </drop-down></header-field>
                 <default-field><display-entity entity-name="mantle.party.time.TimePeriod" text="${periodName}"/></default-field>
@@ -86,12 +86,12 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="postedDebits" align="right" show-total="sum"><default-field><display format="#,##0.00"/></default-field></field>
             <field name="postedCredits" align="right" show-total="sum"><default-field><display format="#,##0.00"/></default-field></field>
             <field name="beginningBalance" align="right" show-total="first"><default-field><display format="#,##0.00"/></default-field></field>
-            <field name="postedAmount" align="right" from="endingBalance - beginningBalance" show-total="sum"><default-field><display format="#,##0.00"/></default-field></field>
+            <field name="postedAmount" align="right" from="toDecimal(endingBalance ?? 0).subtract(beginningBalance ?? 0)" show-total="sum"><default-field><display format="#,##0.00"/></default-field></field>
             <field name="endingBalance" align="right" show-total="last"><default-field><display format="#,##0.00"/></default-field></field>
 
             <field name="ledgerLink"><default-field title="Ledger">
                 <link url="../AccountLedger" text="Ledger" link-type="anchor" condition="glAccountId &amp;&amp; timePeriodId"
-                        parameter-map="[glAccountIdList:glAccountId, timePeriodId:timePeriodId]"/></default-field></field>
+                        parameter-map="{glAccountIdList:glAccountId, timePeriodId:timePeriodId}"/></default-field></field>
 
             <field name="find"><header-field title="Find"><submit/></header-field></field>
         </form-list>

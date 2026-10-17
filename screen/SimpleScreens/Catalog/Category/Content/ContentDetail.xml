@@ -39,7 +39,7 @@ along with this software (see the LICENSE.md file). If not, see
         </if>
 
         <set field="localeStringList" from="[]"/>
-        <iterate list="Locale.getAvailableLocales()" entry="lcl"><script>localeStringList.add([locale:lcl.toString(), name:lcl.getDisplayName(ec.user.locale)])</script></iterate>
+        <iterate list="ec.l10n.getAvailableLocales()" entry="lcl"><script>localeStringList.push(lcl)</script></iterate>
         <order-map-list list="localeStringList"><order-by field-name="name"/></order-map-list>
     </actions>
     <widgets>
@@ -89,17 +89,17 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="version_has_next"><set field="nextVersion" from="versionList[version_index+1]"/></if>
                     </actions><widgets>
                         <dynamic-dialog id="ShowVersionDialog" button-text="Version ${version.versionName}" width="900"
-                                transition="../ContentCompare" parameter-map="[versionNameLhs:version.versionName]"/>
+                                transition="../ContentCompare" parameter-map="{versionNameLhs:version.versionName}"/>
                         <section name="DiffPrevSection" condition="nextVersion &amp;&amp; nextVersion.versionName"><widgets>
                             <dynamic-dialog id="DiffPrevDialog" button-text="Diff Prev" width="900"
-                                    transition="../ContentCompare" parameter-map="[versionNameLhs:nextVersion.versionName, versionNameRhs:version.versionName]"/>
+                                    transition="../ContentCompare" parameter-map="{versionNameLhs:nextVersion.versionName, versionNameRhs:version.versionName}"/>
                         </widgets></section>
                         <section name="DiffCurSection" condition="currentVersionName &amp;&amp; version.versionName != currentVersionName"><widgets>
                             <dynamic-dialog id="DiffCurDialog" button-text="Diff Cur" width="900"
-                                    transition="../ContentCompare" parameter-map="[versionNameLhs:version.versionName, versionNameRhs:currentVersionName]"/>
+                                    transition="../ContentCompare" parameter-map="{versionNameLhs:version.versionName, versionNameRhs:currentVersionName}"/>
                         </widgets></section>
 
-                        <label text="By ${paua.firstName?:''} ${paua.lastName?:''} (${paua.username?:'N/A'})" type="div" condition="paua"/>
+                        <label text="By ${paua.firstName||''} ${paua.lastName||''} (${paua.username||'N/A'})" type="div" condition="paua"/>
                         <label text="At ${ec.l10n.format(version.versionDate, 'yyyy-MM-dd HH:mm')}" type="div"/>
                     </widgets></section-iterate>
                 </widgets><fail-widgets>

@@ -68,13 +68,13 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
             <econdition field-name="orderId"/><order-by field-name="orderPartSeqId"/></entity-find>
 
-        <set field="editableStatusIds" from="new HashSet(['OrderBeingChanged', 'OrderOpen', 'OrderRequested',
+        <set field="editableStatusIds" from="(['OrderBeingChanged', 'OrderOpen', 'OrderRequested',
                 'OrderProposed', 'OrderPlaced', 'OrderHold', 'OrderProcessing', 'OrderWishList', 'OrderGiftRegistry', 'OrderAutoReorder'])"/>
-        <set field="orderEditable" from="editableStatusIds.contains(orderHeader.statusId)"/>
-        <set field="partEditable" from="orderPart != null ? editableStatusIds.contains(orderPart.statusId) : null"/>
+        <set field="orderEditable" from="editableStatusIds.includes(orderHeader.statusId)"/>
+        <set field="partEditable" from="orderPart != null ? editableStatusIds.includes(orderPart.statusId) : null"/>
 
         <!-- the main OrderItem query, top-level only for pagination by top-level items -->
-        <set field="pageSize" from="pageSize ?: '10'"/>
+        <set field="pageSize" from="pageSize || '10'"/>
         <entity-find entity-name="mantle.order.OrderItem" list="orderItemList">
             <search-form-inputs default-order-by="orderPartSeqId,orderItemSeqId" skip-fields="orderId"/>
             <econdition field-name="orderId"/>
@@ -85,23 +85,22 @@ along with this software (see the LICENSE.md file). If not, see
             <select-field field-name="quantity,selectedAmount,unitAmount,unitListPrice,isPromo"/>
             -->
         </entity-find>
-        <set field="topItemSeqIds" from="orderItemList*.orderItemSeqId"/>
-        <if condition="topItemSeqIds">
+        <set field="topItemSeqIds" from="orderItemList.map(it => it.orderItemSeqId)"/>
+        <if condition="topItemSeqIds.length > 0">
             <entity-find entity-name="mantle.order.OrderItem" list="childOrderItemList">
                 <econdition field-name="orderId"/>
                 <econdition field-name="parentItemSeqId" operator="in" from="topItemSeqIds"/>
                 <order-by field-name="orderItemSeqId"/>
             </entity-find>
             <script><![CDATA[
-                // NOTE: must use orderItemList.size() on each iteration as EntityList size will change with child items added
-                for (int oiIdx = 0; oiIdx < orderItemList.size(); oiIdx++) {
-                    Map orderItem = (Map) orderItemList.get(oiIdx)
-                    String orderItemSeqId = orderItem.orderItemSeqId
-                    List childList = childOrderItemList.findAll({ orderItemSeqId.equals(it.parentItemSeqId) })
-                    for (int cIdx = 0; cIdx < childList.size(); cIdx++) {
-                        Map childItem = (Map) childList.get(cIdx)
+                orderItemList = Array.from(orderItemList)
+                // Check length each iteration: inserted children may have children of their own.
+                for (let oiIdx = 0; oiIdx < orderItemList.length; oiIdx++) {
+                    const orderItemSeqId = orderItemList[oiIdx].orderItemSeqId
+                    const childList = childOrderItemList.filter(it => orderItemSeqId == it.parentItemSeqId)
+                    for (const childItem of childList) {
                         oiIdx++
-                        orderItemList.add(oiIdx, childItem)
+                        orderItemList.splice(oiIdx, 0, childItem)
                     }
                 }
             ]]></script>
@@ -137,7 +136,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="unitAmount"><default-field title="Price" tooltip="Leave empty to use Calc Price">
                         <text-line size="10"/></default-field></field>
                     <field name="calcAmount"><default-field title="Calc Price">
-                        <display dynamic-transition="getProductPrice" parameter-map="[orderId:orderId, priceFormat:'#,##0.00']">
+                        <display dynamic-transition="getProductPrice" parameter-map="{orderId:orderId, priceFormat:'#,##0.00'}">
                             <depends-on field="productId"/><depends-on field="quantity"/><depends-on field="orderPartSeqId"/></display>
                     </default-field></field>
                     <field name="standardCost"><conditional-field condition="isCustomerInternalOrg"
@@ -195,35 +194,35 @@ along with this software (see the LICENSE.md file). If not, see
         <section name="PartFlagsSection" condition="orderPart != null &amp;&amp; partEditable"><widgets>
             <link url="updateOrderPart" text="Ship Calc" btn-type="danger" icon="fa fa-remove"
                     condition="orderPart.disableShippingCalc == 'Y'"
-                    parameter-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableShippingCalc:'N']"/>
+                    parameter-map="{orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableShippingCalc:'N'}"/>
             <link url="updateOrderPart" text="Ship Calc" btn-type="success" icon="fa fa-check"
                     condition="orderPart.disableShippingCalc != 'Y'"
-                    parameter-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableShippingCalc:'Y']"/>
+                    parameter-map="{orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableShippingCalc:'Y'}"/>
 
             <link url="updateOrderPart" text="Tax Calc" btn-type="danger" icon="fa fa-remove"
                     condition="orderPart.disableTaxCalc == 'Y'"
-                    parameter-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableTaxCalc:'N']"/>
+                    parameter-map="{orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableTaxCalc:'N'}"/>
             <link url="updateOrderPart" text="Tax Calc" btn-type="success" icon="fa fa-check"
                     condition="orderPart.disableTaxCalc != 'Y'"
-                    parameter-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableTaxCalc:'Y']"/>
+                    parameter-map="{orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disableTaxCalc:'Y'}"/>
 
             <link url="updateOrderPart" text="Promos" btn-type="danger" icon="fa fa-remove"
                     condition="orderPart.disablePromotions == 'Y'"
-                    parameter-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disablePromotions:'N']"/>
+                    parameter-map="{orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disablePromotions:'N'}"/>
             <link url="updateOrderPart" text="Promos" btn-type="success" icon="fa fa-check"
                     condition="orderPart.disablePromotions != 'Y'"
-                    parameter-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disablePromotions:'Y']"/>
+                    parameter-map="{orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, disablePromotions:'Y'}"/>
         </widgets></section>
 
         <form-list name="OrderItems" list="orderItemList" list-entry="orderItem" skip-form="true" header-dialog="true"
                 show-page-size="true" select-columns="true" show-csv-button="true" show-xlsx-button="true">
             <row-actions>
                 <if condition="orderPart == null">
-                    <set field="orderPart" from="orderPartList.find({ it.orderPartSeqId == orderItem.orderPartSeqId })"/>
-                    <set field="partEditable" from="orderPart != null ? editableStatusIds.contains(orderPart.statusId) : null"/>
+                    <set field="orderPart" from="orderPartList.find(it => it.orderPartSeqId == orderItem.orderPartSeqId)"/>
+                    <set field="partEditable" from="orderPart != null ? editableStatusIds.includes(orderPart.statusId) : null"/>
                 </if>
                 <service-call name="mantle.order.OrderInfoServices.get#OrderItemDisplayInfo" out-map="context"
-                        in-map="[orderId:orderId, orderItemSeqId:orderItemSeqId, orderItem:orderItem, orderPart:orderPart]"/>
+                        in-map="{orderId:orderId, orderItemSeqId:orderItemSeqId, orderItem:orderItem, orderPart:orderPart}"/>
                 <!-- <log level="warn" message="itemCanDelete ${itemCanDelete} quantity ${quantity} itemQuantityNotShipped ${itemQuantityNotShipped} itemQuantityNotBilled ${itemQuantityNotBilled} returnableOut.returnedQuantity ${returnableOut.returnedQuantity}"/> -->
             </row-actions>
 
@@ -254,7 +253,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <order-by field-name="description"/></entity-find></entity-options>
                     </drop-down>
                 </header-field>
-                <default-field title="Type" container-style="${isProductItemType ? 'text-info text-strong' : (itemTypeEnumId == 'ItemDiscount' ? 'text-success' : (itemTypeEnumId in ['ItemSalesTax','ItemVatTax'] ? 'text-warning' : ''))}">
+                <default-field title="Type" container-style="${isProductItemType ? 'text-info text-strong' : (itemTypeEnumId == 'ItemDiscount' ? 'text-success' : (['ItemSalesTax','ItemVatTax'].includes(itemTypeEnumId) ? 'text-warning' : ''))}">
                     <display-entity entity-name="moqui.basic.Enumeration" text="${description}${isPromo ? ' (Promotion)' : ''}"/>
                 </default-field>
             </field>
@@ -324,21 +323,21 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="assetReservations">
                 <conditional-field condition="isShippable &amp;&amp; isVendorInternalOrg">
                     <section-iterate name="ReservationInfoSection" list="resInfoList" entry="resInfo"><widgets><container>
-                        <link url="assetDetail" text="Asset ${resInfo.existingRes.assetId}" parameter-map="[assetId:resInfo.existingRes.assetId]" link-type="anchor"/>
+                        <link url="assetDetail" text="Asset ${resInfo.existingRes.assetId}" parameter-map="{assetId:resInfo.existingRes.assetId}" link-type="anchor"/>
                         <label text=" - Res: ${ec.l10n.format(resInfo.existingRes.quantity, null)}, Not Avail: ${ec.l10n.format(resInfo.existingRes.quantityNotAvailable, null)}, Not Issued: ${ec.l10n.format(resInfo.existingRes.quantityNotIssued, null)}"
-                                type="span" style="${resInfo.existingRes.quantityNotAvailable ? 'text-danger' : ''}"/>
+                                type="span" style="${toDecimal(resInfo.existingRes.quantityNotAvailable ?? 0).isZero() ? '' : 'text-danger'}"/>
                         <container>
                             <label text="Lot" type="strong" condition="resInfo.assetLot?.lotId"/>
                             <label text="${ec.resource.expand('LotNameTemplate', '', resInfo.assetLot)}" condition="resInfo.assetLot?.lotId"/>
                         </container>
                     </container></widgets></section-iterate>
-                    <label text="Multiple lots ${lotIdSet}" condition="singleLot &amp;&amp; lotIdSet.size() &gt; 1" type="div" style="text-danger"/>
+                    <label text="Multiple lots ${lotIdSet.join(', ')}" condition="singleLot &amp;&amp; lotIdSet?.length &gt; 1" type="div" style="text-danger"/>
                     <label text="Oldest lot ${ec.l10n.format(oldestLotExpire, 'yyyy-MM-dd')} older than last lot expire ${ec.l10n.format(newerThanExpireDate, 'yyyy-MM-dd')}"
                             condition="newerInventory &amp;&amp; newerThanExpireDate!=null &amp;&amp; oldestLotExpire!=null &amp;&amp; oldestLotExpire &lt; newerThanExpireDate"
                             type="div" style="text-danger"/>
                     <dynamic-dialog id="ItemReserveDialog" button-text="Reserve Assets" transition="ItemReserve" width="960"
                             condition="partEditable || orderPart.statusId == 'OrderApproved'"/>
-                    <link url="removeOrderItemReservations" text="" btn-type="danger" icon="fa fa-trash" condition="resInfoList"
+                    <link url="removeOrderItemReservations" text="" btn-type="danger" icon="fa fa-trash" condition="resInfoList?.length"
                             confirmation="Remove inventory reservations for item ${orderItemSeqId}?"/>
                 </conditional-field>
                 <default-field><display text=" "/></default-field>
@@ -359,7 +358,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <label text="OrderDetailItemReturnable" type="div"/>
             </default-field></field>
             <field name="returnItem">
-                <conditional-field condition="openReturnList &amp;&amp; returnableOut.returnableQuantity &gt; 0">
+                <conditional-field condition="openReturnList?.length &amp;&amp; toDecimal(returnableOut.returnableQuantity ?? 0).compare(0) &gt; 0">
                     <dynamic-dialog id="ReturnItemCtr" button-text="Return" transition="ReturnItem">
                         <parameter name="orderId"/><parameter name="orderItemSeqId" from="orderItem.orderItemSeqId"/></dynamic-dialog>
                 </conditional-field>
@@ -372,8 +371,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <link url="deleteItem" text="" btn-type="danger" icon="fa fa-trash" condition="partEditable &amp;&amp; itemCanDelete" confirmation="Delete item ${orderItemSeqId}?"/>
                 <link url="cancelOrderItem" text="Close" btn-type="warning" link-type="hidden-form"
                         confirmation="Really close item? Quantity will be reduced to quantity shipped and remaining quantity will be cancelled."
-                        condition="isProductItemType &amp;&amp; itemQuantityNotShipped &amp;&amp; orderPart.statusId in ['OrderOpen', 'OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderHold']"
-                        parameter-map="[orderItem:null]"/>
+                        condition="isProductItemType &amp;&amp; !toDecimal(itemQuantityNotShipped ?? 0).isZero() &amp;&amp; ['OrderOpen', 'OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderHold'].includes(orderPart.statusId)"
+                        parameter-map="{orderItem:null}"/>
             </default-field></field>
 
             <field name="findButton"><header-field title="Find"><submit/></header-field></field>

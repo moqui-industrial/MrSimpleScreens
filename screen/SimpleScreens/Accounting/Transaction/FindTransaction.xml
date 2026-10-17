@@ -78,7 +78,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <row-actions>
                 <service-call name="mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance"
-                        in-map="[acctgTransId:acctgTransId]" out-map="context"/>
+                        in-map="{acctgTransId:acctgTransId}" out-map="context"/>
             </row-actions>
 
             <field name="transactionDate"><header-field show-order-by="true"><date-period/></header-field>
@@ -137,10 +137,10 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="reversedByAcctgTransId"><header-field title="Rev By" show-order-by="true"><text-line size="20"/></header-field>
                 <default-field><link url="editTransaction" text="${reversedByAcctgTransId}" link-type="anchor" condition="reversedByAcctgTransId"
-                        parameter-map="[acctgTransId:reversedByAcctgTransId]"/></default-field></field>
+                        parameter-map="{acctgTransId:reversedByAcctgTransId}"/></default-field></field>
             <field name="reverseOfAcctgTransId"><header-field title="Rev Of" show-order-by="true"><text-line size="20"/></header-field>
                 <default-field><link url="editTransaction" text="${reverseOfAcctgTransId}" link-type="anchor" condition="reverseOfAcctgTransId"
-                        parameter-map="[acctgTransId:reverseOfAcctgTransId]"/></default-field></field>
+                        parameter-map="{acctgTransId:reverseOfAcctgTransId}"/></default-field></field>
 
             <field name="isPosted">
                 <header-field title="Posted" show-order-by="true"><drop-down allow-empty="true"><option key="Y"/><option key="N"/></drop-down></header-field>

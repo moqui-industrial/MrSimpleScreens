@@ -50,7 +50,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <container-row><row-col lg="7">
-            <link url="validateAddress" text="Validate Address" parameter-map="[facilityId:facilityId, contactMechId:contactInfo.postalContactMechId]"
+            <link url="validateAddress" text="Validate Address" parameter-map="{facilityId:facilityId, contactMechId:contactInfo.postalContactMechId}"
                     condition="contactInfo.postalContactMech &amp;&amp; (!contactInfo.postalContactMech.trustLevelEnumId || contactInfo.postalContactMech?.trustLevelEnumId == 'CmtlNew')"/>
 
             <form-single name="EditFacilityForm" map="facility" transition="updateFacility">
@@ -65,9 +65,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></default-field></field>
                 <field name="parentFacilityId"><default-field title="Parent Facility">
                     <drop-down allow-empty="true"><dynamic-options transition="getFacilityList" server-search="true" min-length="0"
-                            parameter-map="[parentFacilityId:null, facilityTypeEnumId:null, ownerPartyId:ownerPartyId]"/></drop-down>
+                            parameter-map="{parentFacilityId:null, facilityTypeEnumId:null, ownerPartyId:ownerPartyId}"/></drop-down>
                     <link url="editFacility" text="FacilityNameTemplate" entity-name="mantle.facility.Facility" link-type="anchor"
-                            condition="parentFacilityId" parameter-map="[facilityId:parentFacilityId]"/>
+                            condition="parentFacilityId" parameter-map="{facilityId:parentFacilityId}"/>
                 </default-field></field>
 
                 <field name="openedDate"><default-field title="Opened"><date-time type="date"/></default-field></field>
@@ -83,19 +83,19 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-options></drop-down>
                 </default-field></field>
 
-                <field name="assetAllowOtherOwner"><conditional-field title="Asset Allow Other Owner" condition="facilityTypeEnumId in ['FcTpWarehouse', 'FcTpRetailStore']"
+                <field name="assetAllowOtherOwner"><conditional-field title="Asset Allow Other Owner" condition="['FcTpWarehouse', 'FcTpRetailStore'].includes(facilityTypeEnumId)"
                         tooltip="If Y don't filter by asset owner when reserving inventory">
                     <drop-down allow-empty="true"><option key="Y"/><option key="N"/></drop-down>
                 </conditional-field></field>
-                <field name="assetAllowIssueOverQoh"><conditional-field title="Asset Allow Issue Over QOH" condition="facilityTypeEnumId in ['FcTpWarehouse', 'FcTpRetailStore']"
+                <field name="assetAllowIssueOverQoh"><conditional-field title="Asset Allow Issue Over QOH" condition="['FcTpWarehouse', 'FcTpRetailStore'].includes(facilityTypeEnumId)"
                         tooltip="If Y do automatic physical inventory to get QOH back to zero after issuance, otherwise error on pack/issue if QOH not sufficient">
                     <drop-down allow-empty="true"><option key="Y"/><option key="N"/></drop-down>
                 </conditional-field></field>
-                <field name="assetInventoryLocRequire"><conditional-field title="Require Inventory Location" condition="facilityTypeEnumId in ['FcTpWarehouse', 'FcTpRetailStore']"
+                <field name="assetInventoryLocRequire"><conditional-field title="Require Inventory Location" condition="['FcTpWarehouse', 'FcTpRetailStore'].includes(facilityTypeEnumId)"
                         tooltip="If Y a Location must be specified for all Inventory type Assets on receive and move">
                     <drop-down allow-empty="true"><option key="Y"/><option key="N"/></drop-down>
                 </conditional-field></field>
-                <field name="defaultDaysToShip"><conditional-field title="Default Days to Ship" condition="facilityTypeEnumId in ['FcTpWarehouse', 'FcTpRetailStore']">
+                <field name="defaultDaysToShip"><conditional-field title="Default Days to Ship" condition="['FcTpWarehouse', 'FcTpRetailStore'].includes(facilityTypeEnumId)">
                     <text-line size="5"/></conditional-field></field>
 
                 <field name="toName"><default-field><text-line size="50"/></default-field></field>
@@ -118,7 +118,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </drop-down></default-field>
                 </field>
                 <field name="addressTrust"><default-field>
-                    <display text="${contactInfo.postalTrustLevelEnum?.description ?: 'New'} ${contactInfo.postalContactMech?.validateMessage?:''}"/>
+                    <display text="${contactInfo.postalTrustLevelEnum?.description || 'New'} ${contactInfo.postalContactMech?.validateMessage||''}"/>
                 </default-field></field>
 
                 <field name="latitude"><default-field title="" tooltip="Latitude"><text-line size="15"/></default-field></field>
@@ -189,7 +189,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find-one entity-name="mantle.party.PersonWithUserAccount" value-field="paua">
                             <field-map field-name="userId" from="facilityNote.userId"/></entity-find-one>
                     </actions><widgets>
-                        <label text="By ${paua?.firstName?:''} ${paua?.lastName?:''} (${paua?.username ?: facilityNote.userId}) at ${ec.l10n.format(facilityNote.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
+                        <label text="By ${paua?.firstName||''} ${paua?.lastName||''} (${paua?.username || facilityNote.userId}) at ${ec.l10n.format(facilityNote.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
                         <section name="UpdateNoteSection" condition="facilityNote.userId == ec.user.userId"><widgets>
                             <container-dialog id="UpdateNoteContainer" button-text="Edit Note">
                                 <form-single name="UpdateNoteForm" transition="updateFacilityNote" map="facilityNote">

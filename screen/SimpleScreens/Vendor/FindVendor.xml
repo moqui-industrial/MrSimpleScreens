@@ -57,14 +57,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find entity-name="mantle.party.PartyRoleAndType" list="roleList">
                     <econdition field-name="partyId"/>
                 </entity-find>
-                <iterate list="roleList" entry="role"><script>if (roleStr) { roleStr += ", " }; if (role.description) { roleStr = (roleStr?:'') + role.description }</script></iterate>
+                <iterate list="roleList" entry="role"><script>if (roleStr) { roleStr += ", " }; if (role.description) { roleStr = (roleStr||'') + role.description }</script></iterate>
             </row-actions>
             <field name="editVendorLink"><header-field title="Vendor/Org" show-order-by="true"/><default-field>
                 <link url="editVendor" text="PartyNameTemplate" link-type="anchor"/>
             </default-field></field>
-            <field name="roleTypeId"><default-field title="Roles"><display text="${roleStr?:''}"/></default-field></field>
+            <field name="roleTypeId"><default-field title="Roles"><display text="${roleStr||''}"/></default-field></field>
             <field name="disabled"><header-field title="Disabled?" show-order-by="true"/>
-                <default-field><display text="${disabled?:'N'}"/></default-field></field>
+                <default-field><display text="${disabled||'N'}"/></default-field></field>
         </form-list>
     </widgets>
 </screen>

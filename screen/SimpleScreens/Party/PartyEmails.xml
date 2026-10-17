@@ -29,7 +29,7 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- for matches on *UserId -->
         <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
             <econdition field-name="partyId"/></entity-find>
-        <set field="userIdList" from="userAccountList*.userId"/>
+        <set field="userIdList" from="userAccountList.map(it => it.userId)"/>
 
         <!-- for matches on email address -->
         <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="emailPcmList">
@@ -38,12 +38,12 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress"/>
             <select-field field-name="infoString"/>
         </entity-find>
-        <set field="emailAddressSet" from="new HashSet(emailPcmList*.infoString)"/>
+        <set field="emailAddressSet" from="Array.from(new Set(emailPcmList.map(it => it.infoString)))"/>
     </actions>
     <widgets>
-        <section name="HasUserOrEmailAddress" condition="userIdList || emailAddressSet"><widgets>
-            <label text="User Accounts: ${userAccountList*.username.join(', ')}" condition="userAccountList"/>
-            <label text="Email Addresses: ${emailAddressSet.join(', ')}" condition="emailAddressSet"/>
+        <section name="HasUserOrEmailAddress" condition="userIdList?.length || emailAddressSet?.length"><widgets>
+            <label text="User Accounts: ${userAccountList.map(it => it.username).join(', ')}" condition="(userAccountList?.length > 0)"/>
+            <label text="Email Addresses: ${emailAddressSet.join(', ')}" condition="emailAddressSet?.length"/>
 
             <form-list name="EmailMessageList" list="emailMessageList" skip-form="true" header-dialog="true">
                 <entity-find entity-name="moqui.basic.email.EmailMessage" list="emailMessageList">
@@ -87,10 +87,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <default-field><display-entity entity-name="moqui.basic.Enumeration"/></default-field>
                 </field>
                 <field name="viewLink"><default-field title=""><link url="EmailMessage" text="View Message"
-                        parameter-map="[emailMessageId:emailMessageId]" link-type="anchor-button" target-window="_blank"/>
+                        parameter-map="{emailMessageId:emailMessageId}" link-type="anchor-button" target-window="_blank"/>
                 </default-field></field>
                 <field name="sendLink"><default-field title=""><link url="sendEmailMessage" text="Send/Resend"
-                        parameter-map="[emailMessageId:emailMessageId]" condition="!(statusId in ['ES_DRAFT', 'ES_CANCELLED'])"
+                        parameter-map="{emailMessageId:emailMessageId}" condition="!(['ES_DRAFT', 'ES_CANCELLED'].includes(statusId))"
                         confirmation="Send this email message? Note that this may not include attachments from original email."/>
                 </default-field></field>
 

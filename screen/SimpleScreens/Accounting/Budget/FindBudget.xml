@@ -41,7 +41,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </default-field></field>
                     <field name="timePeriodId"><default-field title="Time Period"><drop-down>
                         <dynamic-options transition="getOrgFiscalPeriods" value-field="timePeriodId" label-field="periodName"
-                                parameter-map="[timePeriodTypeId:'FiscalYear']">
+                                parameter-map="{timePeriodTypeId:'FiscalYear'}">
                             <depends-on field="organizationPartyId"/></dynamic-options>
                     </drop-down></default-field></field>
                     <field name="subTimePeriodTypeId"><default-field title="Sub Period Type">

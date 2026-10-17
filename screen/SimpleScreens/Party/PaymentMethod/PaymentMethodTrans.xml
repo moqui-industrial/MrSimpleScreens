@@ -30,11 +30,11 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
 
     <transition name="reconcile"><service-call name="mantle.account.ReconciliationServices.reconcile#PaymentMethodTrans"/>
-        <default-response url="." parameter-map="ec.web.requestParameters + [fitId:null, paymentId:null, acctgTransId:null, moquiFormName:null]"/></transition>
+        <default-response url="." parameter-map="Object.assign({}, ec.web.requestParameters, {fitId:null, paymentId:null, acctgTransId:null, moquiFormName:null})"/></transition>
     <transition name="unreconcile"><service-call name="mantle.account.ReconciliationServices.unreconcile#PaymentMethodTrans"/>
-        <default-response url="." parameter-map="ec.web.requestParameters + [fitId:null, submitButton:null]"/></transition>
+        <default-response url="." parameter-map="Object.assign({}, ec.web.requestParameters, {fitId:null, submitButton:null})"/></transition>
     <transition name="noReconcile"><service-call name="mantle.account.ReconciliationServices.noReconcile#PaymentMethodTrans"/>
-        <default-response url="." parameter-map="ec.web.requestParameters + [fitId:null, moquiFormName:null, submitButton:null]"/></transition>
+        <default-response url="." parameter-map="Object.assign({}, ec.web.requestParameters, {fitId:null, moquiFormName:null, submitButton:null})"/></transition>
 
     <transition name="uploadOfxVersion1"><service-call name="mantle.account.OfxServices.upload#OfxVersion1"/>
         <default-response url="."/></transition>
@@ -101,12 +101,12 @@ along with this software (see the LICENSE.md file). If not, see
             </form-single>
         </container-dialog>
 
-        <link url="findPayment" text="Payments From" parameter-map="[paymentMethodId:paymentMethodId]"/>
-        <link url="findPayment" text="Payments To" parameter-map="[toPaymentMethodId:paymentMethodId]"/>
-        <link url="findPayment" text="Payments Not Rec" parameter-map="[eitherPaymentMethodId:paymentMethodId,
-                onlyNotRec:'Y', statusId:'PmntDelivered,PmntConfirmed', statusId_op:'in']"/>
+        <link url="findPayment" text="Payments From" parameter-map="{paymentMethodId:paymentMethodId}"/>
+        <link url="findPayment" text="Payments To" parameter-map="{toPaymentMethodId:paymentMethodId}"/>
+        <link url="findPayment" text="Payments Not Rec" parameter-map="{eitherPaymentMethodId:paymentMethodId,
+                onlyNotRec:'Y', statusId:'PmntDelivered,PmntConfirmed', statusId_op:'in'}"/>
         <link url="findTransactionEntry" text="GL Trans Not Rec" condition="paymentMethod?.glAccountId"
-                parameter-map="[glAccountId:paymentMethod?.glAccountId, onlyNotRec:'Y']"/>
+                parameter-map="{glAccountId:paymentMethod?.glAccountId, onlyNotRec:'Y'}"/>
 
         <form-list name="TransList" list="transList" transition="updatePaymentMethodTrans" skip-form="true"
                    header-dialog="true" saved-finds="true" select-columns="true" show-csv-button="true" show-xlsx-button="true">
@@ -159,9 +159,9 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="transAmount"><header-field><range-find/></header-field>
                 <default-field><display currency-unit-field="paymentMethod.currencyUomId" style="text-strong"/></default-field></field>
             <field name="paymentAmount" from="payment?.amount"><default-field>
-                <display currency-unit-field="payment?.amountUomId" style="${payment?.amount == transAmount?.abs() ? 'text-success' : 'text-danger'}"/></default-field></field>
+                <display currency-unit-field="payment?.amountUomId" style="${payment?.amount != null &amp;&amp; transAmount != null &amp;&amp; toDecimal(payment.amount).compare(toDecimal(transAmount).abs()) == 0 ? 'text-success' : 'text-danger'}"/></default-field></field>
             <field name="glTransAmount" from="acctgTransEntry?.amount"><default-field title="GL Trans Amount">
-                <display currency-unit-field="acctgTrans?.amountUomId" style="${acctgTransEntry?.amount == transAmount?.abs() ? 'text-success' : 'text-danger'}"/></default-field></field>
+                <display currency-unit-field="acctgTrans?.amountUomId" style="${acctgTransEntry?.amount != null &amp;&amp; transAmount != null &amp;&amp; toDecimal(acctgTransEntry.amount).compare(toDecimal(transAmount).abs()) == 0 ? 'text-success' : 'text-danger'}"/></default-field></field>
 
             <field name="fitId">
                 <header-field title="FIT ID" show-order-by="true"><text-find size="10" hide-options="true"/></header-field>
@@ -169,7 +169,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="transType">
                 <header-field show-order-by="true"><text-find size="8" hide-options="true"/></header-field>
-                <default-field><display text="${transTypeEnum?.description ?: transType}"/></default-field>
+                <default-field><display text="${transTypeEnum?.description || transType}"/></default-field>
             </field>
 
             <field name="checkNumber">
@@ -205,7 +205,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="paymentInfo"><default-field>
                 <!-- moved to separate fields: ${ec.l10n.formatCurrency(payment?.amount, payment?.amountUomId)} ${ec.l10n.format(payment?.effectiveDate, 'yyyy-MM-dd')} Ref ${payment?.paymentRefNum ?: 'N/A'} -->
                 <link url="editPayment" text="Payment ${paymentId} ${payment.status?.description}"
-                        link-type="anchor" condition="payment" style="${payment.statusId in ['PmntDelivered', 'PmntConfirmed'] ? '' : 'text-danger'}"/>
+                        link-type="anchor" condition="payment" style="${['PmntDelivered', 'PmntConfirmed'].includes(payment.statusId) ? '' : 'text-danger'}"/>
                 <label text="From ${ec.resource.expand('PartyNameTemplate', null, pmtFromParty)}" condition="pmtFromParty"/>
                 <label text="To ${ec.resource.expand('PartyNameTemplate', null, pmtToParty)}" condition="pmtToParty"/>
 
@@ -220,7 +220,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <field name="transActions"><default-field title="">
                 <dynamic-dialog id="CreatePmtDialog" button-text="New Payment" transition="CreatePayment"
-                        parameter-map="[paymentMethodId:paymentMethodId, fitId:fitId, pageIndex:pageIndex]"
+                        parameter-map="{paymentMethodId:paymentMethodId, fitId:fitId, pageIndex:pageIndex}"
                         condition="!(paymentId || acctgTransId || noReconcile == 'Y')"/>
                 <container-dialog id="ManRecDialog" button-text="Manual Rec" title="Manual Reconcile"
                         condition="(!paymentId || !acctgTransId) &amp;&amp; noReconcile != 'Y'">
@@ -242,9 +242,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </form-single>
                 </container-dialog>
 
-                <link url="noReconcile" text="No Rec" parameter-map="ec.web.requestParameters + [fitId:fitId, pageIndex:pageIndex]"
+                <link url="noReconcile" text="No Rec" parameter-map="Object.assign({}, ec.web.requestParameters, {fitId:fitId, pageIndex:pageIndex})"
                         condition="!(paymentId || acctgTransId || noReconcile == 'Y')"/>
-                <link url="unreconcile" text="Unrec" parameter-map="ec.web.requestParameters + [fitId:fitId, pageIndex:pageIndex]"
+                <link url="unreconcile" text="Unrec" parameter-map="Object.assign({}, ec.web.requestParameters, {fitId:fitId, pageIndex:pageIndex})"
                         condition="paymentId || acctgTransId || noReconcile == 'Y'"/>
             </default-field></field>
 

@@ -23,7 +23,7 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <!-- NOTE: excludeFilter is set in SimpleReport.xml (the parent screen) -->
         <set field="entityInfoList" from="ec.entity.getAllEntitiesInfo('entityName', null, false, true)"/>
-        <if condition="excludeFilter"><set field="entityInfoList" from="entityInfoList.findAll({ !it.fullEntityName.matches(excludeFilter) })"/></if>
+        <if condition="excludeFilter"><set field="entityInfoList" from="entityInfoList.filter(it => !new RegExp('^(?:' + excludeFilter + ')$').test(it.fullEntityName))"/></if>
     </actions>
     <widgets>
         <container-dialog id="CreateDialog" button-text="Create Report">
@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="documentName"><default-field title="Name"><text-line size="60"/></default-field></field>
                 <field name="primaryEntityName"><default-field title="Primary Entity"><drop-down>
                     <list-options list="entityInfoList" key="${fullEntityName}"
-                            text="${org.moqui.util.StringUtilities.camelCaseToPretty(entityName)}"/>
+                            text="${StringUtilities.camelCaseToPretty(entityName)}"/>
                 </drop-down></default-field></field>
                 <field name="userGroupId"><default-field title="User Group"><drop-down>
                     <entity-options key="${userGroupId}" text="${description}">
@@ -57,12 +57,12 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="primaryEntityName">
                 <header-field title="Primary Entity" show-order-by="true"><drop-down allow-empty="true">
                     <entity-options key="${primaryEntityName}"
-                            text="${org.moqui.util.StringUtilities.camelCaseToPretty(primaryEntityName.substring(primaryEntityName.lastIndexOf('.')+1))}">
+                            text="${StringUtilities.camelCaseToPretty(primaryEntityName.substring(primaryEntityName.lastIndexOf('.')+1))}">
                         <entity-find entity-name="moqui.entity.document.DataDocument" distinct="true">
                             <select-field field-name="primaryEntityName"/><order-by field-name="primaryEntityName"/></entity-find>
                     </entity-options>
                 </drop-down></header-field>
-                <default-field><display text="${org.moqui.util.StringUtilities.camelCaseToPretty(primaryEntityName.substring(primaryEntityName.lastIndexOf('.')+1))}"/></default-field>
+                <default-field><display text="${StringUtilities.camelCaseToPretty(primaryEntityName.substring(primaryEntityName.lastIndexOf('.')+1))}"/></default-field>
             </field>
 
             <field name="findButton"><header-field><submit/></header-field></field>

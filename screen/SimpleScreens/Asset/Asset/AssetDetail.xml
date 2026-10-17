@@ -42,8 +42,8 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <container-row><row-col lg="5">
-            <link url="findTransactionEntry" text="TX Entries" link-type="anchor-button" parameter-map="[assetId:assetId]"/>
-            <link url="checkAssetReservations" text="Check Reservations" parameter-map="[assetId:assetId]"/>
+            <link url="findTransactionEntry" text="TX Entries" link-type="anchor-button" parameter-map="{assetId:assetId}"/>
+            <link url="checkAssetReservations" text="Check Reservations" parameter-map="{assetId:assetId}"/>
             <container-dialog id="UpdateCostDialog" button-text="Update Cost &amp; Owner">
                 <label text="This will update all GL transactions for this Asset including receipt, issuance, and physical inventory changes."/>
                 <label text="NOTE: this should only be used to correct data as it rewrites the accounting history for this asset. Do not use to change ownership for a business transaction like a sale." type="p"/>
@@ -70,7 +70,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="changedByUserId"><default-field title="User">
                         <display-entity text="UsernameTemplate" entity-name="mantle.party.PersonWithUserAccount" key-field-name="userId"/></default-field></field>
                     <field name="changedFieldName"><default-field title="Field">
-                        <display text="${org.moqui.util.StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
+                        <display text="${StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
                     <field name="oldValueText"><default-field title="From">
                         <display text="${ec.entity.formatFieldString(changedEntityName, changedFieldName, oldValueText)}"/></default-field></field>
                     <field name="newValueText"><default-field title="To">
@@ -96,9 +96,9 @@ along with this software (see the LICENSE.md file). If not, see
                 </default-field></field>
 
                 <field name="quantityOnHandTotal"><default-field title="QOH">
-                    <display text="${ec.l10n.format(asset.quantityOnHandTotal, null)} (${product?.'Amount#moqui.basic.Uom'?.description?:'each'})"/></default-field></field>
+                    <display text="${ec.l10n.format(asset.quantityOnHandTotal, null)} (${product?.['Amount#moqui.basic.Uom']?.description||'each'})"/></default-field></field>
                 <field name="availableToPromiseTotal"><default-field title="ATP">
-                    <display text="${ec.l10n.format(asset.availableToPromiseTotal, null)} (${product?.'Amount#moqui.basic.Uom'?.description?:'each'})"/></default-field></field>
+                    <display text="${ec.l10n.format(asset.availableToPromiseTotal, null)} (${product?.['Amount#moqui.basic.Uom']?.description||'each'})"/></default-field></field>
 
                 <field name="facilityId"><default-field title="Facility">
                     <link url="editFacility" entity-name="mantle.facility.Facility" text="FacilityNameTemplate" link-type="anchor"/></default-field></field>
@@ -116,16 +116,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- <field name="acquireCostUomId"><default-field title="Cost Unit"><display-entity entity-name="moqui.basic.Uom"/></default-field></field> -->
                 <field name="acquireCost"><default-field>
                     <display currency-unit-field="acquireCostUomId"/>
-                    <link url="orderDetail" text="PO #${asset.acquireOrderId?:'N/A'}" parameter-map="[orderId:asset.acquireOrderId]"
+                    <link url="orderDetail" text="PO #${asset.acquireOrderId||'N/A'}" parameter-map="{orderId:asset.acquireOrderId}"
                             link-type="anchor" condition="asset.acquireOrderId"/>
                 </default-field></field>
 
                 <field name="acquireShipmentId"><conditional-field title="From Shipment" condition="acquireShipmentId">
                     <link url="shipmentDetail" text="${asset.acquireShipmentId}" link-type="anchor" condition="asset.acquireShipmentId"
-                            parameter-map="[shipmentId:asset.acquireShipmentId]"/></conditional-field></field>
+                            parameter-map="{shipmentId:asset.acquireShipmentId}"/></conditional-field></field>
                 <field name="acquireWorkEffortId"><conditional-field title="From Run" condition="acquireWorkEffortId">
                     <link url="productionRun" text="${asset.acquireWorkEffortId}" link-type="anchor" condition="asset.acquireWorkEffortId"
-                            parameter-map="[workEffortId:asset.acquireWorkEffortId]"/></conditional-field></field>
+                            parameter-map="{workEffortId:asset.acquireWorkEffortId}"/></conditional-field></field>
 
                 <field name="receivedDate"><default-field title="Received"><display/></default-field></field>
                 <field name="acquiredDate"><default-field title="Acquired"><date-time/></default-field></field>
@@ -134,9 +134,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="lotId"><default-field title="Lot"><drop-down allow-empty="true">
                     <dynamic-options transition="getLotList" server-search="true" min-length="2"/></drop-down></default-field></field>
 
-                <field name="serialNumber"><conditional-field condition="isFixedAsset || hasQuantity != 'Y' || quantityOnHandTotal == 1.0">
+                <field name="serialNumber"><conditional-field condition="isFixedAsset || hasQuantity != 'Y' || toDecimal(quantityOnHandTotal ?? 0).compare(1) == 0">
                     <text-line size="40"/></conditional-field></field>
-                <field name="softIdentifier"><conditional-field title="Soft Identifier" condition="isFixedAsset || hasQuantity != 'Y' || quantityOnHandTotal == 1.0">
+                <field name="softIdentifier"><conditional-field title="Soft Identifier" condition="isFixedAsset || hasQuantity != 'Y' || toDecimal(quantityOnHandTotal ?? 0).compare(1) == 0">
                     <text-line size="40"/></conditional-field></field>
 
                 <field name="assetName"><conditional-field title="Name" condition="isFixedAsset">
@@ -201,29 +201,29 @@ along with this software (see the LICENSE.md file). If not, see
                             <conditional-field condition="assetReceipt">
                                 <label text="Receipt #${assetReceiptId}"/>
                                 <link url="shipmentDetail" text="Shipment #${assetReceipt.shipmentId}"
-                                        parameter-map="[shipmentId:assetReceipt.shipmentId]" link-type="anchor"
+                                        parameter-map="{shipmentId:assetReceipt.shipmentId}" link-type="anchor"
                                         condition="assetReceipt.shipmentId"/>
                                 <link url="orderDetail" text="PO #${assetReceipt.orderId}"
-                                        parameter-map="[orderId:assetReceipt.orderId]" link-type="anchor"
+                                        parameter-map="{orderId:assetReceipt.orderId}" link-type="anchor"
                                         condition="assetReceipt.orderId"/>
                             </conditional-field>
                             <conditional-field condition="assetIssuance">
                                 <label text="Issuance #${assetIssuanceId}"/>
                                 <link url="shipmentDetail" text="Shipment #${assetIssuance.shipmentId}"
-                                        parameter-map="[shipmentId:assetIssuance.shipmentId]" link-type="anchor"
+                                        parameter-map="{shipmentId:assetIssuance.shipmentId}" link-type="anchor"
                                         condition="assetIssuance.shipmentId"/>
                                 <link url="orderDetail" text="SO #${assetIssuance.orderId}"
-                                        parameter-map="[orderId:assetIssuance.orderId]" link-type="anchor"
+                                        parameter-map="{orderId:assetIssuance.orderId}" link-type="anchor"
                                         condition="assetIssuance.orderId"/>
                             </conditional-field>
                             <conditional-field condition="assetReservationId">
                                 <label text="Reservation #${assetReservationId}"/>
                                 <label text=" (reservation removed)" condition="!assetReservation"/>
-                                <link url="orderDetail" text="Order #${assetReservation?.orderId ?: orderId}" link-type="anchor"
-                                        parameter-map="[orderId:(assetReservation?.orderId ?: orderId)]" condition="assetReservation?.orderId ?: orderId"/>
+                                <link url="orderDetail" text="Order #${assetReservation?.orderId || orderId}" link-type="anchor"
+                                        parameter-map="{orderId:(assetReservation?.orderId || orderId)}" condition="assetReservation?.orderId || orderId"/>
                             </conditional-field>
                             <conditional-field condition="otherAssetId">
-                                <link url="." text="Move, other asset: ${otherAssetId}" link-type="anchor" parameter-map="[assetId:otherAssetId]"/>
+                                <link url="." text="Move, other asset: ${otherAssetId}" link-type="anchor" parameter-map="{assetId:otherAssetId}"/>
                             </conditional-field>
                             <conditional-field condition="physicalInventory">
                                 <label text="Physical Inventory #${physicalInventoryId} (${varianceReasonEnum?.description})"/>
@@ -236,7 +236,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <section name="AssetDepreciation" condition="asset.depreciationTypeEnumId"><actions>
                 <service-call name="mantle.ledger.AssetAutoPostServices.calculate#FixedAssetDepreciation"
-                        in-map="[assetId:assetId]" out-map="curDepOut"/>
+                        in-map="{assetId:assetId}" out-map="curDepOut"/>
                 <entity-find entity-name="mantle.product.asset.AssetDepreciation" list="assetDepreciationList">
                     <econdition field-name="assetId"/></entity-find>
             </actions><widgets>
@@ -279,7 +279,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="yearBeginDepreciation"><default-field title="Year Begin">
                             <display currency-unit-field="asset.acquireCostUomId"/></default-field></field>
                         <field name="acctgTransId"><default-field title="TX"><link url="editTransaction"
-                                text="${acctgTransId}" link-type="anchor" parameter-map="[acctgTransId:acctgTransId]"/></default-field></field>
+                                text="${acctgTransId}" link-type="anchor" parameter-map="{acctgTransId:acctgTransId}"/></default-field></field>
                         <form-list-column><field-ref name="timePeriodId"/></form-list-column>
                         <form-list-column><field-ref name="usefulLifeYears"/><field-ref name="yearsRemaining"/></form-list-column>
                         <form-list-column><field-ref name="monthlyDepreciation"/><field-ref name="annualDepreciation"/></form-list-column>

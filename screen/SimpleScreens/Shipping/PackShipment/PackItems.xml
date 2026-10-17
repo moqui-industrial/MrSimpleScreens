@@ -45,20 +45,20 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getShipmentLabel" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
 
     <actions>
-        <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentDisplayInfo" in-map="[shipmentId:shipmentId]" out-map="context"/>
+        <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>
         <if condition="!isOutgoing &amp;&amp; !isTransfer"><return error="true" message="Shipment ${shipmentId} is not an outgoing or transfer shipment"/></if>
-        <set field="statusPrePacked" from="shipment.statusId in ['ShipInput', 'ShipScheduled', 'ShipPicked']"/>
+        <set field="statusPrePacked" from="['ShipInput', 'ShipScheduled', 'ShipPicked'].includes(shipment.statusId)"/>
 
         <!-- maybe improve; session maintained active (or first package with no box/weight?) -->
-        <set field="activePackage" from="shipmentPackageList?.find({ it.weight == null || it.shipmentBoxTypeId == null })"/>
+        <set field="activePackage" from="shipmentPackageList?.find(it => it.weight == null || it.shipmentBoxTypeId == null)"/>
         <set field="activePackageSeqId" from="activePackage?.shipmentPackageSeqId"/>
         <if condition="activePackage != null">
-            <set field="activePackageRouteSeg" from="packageRouteSegList.find({ it.shipmentPackageSeqId == activePackage.shipmentPackageSeqId &amp;&amp; it.shipmentRouteSegmentSeqId == firstRouteSegment.shipmentRouteSegmentSeqId })"/>
-            <script>activePackageAndRouteSeg = new HashMap(activePackage); activePackageAndRouteSeg.putAll(activePackageRouteSeg)</script>
+            <set field="activePackageRouteSeg" from="packageRouteSegList.find(it => it.shipmentPackageSeqId == activePackage.shipmentPackageSeqId &amp;&amp; it.shipmentRouteSegmentSeqId == firstRouteSegment.shipmentRouteSegmentSeqId)"/>
+            <script>activePackageAndRouteSeg = Object.assign({}, activePackage, activePackageRouteSeg)</script>
         </if>
 
         <!-- get all products for filter form -->
-        <set field="allProductIds" from="shipmentItemDetailList*.productId"/>
+        <set field="allProductIds" from="shipmentItemDetailList.map(it => it.productId)"/>
         <entity-find entity-name="mantle.product.Product" list="allProductList">
             <econdition field-name="productId" operator="in" from="allProductIds"/>
             <order-by field-name="pseudoId"/>
@@ -68,21 +68,21 @@ along with this software (see the LICENSE.md file). If not, see
             <filter-map-list list="shipmentItemDetailList"><field-map field-name="productId" from="filterProductId"/></filter-map-list>
         </if>
         <if condition="onlyRemaining == 'Y'">
-            <set field="tempItemDetailList" from="new ArrayList()"/>
+            <set field="tempItemDetailList" from="[]"/>
             <iterate list="shipmentItemDetailList" entry="sid">
                 <if condition="isOutgoing || isTransfer">
-                    <if condition="(sid.quantity - (sid.quantityTotal ?: 0.0)) &gt; 0.0">
-                        <script>tempItemDetailList.add(sid)</script><continue/></if>
+                    <if condition="toDecimal(sid.quantity).subtract(sid.quantityTotal ?? 0).compare(0) &gt; 0">
+                        <script>tempItemDetailList.push(sid)</script><continue/></if>
                 </if>
                 <if condition="isIncoming || isTransfer">
-                    <if condition="(sid.quantity - (sid.quantityAcceptedTotal ?: 0.0) - (sid.quantityRejectedTotal ?: 0.0)) &gt; 0.0">
-                        <script>tempItemDetailList.add(sid)</script><continue/></if>
+                    <if condition="toDecimal(sid.quantity).subtract(sid.quantityAcceptedTotal ?? 0).subtract(sid.quantityRejectedTotal ?? 0).compare(0) &gt; 0">
+                        <script>tempItemDetailList.push(sid)</script><continue/></if>
                 </if>
             </iterate>
             <set field="shipmentItemDetailList" from="tempItemDetailList"/>
         </if>
 
-        <set field="pageSize" from="pageSize ?: '10'"/>
+        <set field="pageSize" from="pageSize || '10'"/>
     </actions>
     <widgets>
         <container style="text-strong">
@@ -107,11 +107,11 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- unpack button -->
         <section-iterate name="ShipmentItemsSection" list="shipmentItemDetailList" entry="sid" paginate="true"><actions>
             <if condition="isOutgoing || isTransfer">
-                <set field="quantityPackRemaining" from="sid.quantity - (sid.quantityTotal ?: 0)"/>
+                <set field="quantityPackRemaining" from="toDecimal(sid.quantity).subtract(sid.quantityTotal ?? 0)"/>
                 <entity-find entity-name="mantle.product.issuance.AssetAndIssuance" list="assetIssuanceList">
                     <econdition field-name="shipmentId"/><econdition field-name="productId" from="sid.productId"/></entity-find>
             </if>
-            <set field="allowPack" from="(isOutgoing || isTransfer) &amp;&amp; shipment.statusId in ['ShipInput', 'ShipScheduled', 'ShipPicked'] &amp;&amp; quantityPackRemaining &gt; 0"/>
+            <set field="allowPack" from="(isOutgoing || isTransfer) &amp;&amp; ['ShipInput', 'ShipScheduled', 'ShipPicked'].includes(shipment.statusId) &amp;&amp; toDecimal(quantityPackRemaining ?? 0).compare(0) &gt; 0"/>
 
             <entity-find-one entity-name="moqui.basic.Uom" value-field="productUom">
                 <field-map field-name="uomId" from="sid.amountUomId"/></entity-find-one>
@@ -122,10 +122,10 @@ along with this software (see the LICENSE.md file). If not, see
 
             <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="packageContentList">
                 <econdition field-name="shipmentId"/><econdition field-name="productId" from="sid.productId"/></entity-find>
-            <set field="packageContentTotal" from="(packageContentList*.quantity).sum() ?: 0.0"/>
-            <set field="quantityNotInPackage" from="((BigDecimal) sid.quantity ?: 0.0) - packageContentTotal"/>
+            <set field="packageContentTotal" from="packageContentList.reduce((sum, it) => sum.add(it.quantity ?? 0), toDecimal(0))"/>
+            <set field="quantityNotInPackage" from="toDecimal(sid.quantity ?? 0).subtract(packageContentTotal)"/>
         </actions><widgets>
-            <container-box><box-header title="${ec.resource.expand('ProductNameTemplate', '', sid)} (Qty ${ec.l10n.format(sid.quantity ?: 0, '#.##')})"/><box-toolbar>
+            <container-box><box-header title="${ec.resource.expand('ProductNameTemplate', '', sid)} (Qty ${ec.l10n.format(sid.quantity || 0, '#.##')})"/><box-toolbar>
                 <section name="PackItemSection" condition="allowPack"><widgets>
                     <container-dialog id="PackItemContainer" button-text="Pack/Issue Item" type="success">
                         <form-single name="PackItemForm" transition="packShipmentProduct" map="sid" pass-through-parameters="true">
@@ -138,11 +138,11 @@ along with this software (see the LICENSE.md file). If not, see
                             </drop-down></default-field></field>
                             <field name="quantity" from="quantityPackRemaining">
                                 <default-field><text-line size="8"/></default-field></field>
-                            <field name="packDate" from="shipment.estimatedShipDate ?: ec.user.nowTimestamp">
+                            <field name="packDate" from="shipment.estimatedShipDate || ec.user.nowTimestamp">
                                 <default-field title="Pack Date"><date-time/></default-field></field>
                             <field name="assetId"><default-field title="Asset">
                                 <drop-down><dynamic-options transition="getAssetList" server-search="true" min-length="0"
-                                        parameter-map="[facilityId:firstRouteSegment.originFacilityId, productId:productId, assetTypeEnumId:null, excludeZeroQoh:'true']"/></drop-down>
+                                        parameter-map="{facilityId:firstRouteSegment.originFacilityId, productId:productId, assetTypeEnumId:null, excludeZeroQoh:'true'}"/></drop-down>
                             </default-field></field>
                             <field name="submitButton"><default-field title="Pack Quantity"><submit/></default-field></field>
                         </form-single>
@@ -152,7 +152,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </widgets></section>
             </box-toolbar><box-body>
                 <label condition="isOutgoing || isTransfer" type="p" style="text-strong"
-                        text="Packed/Issued: ${ec.l10n.format(sid.quantityTotal ?: 0, '#.##')}, Remaining: ${ec.l10n.format(quantityPackRemaining, '#.##')}  (Unit: ${productUom?.description ?: 'N/A'})"/>
+                        text="Packed/Issued: ${ec.l10n.format(sid.quantityTotal || 0, '#.##')}, Remaining: ${ec.l10n.format(quantityPackRemaining, '#.##')}  (Unit: ${productUom?.description || 'N/A'})"/>
                 <container-row>
                     <row-col lg="5">
                         <section name="ShipItemUpdateSection" condition="allowUpdate"><widgets>
@@ -190,12 +190,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <row-actions>
                             <entity-find entity-name="mantle.product.issuance.AssetReservation" list="existingResList">
                                 <econdition field-name="orderId"/><econdition field-name="orderItemSeqId"/></entity-find>
-                            <set field="resPackForm" from="allowPack &amp;&amp; quantityNotHandled &gt; 0.0 &amp;&amp; existingResList &amp;&amp; product.productTypeEnumId != 'PtPickAssembly'"/>
+                            <set field="resPackForm" from="allowPack &amp;&amp; toDecimal(quantityNotHandled ?? 0).compare(0) &gt; 0 &amp;&amp; existingResList?.length &gt; 0 &amp;&amp; product.productTypeEnumId != 'PtPickAssembly'"/>
                         </row-actions>
                         <field name="shipmentId"><default-field><hidden/></default-field></field>
                         <field name="shipmentItemSourceId"><default-field><hidden/></default-field></field>
                         <field name="orderId"><default-field title="Order Item">
-                            <link url="orderDetail" text="${orderId?:''}:${orderItemSeqId?:''}" link-type="anchor" condition="orderId"/></default-field></field>
+                            <link url="orderDetail" text="${orderId||''}:${orderItemSeqId||''}" link-type="anchor" condition="orderId"/></default-field></field>
 
                         <field name="quantitySis" from="quantity"><default-field title="Qty"><display/></default-field></field>
                         <field name="quantityNotHandled"><default-field title="Rem"><display/></default-field></field>
@@ -204,14 +204,14 @@ along with this software (see the LICENSE.md file). If not, see
                             <link url="editInvoice" text="${invoiceId?:''}:${invoiceItemSeqId?:''}" link-type="anchor" condition="invoiceId"/></default-field></field> -->
 
                         <field name="assetReservations">
-                            <conditional-field condition="existingResList">
+                            <conditional-field condition="(existingResList?.length > 0)">
                                 <section-iterate name="ReservationInfoSection" list="existingResList" entry="existingRes"><actions>
                                     <entity-find-one entity-name="mantle.product.asset.AssetLotAndMfgParty" value-field="assetLot">
                                         <field-map field-name="assetId" from="existingRes.assetId"/></entity-find-one>
                                 </actions><widgets>
                                     <container>
                                         <label text="Res: ${ec.l10n.format(existingRes.quantity, null)}, Not Avail: ${ec.l10n.format(existingRes.quantityNotAvailable, null)}, Not Issued: ${ec.l10n.format(existingRes.quantityNotIssued, null)}" type="span"/>
-                                        <link url="assetDetail" text="Asset ${existingRes.assetId}" parameter-map="[assetId:existingRes.assetId]" link-type="anchor"/>
+                                        <link url="assetDetail" text="Asset ${existingRes.assetId}" parameter-map="{assetId:existingRes.assetId}" link-type="anchor"/>
                                     </container>
                                     <label text="LotNameTemplate" text-map="assetLot" condition="assetLot?.lotId"/>
                                 </widgets></section-iterate>
@@ -247,7 +247,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="issuedDate"><default-field title="Issued Date"><display/></default-field></field>
 
                         <field name="orderId"><default-field title="Order Item">
-                            <link url="orderDetail" text="${orderId?:''}:${orderItemSeqId?:''}" link-type="anchor"/></default-field></field>
+                            <link url="orderDetail" text="${orderId||''}:${orderItemSeqId||''}" link-type="anchor"/></default-field></field>
                         <field name="assetId"><default-field title="Asset">
                             <link url="assetDetail" text="${assetId}" link-type="anchor"/></default-field></field>
                         <field name="assetReservationId">
@@ -260,9 +260,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <display-entity entity-name="mantle.product.asset.LotAndMfgParty" text="LotNameTemplate"/></default-field></field>
 
                         <field name="locationSeqId"><default-field title="Was Stored At">
-                            <display text="FacilityLocationNameTemplate" text-map="facLoc?:[:]"/></default-field></field>
+                            <display text="FacilityLocationNameTemplate" text-map="facLoc||{}"/></default-field></field>
                         <field name="unpackLink"><default-field title=""><link url="unpackItemIssuance" text="Unpack"
-                                parameter-map="[shipmentId:shipmentId, assetIssuanceId:assetIssuanceId]"
+                                parameter-map="{shipmentId:shipmentId, assetIssuanceId:assetIssuanceId}"
                                 condition="!invoiceId &amp;&amp; quantity"
                                 confirmation="Are you sure? Only do this when necessary to avoid processing a return to receive the item back into inventory."/>
                         </default-field></field>

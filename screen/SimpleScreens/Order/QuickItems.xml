@@ -15,15 +15,15 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Quick Items" default-menu-index="3">
 
-    <parameter name="orderId" from="orderId ?: orderId_0" required="true"/>
-    <parameter name="orderPartSeqId" from="orderPartSeqId ?: orderPartSeqId_0"/>
-    <parameter name="productCategoryId" from="productCategoryId ?: productCategoryId_0"/>
+    <parameter name="orderId" from="orderId || orderId_0" required="true"/>
+    <parameter name="orderPartSeqId" from="orderPartSeqId || orderPartSeqId_0"/>
+    <parameter name="productCategoryId" from="productCategoryId || productCategoryId_0"/>
 
     <transition name="editProduct"><default-response url="//${appRoot}/Product/EditProduct"/></transition>
 
     <transition name="setItemQuantities">
         <service-call name="mantle.order.OrderServices.add#OrderProductQuantity" multi="true"
-                in-map="context + [addToQuantity:false, requireInventory:false, quantity:0, customerPartyId:null]"/>
+                in-map="Object.assign({}, context, {addToQuantity:false, requireInventory:false, quantity:0, customerPartyId:null})"/>
         <actions><log message="Order ${orderId} setItemQuantities parameters: ${ec.web.requestParameters}"/></actions>
         <default-response url="."/>
     </transition>
@@ -41,19 +41,19 @@ along with this software (see the LICENSE.md file). If not, see
                     <date-filter/><econdition field-name="productStoreId"/>
                     <econdition field-name="storeCategoryTypeEnumId" value="PsctQuickInternal"/>
                 </entity-find>
-                <if condition="!psCatList">
+                <if condition="!psCatList?.length">
                     <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="psCatList" cache="true">
                         <date-filter/><econdition field-name="productStoreId"/>
                         <econdition field-name="storeCategoryTypeEnumId" value="PsctQuickAdd"/>
                     </entity-find>
                 </if>
-                <if condition="!psCatList">
+                <if condition="!psCatList?.length">
                     <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="psCatList" cache="true">
                         <date-filter/><econdition field-name="productStoreId"/>
                         <econdition field-name="storeCategoryTypeEnumId" value="PsctSearch"/>
                     </entity-find>
                 </if>
-                <set field="productCategoryId" from="psCatList ? psCatList[0].productCategoryId : null"/>
+                <set field="productCategoryId" from="psCatList?.length ? psCatList[0].productCategoryId : null"/>
             </if>
 
             <set field="productInfoList" from="[]"/>
@@ -67,7 +67,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
                 <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+            <set field="productItemTypes" from="productItemTypeEgms.map(it => it.enumId)"/>
             <entity-find entity-name="mantle.order.OrderItem" list="orderItemList" cache="false">
                 <econdition field-name="orderId"/>
                 <econdition field-name="orderPartSeqId"/>
@@ -76,24 +76,24 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
 
             <iterate list="productList" entry="product">
-                <set field="prodItemList" from="orderItemList.findAll({ it.productId == product.productId })"/>
-                <if condition="prodItemList"><then>
+                <set field="prodItemList" from="orderItemList.filter(it => it.productId == product.productId)"/>
+                <if condition="prodItemList.length > 0"><then>
                     <iterate list="prodItemList" entry="prodItem">
-                        <script>productInfoList.add(product.getMap() + prodItem.getMap())</script></iterate>
-                    <script>orderItemList.removeByAnd([productId:product.productId])</script>
+                        <script>productInfoList.push(Object.assign({}, product, prodItem))</script></iterate>
+                    <script>orderItemList = orderItemList.filter(it => it.productId != product.productId)</script>
                 </then><else>
-                    <script>productInfoList.add(product.getMap())</script>
+                    <script>productInfoList.push(Object.assign({}, product))</script>
                 </else></if>
             </iterate>
 
             <iterate list="orderItemList" entry="orderItem">
                 <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
                     <field-map field-name="productId" from="orderItem.productId"/></entity-find-one>
-                <script>productInfoList.add(product.getMap() + orderItem.getMap())</script>
+                <script>productInfoList.push(Object.assign({}, product, orderItem))</script>
             </iterate>
 
-            <set field="orderByField" from="orderByField ?: 'pseudoId,orderItemSeqId'"/>
-            <script>orderMapList(productInfoList, (orderByField.split(',').collect({it?.trim()}) as List))</script>
+            <set field="orderByField" from="orderByField || 'pseudoId,orderItemSeqId'"/>
+            <order-map-list list="productInfoList"><order-by field-name="${orderByField}"/></order-map-list>
         </if>
     </actions>
 
@@ -120,12 +120,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-ref name="submitButton"/></field-row-big></field-layout>
         </form-single>
 
-        <section name="QuickItemSection" condition="productInfoList"><widgets>
+        <section name="QuickItemSection" condition="productInfoList?.length"><widgets>
             <form-list name="QuickItemList" list="productInfoList" multi="true" transition="setItemQuantities">
                 <row-actions>
                     <service-call name="mantle.product.PriceServices.get#ProductPrice" out-map="priceOut"
-                            in-map="[productId:productId, priceUomId:orderHeader.currencyUomId,
-                                productStoreId:productStoreId, customerPartyId:orderPart.customerPartyId]"/>
+                            in-map="{productId:productId, priceUomId:orderHeader.currencyUomId,
+                                productStoreId:productStoreId, customerPartyId:orderPart.customerPartyId}"/>
                 </row-actions>
 
                 <hidden-parameters>
@@ -155,7 +155,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <default-field><display/></default-field></field>
                 <field name="itemQuantity" from="quantity" align="right">
                     <default-field title="Cur Qty"><display also-hidden="false"/></default-field></field>
-                <field name="itemTotal" from="(quantity?:0.0)*(unitAmount?:0.0)" align="right">
+                <field name="itemTotal" from="toDecimal(quantity ?? 0).multiply(unitAmount ?? 0)" align="right">
                     <default-field title="Cur Total"><display currency-unit-field="orderHeader.currencyUomId" also-hidden="false"/></default-field></field>
 
                 <field name="submitButton"><default-field title="Set Quantities"><submit/></default-field></field>

@@ -45,20 +45,20 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find>
 
         <service-call name="mantle.humanres.PositionServices.get#PartyEmployersAndPositionClasses"
-                in-map="[partyId:partyId]" out-map="context"/>
+                in-map="{partyId:partyId}" out-map="context"/>
     </actions>
     <widgets>
         <section-include name="ClockInOutSection" location="component://SimpleScreens/screen/SimpleScreens/Party/PartyTimeEntries.xml"/>
 
         <dynamic-dialog id="AddTimeDialogDyn" button-text="Record Time" transition="EditTimeEntry"
-                parameter-map="[partyId:partyId, timeEntryId:null]"/>
+                parameter-map="{partyId:partyId, timeEntryId:null}"/>
 
         <form-list name="TimeEntryList" list="timeEntryList" transition="recordTimeEntry" header-dialog="true" saved-finds="true">
             <field name="timeEntryId"><default-field><hidden/></default-field></field>
 
             <field name="editButton"><default-field title="">
                 <dynamic-dialog id="EditTimeEntryDialog" button-text=" " icon="fa fa-pencil" transition="EditTimeEntry"
-                        parameter-map="[partyId:partyId, timeEntryId:timeEntryId]"/>
+                        parameter-map="{partyId:partyId, timeEntryId:timeEntryId}"/>
             </default-field></field>
 
             <field name="fromDate"><header-field show-order-by="true"><date-period allow-empty="true"/></header-field>
@@ -81,7 +81,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="workEffortId">
                 <header-field title="Task" show-order-by="true">
                     <drop-down allow-empty="true"><dynamic-options transition="getTaskList" min-length="0" server-search="true"
-                            parameter-map="[assignedPartyId:partyId]"/></drop-down>
+                            parameter-map="{assignedPartyId:partyId}"/></drop-down>
                 </header-field>
                 <default-field><link url="taskDetail" entity-name="mantle.work.effort.WorkEffort" text="WorkEffortNameTemplate" link-type="anchor"/></default-field>
             </field>

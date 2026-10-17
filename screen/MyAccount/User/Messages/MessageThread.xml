@@ -24,22 +24,23 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <entity-find-one entity-name="mantle.party.communication.CommunicationEvent" value-field="commEvent"/>
-        <set field="rootCommEventId" from="commEvent.rootCommEventId ?: commEvent.communicationEventId"/>
+        <set field="rootCommEventId" from="commEvent.rootCommEventId || commEvent.communicationEventId"/>
         <entity-find-one entity-name="mantle.party.communication.CommunicationEvent" value-field="rootCommEvent">
             <field-map field-name="communicationEventId" from="rootCommEventId"/></entity-find-one>
 
         <script>
-            idPathSb = new StringBuilder(commEvent.communicationEventId)
-            def curCe = commEvent
-            while (curCe.parentCommEventId) {
-                idPathSb.insert(0, "/").insert(0, curCe.parentCommEventId)
+            const idPath = [commEvent.communicationEventId]
+            let curCe = commEvent
+            while (curCe?.parentCommEventId) {
+                idPath.unshift(curCe.parentCommEventId)
                 curCe = ec.entity.find("mantle.party.communication.CommunicationEvent")
                         .condition("communicationEventId", curCe.parentCommEventId).one()
             }
+            idPathSb = idPath.join("/")
         </script>
     </actions>
     <widgets>
-        <label text="${rootCommEvent?.subject ?: 'Thread'}" type="h3"/>
+        <label text="${rootCommEvent?.subject || 'Thread'}" type="h3"/>
 
         <container style="row">
             <container style="col-lg-4">
@@ -60,7 +61,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </link>
                         <tree-sub-node node-name="MessageNode" list="childMessages">
                             <actions>
-                                <set field="messageId" from="treeNodeId.split('/').last()"/>
+                                <set field="messageId" from="treeNodeId.split('/').at(-1)"/>
                                 <entity-find entity-name="mantle.party.communication.CommunicationEvent" list="childMessages">
                                     <econdition field-name="parentCommEventId" from="messageId"/>
                                     <order-by field-name="entryDate"/>

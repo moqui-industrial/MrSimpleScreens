@@ -25,9 +25,9 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem"/>
         <service-call name="mantle.order.ReturnServices.calculate#OrderItemReturnable" out-map="returnableOut"
-                in-map="[orderId:orderId, orderItemSeqId:orderItem.orderItemSeqId]"/>
+                in-map="{orderId:orderId, orderItemSeqId:orderItem.orderItemSeqId}"/>
         <service-call name="mantle.order.ReturnServices.find#OrderOpenReturns" out-map="openReturnsOut"
-                in-map="[orderId:orderId, orderPartSeqId:orderItem.orderPartSeqId]"/>
+                in-map="{orderId:orderId, orderPartSeqId:orderItem.orderPartSeqId}"/>
     </actions>
     <widgets>
         <form-single name="ReturnItem" transition="addOrderItemToReturn">

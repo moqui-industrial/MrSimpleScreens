@@ -43,8 +43,8 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <container-row><row-col lg="5">
-            <link url="findSummary" text="Assets (Summary)" parameter-map="[assetPoolId:assetPoolId]"/>
-            <link url="findAsset" text="Assets (Detail)" parameter-map="[assetPoolId:assetPoolId]"/>
+            <link url="findSummary" text="Assets (Summary)" parameter-map="{assetPoolId:assetPoolId}"/>
+            <link url="findAsset" text="Assets (Detail)" parameter-map="{assetPoolId:assetPoolId}"/>
 
             <form-single name="UpdateAssetPoolForm" transition="updateAssetPool" map="assetPool">
                 <field name="assetPoolId"><default-field><hidden/></default-field></field>
@@ -98,7 +98,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="removeLink" align="right"><default-field title="">
                         <link url="deleteAssetPoolParty" icon="fa fa-trash"
                                 confirmation="Remove party from pool?"
-                                parameter-map="[assetPoolId:assetPoolId, partyId:partyId]"/>
+                                parameter-map="{assetPoolId:assetPoolId, partyId:partyId}"/>
                     </default-field></field>
                 </form-list>
             </box-body></container-box>
@@ -128,7 +128,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="removeLink" align="right"><default-field title="">
                         <link url="deleteAssetPoolStore" icon="fa fa-trash"
                                 confirmation="Remove store from pool?"
-                                parameter-map="[assetPoolId:assetPoolId, productStoreId:productStoreId]"/>
+                                parameter-map="{assetPoolId:assetPoolId, productStoreId:productStoreId}"/>
                     </default-field></field>
                 </form-list>
             </box-body></container-box>

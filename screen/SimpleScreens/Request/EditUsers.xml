@@ -66,7 +66,7 @@ along with this software (see the LICENSE.md file). If not, see
             <row-actions>
                 <entity-find entity-name="moqui.security.UserAccount" list="uaList">
                     <econdition field-name="partyId"/></entity-find>
-                <set field="usernames" from="uaList*.username.join(', ')"/>
+                <set field="usernames" from="uaList.map(it => it.username).join(', ')"/>
             </row-actions>
 
             <field name="requestId"><default-field><hidden/></default-field></field>

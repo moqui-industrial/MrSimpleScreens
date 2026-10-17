@@ -19,7 +19,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="editParty"><default-response url="//${appRoot}/Party/EditParty"/></transition>
     <transition name="projectSummary"><default-response url="../../Project/ProjectSummary"/></transition>
-    <transition name="taskSummary"><default-response url="//${taskRoot?:appRoot}/Task/TaskSummary"/></transition>
+    <transition name="taskSummary"><default-response url="//${taskRoot||appRoot}/Task/TaskSummary"/></transition>
 
     <transition name="updateRequest"><service-call name="mantle.request.RequestServices.update#Request"/><default-response url="."/></transition>
     <transition name="updateStatus"><service-call name="mantle.request.RequestServices.update#Request"/><default-response url="."/></transition>
@@ -55,10 +55,10 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find entity-name="mantle.request.RequestParty" list="customerRpList">
             <date-filter/><econdition field-name="requestId"/><econdition field-name="roleTypeId" value="Customer"/></entity-find>
-        <set field="customerRp" from="customerRpList?.getAt(0)"/>
+        <set field="customerRp" from="customerRpList?.[0]"/>
         <entity-find entity-name="mantle.request.RequestParty" list="assignToRpList">
             <date-filter/><econdition field-name="requestId"/><econdition field-name="roleTypeId" value="Assignee"/></entity-find>
-        <set field="assignToRp" from="assignToRpList?.getAt(0)"/>
+        <set field="assignToRp" from="assignToRpList?.[0]"/>
     </actions>
     <widgets>
         <container-row><row-col md="7">
@@ -173,14 +173,14 @@ along with this software (see the LICENSE.md file). If not, see
                             <dynamic-dialog id="EditCommentContainer${uniqueExtension}" button-text="Edit" transition="RequestCommentUpdate"
                                     condition="commEventDetail.fromPartyId == ec.user.userAccount.partyId || ec.user.isInGroup('ADMIN') || ec.user.isInGroup('HIVE_MIND_ADMIN')">
                                 <parameter name="communicationEventId" from="commEventDetail.communicationEventId"/></dynamic-dialog>
-                            <link text="Delete" url="deleteComment" parameter-map="[requestId:requestId, communicationEventId:commEventDetail.communicationEventId]"
+                            <link text="Delete" url="deleteComment" parameter-map="{requestId:requestId, communicationEventId:commEventDetail.communicationEventId}"
                                     condition="commEventDetail.fromPartyId == ec.user.userAccount.partyId || ec.user.isInGroup('ADMIN') || ec.user.isInGroup('HIVE_MIND_ADMIN')"
                                     confirmation="Delete comment ${commEventDetail.subject}?"/>
 
                             <label text="${commEventDetail.body}" type="pre" encode="false"/>
 
                             <section name="ChildNestedComments">
-                                <condition><expression>childCeList</expression></condition>
+                                <condition><expression>childCeList?.length</expression></condition>
                                 <actions><set field="currentCe" from="commEventDetail"/></actions>
                                 <widgets><include-screen location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest/RequestCommentNested.xml"/></widgets>
                             </section>
@@ -254,7 +254,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find-one entity-name="mantle.party.PersonWithUserAccount" value-field="paua">
                             <field-map field-name="userId" from="note.userId"/></entity-find-one>
                     </actions><widgets>
-                        <label text="By ${paua?.firstName?:''} ${paua?.lastName?:''} (${paua?.username ?: note.userId}) at ${ec.l10n.format(note.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
+                        <label text="By ${paua?.firstName||''} ${paua?.lastName||''} (${paua?.username || note.userId}) at ${ec.l10n.format(note.noteDate, 'yyyy-MM-dd HH:mm')}" type="strong"/>
                         <section name="UpdateNoteSection" condition="note.userId == ec.user.userId || ec.user.isInGroup('ADMIN') || ec.user.isInGroup('HIVE_MIND_ADMIN')"><widgets>
                             <container-dialog id="UpdateNoteContainer" button-text="Edit Note">
                                 <form-single name="UpdateNoteForm" transition="updateNote" map="note">
@@ -295,9 +295,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <field-map field-name="enumId" from="content.contentTypeEnumId"/></entity-find-one>
                     </actions><widgets>
                         <container>
-                            <container><label text="${contentTypeEnum?.description?:'No Type'}" type="strong"/></container>
+                            <container><label text="${contentTypeEnum?.description||'No Type'}" type="strong"/></container>
                             <link url="downloadContent" condition="content.contentLocation"
-                                    parameter-map="[requestContentId:content.requestContentId]"
+                                    parameter-map="{requestContentId:content.requestContentId}"
                                     text="Download ${content.contentLocation.substring(content.contentLocation.lastIndexOf('/')+1)}"/>
                             <container-dialog id="UpdateContentContainer" button-text="Edit Content">
                                 <form-single name="UpdateContentForm" transition="updateContent" map="content">
@@ -312,8 +312,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                                 </form-single>
                             </container-dialog>
-                            <container><label condition="paua" text="By ${ec.resource.expand('UsernameTemplate','',paua+[userId:content.userId])} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"/></container>
-                            <label text="${content.description ?: 'No Description'}" type="p"/>
+                            <container><label condition="paua" text="By ${ec.resource.expand('UsernameTemplate','',Object.assign({}, paua, {userId:content.userId}))} at ${ec.l10n.format(content.contentDate, 'yyyy-MM-dd HH:mm')}"/></container>
+                            <label text="${content.description || 'No Description'}" type="p"/>
                         </container>
                     </widgets></section-iterate>
                 </box-body></container-box>

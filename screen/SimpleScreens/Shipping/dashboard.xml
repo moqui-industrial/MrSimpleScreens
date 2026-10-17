@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
             <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
-        <set field="itemTypeEnumIdList" from="productItemTypeEgms*.enumId"/>
+        <set field="itemTypeEnumIdList" from="productItemTypeEgms.map(it => it.enumId)"/>
         <!-- Reservation Summary -->
         <entity-find entity-name="mantle.facility.FacilityShippingReservationSummary" list="fsrsList">
             <econdition field-name="partStatusId" value="OrderApproved"/>
@@ -62,11 +62,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find-one entity-name="moqui.basic.Enumeration" value-field="shipMethEnum" cache="true">
                     <field-map field-name="enumId" from="shipmentMethodEnumId"/></entity-find-one>
                 <!-- Reservation Summary -->
-                <set field="resSummary" from="fsrsList.find({ it.facilityId == facilityId &amp;&amp; it.shipmentMethodEnumId == shipmentMethodEnumId &amp;&amp; it.carrierPartyId == carrierPartyId})"/>
-                <set field="resPickSummary" from="fsrsPickList.find({ it.facilityId == facilityId &amp;&amp; it.shipmentMethodEnumId == shipmentMethodEnumId &amp;&amp; it.carrierPartyId == carrierPartyId})"/>
+                <set field="resSummary" from="fsrsList.find(it => it.facilityId == facilityId &amp;&amp; it.shipmentMethodEnumId == shipmentMethodEnumId &amp;&amp; it.carrierPartyId == carrierPartyId)"/>
+                <set field="resPickSummary" from="fsrsPickList.find(it => it.facilityId == facilityId &amp;&amp; it.shipmentMethodEnumId == shipmentMethodEnumId &amp;&amp; it.carrierPartyId == carrierPartyId)"/>
 
-                <set field="resQuantity" from="resSummary?.quantity ?: 0.0"/>
-                <set field="resPickQuantity" from="resPickSummary?.quantity ?: 0.0"/>
+                <set field="resQuantity" from="resSummary?.quantity ?? 0"/>
+                <set field="resPickQuantity" from="resPickSummary?.quantity ?? 0"/>
             </row-actions>
 
             <field name="pseudoId">
@@ -75,7 +75,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="shipmentMethodSequenceNum">
                 <header-field title="Ship Method" show-order-by="true"/>
-                <default-field><display text="${shipmentMethodSequenceNum != null ? shipmentMethodSequenceNum + ' - ' : ''}${shipMethEnum?.description ?: ''}"/></default-field>
+                <default-field><display text="${shipmentMethodSequenceNum != null ? shipmentMethodSequenceNum + ' - ' : ''}${shipMethEnum?.description || ''}"/></default-field>
             </field>
             <field name="carrierPartyId">
                 <header-field title="Carrier" show-order-by="true"/>
@@ -83,7 +83,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="quantityTotal"><default-field title="Appr Order Qty"><link url="findOrder" link-type="anchor"
                     text="${ec.l10n.format(quantityTotal, '#,##0.###')}"
-                    parameter-map="[orderType:'Sales', statusId:'OrderApproved', facilityId:facilityId, shipmentMethodEnumId:shipmentMethodEnumId, carrierPartyId:carrierPartyId]"/></default-field></field>
+                    parameter-map="{orderType:'Sales', statusId:'OrderApproved', facilityId:facilityId, shipmentMethodEnumId:shipmentMethodEnumId, carrierPartyId:carrierPartyId}"/></default-field></field>
 
             <!-- reserved, not available, not issued -->
             <!-- really useful? <field name="resQuantity"><default-field title="Res Qty"><display/></default-field></field> -->
@@ -93,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <display/></default-field></field>
 
             <!-- quantity in Pick locations -->
-            <field name="resPickQuantity"><default-field title="Pick Loc Qty"><display style="${(resPickQuantity == resQuantity) ? 'text-success' : 'text-danger'}"/></default-field></field>
+            <field name="resPickQuantity"><default-field title="Pick Loc Qty"><display style="${(toDecimal(resPickQuantity ?? 0).compare(resQuantity ?? 0) == 0) ? 'text-success' : 'text-danger'}"/></default-field></field>
 
             <!-- TODO: quantity on shipment and picklist? -->
         </form-list>

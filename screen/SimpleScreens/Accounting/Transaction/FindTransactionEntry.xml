@@ -33,7 +33,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <set field="glAccountCodeMask" from="ec.user.getPreference('GlAccountCodeMask')"/>
-        <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
     </actions>
     <widgets>
         <section-include name="EmailScreenSection" location="component://webroot/template/screen/BasicTransitions.xml"/>
@@ -80,13 +80,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <order-by field-name="organizationName"/>
                     </entity-find></entity-options>
                 </drop-down></header-field>
-                <default-field><link url="editParty" link-type="anchor" parameter-map="[partyId:organizationPartyId]"
+                <default-field><link url="editParty" link-type="anchor" parameter-map="{partyId:organizationPartyId}"
                         entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"/></default-field>
             </field>
             <field name="otherPartyId">
                 <header-field title="Other Party"><drop-down allow-empty="true">
                     <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/></drop-down></header-field>
-                <default-field><link url="editParty" link-type="anchor" parameter-map="[partyId:otherPartyId]"
+                <default-field><link url="editParty" link-type="anchor" parameter-map="{partyId:otherPartyId}"
                         entity-name="mantle.party.PartyDetail" text="PartyNameTemplate" condition="otherPartyId"/></default-field>
             </field>
 

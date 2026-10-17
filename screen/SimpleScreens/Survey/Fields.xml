@@ -19,11 +19,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="addDbFormField">
         <service-call name="create#moqui.screen.form.DbFormField"
-                in-map="context + [condition:null, fieldName:org.moqui.util.StringUtilities.prettyToCamelCase(title, false)]"/>
+                in-map="Object.assign({}, context, {condition:null, fieldName:StringUtilities.prettyToCamelCase(title, false)})"/>
         <default-response url="."/>
     </transition>
     <transition name="updateDbFormField">
-        <service-call name="org.moqui.impl.ScreenServices.update#DbFormField" in-map="context + [condition:null]"/>
+        <service-call name="org.moqui.impl.ScreenServices.update#DbFormField" in-map="Object.assign({}, context, {condition:null})"/>
         <default-response url="."/>
     </transition>
     <transition name="deleteDbFormField"><service-call name="org.moqui.impl.ScreenServices.delete#DbFormField"/>
@@ -42,11 +42,9 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="layoutSequenceNum"/>
         </entity-find>
         <script>
-            enumFieldOptionsList = [];
-            enumFieldOptionsList.addAll(dbFormFieldList.cloneList().filterByAnd([fieldTypeEnumId: 'DBFFT_check']))
-            enumFieldOptionsList.addAll(dbFormFieldList.cloneList().filterByAnd([fieldTypeEnumId: 'DBFFT_drop-down']))
-            enumFieldOptionsList.addAll(dbFormFieldList.cloneList().filterByAnd([fieldTypeEnumId: 'DBFFT_radio']))
-            enumFieldOptionsList = org.moqui.util.CollectionUtilities.orderMapList(enumFieldOptionsList, ['layoutSequenceNum'])
+            enumFieldOptionsList = Array.from(dbFormFieldList).filter(field =>
+                ['DBFFT_check', 'DBFFT_drop-down', 'DBFFT_radio'].includes(field.fieldTypeEnumId))
+                .sort((a, b) => Number(a.layoutSequenceNum ?? 0) - Number(b.layoutSequenceNum ?? 0))
         </script>
     </actions>
 
@@ -55,10 +53,10 @@ along with this software (see the LICENSE.md file). If not, see
             <form-single name="NewDbFormFieldForm"  transition="addDbFormField">
                 <field name="formId"><default-field title="Survey ID"><hidden/></default-field></field>
                 <field name="title"><default-field title="Title"><text-line size="50"/></default-field></field>
-                <field name="fieldName" from="org.moqui.util.StringUtilities.prettyToCamelCase(title, false)">
+                <field name="fieldName" from="StringUtilities.prettyToCamelCase(title, false)">
                     <default-field title=""><hidden/></default-field></field>
                 <field name="fieldTypeEnumId"><default-field title="Type">
-                    <drop-down><entity-options key="${enumId}" text="${description ?: enumId}">
+                    <drop-down><entity-options key="${enumId}" text="${description || enumId}">
                         <entity-find entity-name="moqui.basic.Enumeration">
                             <econdition field-name="enumTypeId" value="DbFormFieldType"/>
                             <order-by field-name="description,enumId"/></entity-find>
@@ -78,7 +76,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <container-row>
             <row-col lg="7">
-                <section name="DbFormFields" condition="dbFormFieldList"><widgets>
+                <section name="DbFormFields" condition="(dbFormFieldList?.length > 0)"><widgets>
                     <form-list name="DbFormFieldList" list="dbFormFieldList" transition="updateDbFormField">
                         <field name="formId"><default-field><hidden/></default-field></field>
                         <field name="fieldName"><default-field><display/></default-field></field>
@@ -86,7 +84,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <!-- on second thought better not to put this here, is an attack vector given this is a non-sandboxed groovy expression, see protections in create/update transitions:
                             <field name="condition"><default-field><text-line size="25"/></default-field></field> -->
                         <field name="fieldTypeEnumId"><default-field title="Type">
-                            <drop-down><entity-options key="${enumId}" text="${description ?: enumId}">
+                            <drop-down><entity-options key="${enumId}" text="${description || enumId}">
                                 <entity-find entity-name="moqui.basic.Enumeration">
                                     <econdition field-name="enumTypeId" value="DbFormFieldType"/>
                                     <order-by field-name="description,enumId"/></entity-find>
@@ -94,7 +92,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </default-field></field>
                         <field name="layoutSequenceNum"><default-field title="Sequence"><text-line size="5"/></default-field></field>
                         <field name="submitButton" align="right"><default-field><submit text="Update"/>
-                            <link url="deleteDbFormField" icon="fa fa-trash" parameter-map="[formId:formId, fieldName:fieldName]"
+                            <link url="deleteDbFormField" icon="fa fa-trash" parameter-map="{formId:formId, fieldName:fieldName}"
                                     confirmation="Are you sure you want to remove this Field?"/>
                         </default-field></field>
                     </form-list>
@@ -131,7 +129,7 @@ along with this software (see the LICENSE.md file). If not, see
                                <field name="text"><default-field title="Description"><text-line size="30"/></default-field></field>
                                <field name="deleteButton" align="right"><default-field title="">
                                    <link url="deleteFieldOption" icon="fa fa-trash"
-                                         parameter-map="[formId:formId, fieldName:fieldName, sequenceNum:sequenceNum]"
+                                         parameter-map="{formId:formId, fieldName:fieldName, sequenceNum:sequenceNum}"
                                          confirmation="Are you sure you want to remove this Field Option?"/>
                                </default-field></field>
                                <field name="submitButton" align="right"><default-field title="Update"><submit/></default-field></field>

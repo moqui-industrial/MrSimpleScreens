@@ -1,0 +1,64 @@
+<style>
+@page mrss-PartyBadge { size:3.370in 2.125in; margin:0 0 0 0; @top-center { content:none; } @bottom-center { content:none; } }
+.print-PartyBadge { page:mrss-PartyBadge; font:10pt Helvetica,Arial,sans-serif; }
+.print-PartyBadge .page-header { position:relative; min-height:0; }
+.print-PartyBadge .page-footer { margin-top:.2in; }
+.print-PartyBadge table { border-collapse:collapse; table-layout:fixed; }
+.print-PartyBadge thead { display:table-header-group; }
+.print-PartyBadge tbody tr { break-inside:avoid; }
+.print-PartyBadge { position:relative; width:3.370in; height:2.125in; overflow:hidden; }
+</style>
+<section class="print-PartyBadge">
+<#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal plus a Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<#-- Data prepared by the mantle.party.PartyServices.get#PartyBadgeInfo service -->
+
+<div class="page-body">
+                <#if has(faceImageLocation)>
+                    <div style="position:absolute;top:0;left:0;width:1.125in">
+                        <div style="text-align:center;vertical-align:top">
+                            <img src="${faceImageLocation}" style="width:1.125in;object-fit:contain">
+                        </div>
+                    </div>
+                </#if>
+                <#if has(logoImageLocation)>
+                    <div style="position:absolute;top:0;left:1.25in;width:1in">
+                        <div style="text-align:center;vertical-align:top">
+                            <img src="${logoImageLocation}" style="width:1in;object-fit:contain">
+                        </div>
+                    </div>
+                </#if>
+                <#if has(partyBadge?.partyId)>
+                    <div style="position:absolute;top:0.2in;left:2.35in;width:1in">
+                        <div style="text-align:left;font-size:8pt">${partyBadge.partyId}</div>
+                    </div>
+                </#if>
+                <#if has(person)>
+                    <div style="position:absolute;top:0.75in;left:1.25in;width:2in">
+                        <div style="text-align:left;font-size:14pt">${(person.lastName ?? '')},</div>
+                        <div style="text-align:left;font-size:14pt">${(person.firstName ?? '')}</div>
+                    </div>
+                </#if>
+
+                <div style="position:absolute;top:1.5in;left:1.25in;width:2in">
+                    <div style="text-align:center">
+                        ${raw(ec.resource.code128Svg(partyBadgeId, {height: '0.5in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
+                    </div>
+                </div>
+            </div>
+        
+</section>

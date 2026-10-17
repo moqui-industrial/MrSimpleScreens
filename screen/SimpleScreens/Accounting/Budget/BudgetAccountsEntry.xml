@@ -15,7 +15,7 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-index="2" default-menu-title="Accounts Entry">
 
-    <parameter name="budgetId" from="budgetId ?: budgetId_0" required="true"/>
+    <parameter name="budgetId" from="budgetId || budgetId_0" required="true"/>
 
     <transition name="storeBudgetItem"><service-call name="mantle.other.BudgetServices.store#BudgetItemsSubPeriods"/>
         <default-response url="."/></transition>
@@ -24,8 +24,10 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="getGlAccountList" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
 
     <actions>
-        <set field="pageSize" from="pageSize ?: '30'"/>
+        <set field="pageSize" from="pageSize || '30'"/>
         <service-call name="mantle.other.BudgetServices.get#BudgetItemsAccountsSubPeriods" in-map="context" out-map="context"/>
+        <!-- the service returns the mask; the Java service returned the formatter -->
+        <set field="accountCodeFormatter" from="StringUtilities.masker(glAccountCodeMask, '0')"/>
     </actions>
     <widgets>
         <form-list name="GlAccountBudgetList" list="glAccountList" transition="storeBudgetItem" multi="true" header-dialog="true">
@@ -36,10 +38,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="glAccountId,accountCode,accountName"/>
             </entity-find>
             <row-actions>
-                <set field="curBiList" from="budgetItemsByGlId.get(glAccountId)"/>
-                <set field="amountMain" from="curBiList?.get(0)?.amount"/>
-                <set field="subPerTotal" from="0.0"/>
-                <script><![CDATA[if (curBiList) for (int i = 1; i < 13; i++) subPerTotal += (curBiList.get(i)?.amount ?: BigDecimal.ZERO)]]></script>
+                <set field="curBiList" from="budgetItemsByGlId?.[glAccountId]"/>
+                <set field="amountMain" from="curBiList?.[0]?.amount"/>
+                <set field="subPerTotal" from="toDecimal(0)"/>
+                <script><![CDATA[if (curBiList?.length) for (let i = 1; i < 13; i++) subPerTotal = subPerTotal.add(curBiList[i]?.amount ?? 0)]]></script>
             </row-actions>
             <hidden-parameters><parameter name="budgetId"/></hidden-parameters>
 
@@ -52,34 +54,34 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field><display/></default-field></field>
 
             <field name="amountMain" align="right"><default-field title="Main">
-                <text-line size="9"/><label text="Periods: ${ec.l10n.format(subPerTotal, '')}" condition="amountMain &amp;&amp; subPerTotal &amp;&amp; amountMain != subPerTotal" style="text-warning"/></default-field></field>
+                <text-line size="9"/><label text="Periods: ${ec.l10n.format(subPerTotal, '')}" condition="amountMain != null &amp;&amp; !toDecimal(amountMain).isZero() &amp;&amp; !subPerTotal.isZero() &amp;&amp; toDecimal(amountMain).compare(subPerTotal) != 0" style="text-warning"/></default-field></field>
 
-            <field name="amountPer1" from="curBiList?.get(1)?.amount" align="right">
+            <field name="amountPer1" from="curBiList?.[1]?.amount" align="right">
                 <default-field title="Per 1"><text-line size="6"/></default-field></field>
-            <field name="amountPer2" from="curBiList?.get(2)?.amount" align="right" hide="subTimePeriodSize &lt; 2">
+            <field name="amountPer2" from="curBiList?.[2]?.amount" align="right" hide="subTimePeriodSize &lt; 2">
                 <default-field title="Per 2"><text-line size="6"/></default-field></field>
-            <field name="amountPer3" from="curBiList?.get(3)?.amount" align="right" hide="subTimePeriodSize &lt; 3">
+            <field name="amountPer3" from="curBiList?.[3]?.amount" align="right" hide="subTimePeriodSize &lt; 3">
                 <default-field title="Per 3"><text-line size="6"/></default-field></field>
 
-            <field name="amountPer4" from="curBiList?.get(4)?.amount" align="right" hide="subTimePeriodSize &lt; 4">
+            <field name="amountPer4" from="curBiList?.[4]?.amount" align="right" hide="subTimePeriodSize &lt; 4">
                 <default-field title="Per 4"><text-line size="6"/></default-field></field>
-            <field name="amountPer5" from="curBiList?.get(5)?.amount" align="right" hide="subTimePeriodSize &lt; 5">
+            <field name="amountPer5" from="curBiList?.[5]?.amount" align="right" hide="subTimePeriodSize &lt; 5">
                 <default-field title="Per 5"><text-line size="6"/></default-field></field>
-            <field name="amountPer6" from="curBiList?.get(6)?.amount" align="right" hide="subTimePeriodSize &lt; 6">
+            <field name="amountPer6" from="curBiList?.[6]?.amount" align="right" hide="subTimePeriodSize &lt; 6">
                 <default-field title="Per 6"><text-line size="6"/></default-field></field>
 
-            <field name="amountPer7" from="curBiList?.get(7)?.amount" align="right" hide="subTimePeriodSize &lt; 7">
+            <field name="amountPer7" from="curBiList?.[7]?.amount" align="right" hide="subTimePeriodSize &lt; 7">
                 <default-field title="Per 7"><text-line size="6"/></default-field></field>
-            <field name="amountPer8" from="curBiList?.get(8)?.amount" align="right" hide="subTimePeriodSize &lt; 8">
+            <field name="amountPer8" from="curBiList?.[8]?.amount" align="right" hide="subTimePeriodSize &lt; 8">
                 <default-field title="Per 8"><text-line size="6"/></default-field></field>
-            <field name="amountPer9" from="curBiList?.get(9)?.amount" align="right" hide="subTimePeriodSize &lt; 9">
+            <field name="amountPer9" from="curBiList?.[9]?.amount" align="right" hide="subTimePeriodSize &lt; 9">
                 <default-field title="Per 9"><text-line size="6"/></default-field></field>
 
-            <field name="amountPer10" from="curBiList?.get(10)?.amount" align="right" hide="subTimePeriodSize &lt; 10">
+            <field name="amountPer10" from="curBiList?.[10]?.amount" align="right" hide="subTimePeriodSize &lt; 10">
                 <default-field title="Per 10"><text-line size="6"/></default-field></field>
-            <field name="amountPer11" from="curBiList?.get(11)?.amount" align="right" hide="subTimePeriodSize &lt; 11">
+            <field name="amountPer11" from="curBiList?.[11]?.amount" align="right" hide="subTimePeriodSize &lt; 11">
                 <default-field title="Per 11"><text-line size="6"/></default-field></field>
-            <field name="amountPer12" from="curBiList?.get(12)?.amount" align="right" hide="subTimePeriodSize &lt; 12">
+            <field name="amountPer12" from="curBiList?.[12]?.amount" align="right" hide="subTimePeriodSize &lt; 12">
                 <default-field title="Per 12"><text-line size="6"/></default-field></field>
 
             <field name="findButton"><header-field title="Find"><submit/></header-field></field>

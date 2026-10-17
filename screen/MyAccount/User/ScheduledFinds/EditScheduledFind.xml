@@ -27,8 +27,8 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="cronSelected"><set field="cronExpression" from="cronSelected"/></if>
             <script>
                 if (cronExpression) {
-                    try { org.moqui.impl.service.ScheduledJobRunner.getExecutionTime((String) cronExpression) } catch (Exception e) {
-                        ec.message.addError("Invalid Cron expression '${cronExpression}': ${e.message}")
+                    try { ec.service.nextCronExecution(String(cronExpression)) } catch (e) {
+                        ec.message.addError(`Invalid Cron expression '${cronExpression}': ${e.message}`)
                         return
                     }
                 }
@@ -40,7 +40,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <entity-find-one entity-name="moqui.screen.ScreenScheduled" value-field="screenScheduled"/>
-        <set field="cronDescription" from="org.moqui.impl.service.ScheduledJobRunner.getCronDescription(screenScheduled?.cronExpression, ec.user.getLocale(), true)"/>
+        <set field="cronDescription" from="screenScheduled?.cronExpression ? ec.service.getCronDescription(screenScheduled.cronExpression, ec.user.getLocale(), true) : null"/>
     </actions>
     <widgets>
         <label text="To disable set a Thru Date in the past or clear the Schedule and Cron Expression" type="p"/>

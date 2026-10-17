@@ -74,7 +74,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <display-entity text="UsernameTemplate" entity-name="mantle.party.PersonWithUserAccount" key-field-name="userId"/></default-field></field>
                     <field name="pkSecondaryValue"><default-field title="Item"><display/></default-field></field>
                     <field name="changedFieldName"><default-field title="Field">
-                        <display text="${org.moqui.util.StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
+                        <display text="${StringUtilities.camelCaseToPretty(changedFieldName)}"/></default-field></field>
                     <field name="oldValueText"><default-field title="From">
                         <display text="${ec.entity.formatFieldString(changedEntityName, changedFieldName, oldValueText)}"/></default-field></field>
                     <field name="newValueText"><default-field title="To">
@@ -88,10 +88,10 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <field name="vendorPartyId"><default-field title="Vendor">
                     <link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                          link-type="anchor" parameter-map="[partyId:vendorPartyId]"/></default-field></field>
+                          link-type="anchor" parameter-map="{partyId:vendorPartyId}"/></default-field></field>
                 <field name="customerPartyId"><default-field title="Customer">
                     <link url="editParty" entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"
-                          link-type="anchor" parameter-map="[partyId:customerPartyId]"/></default-field></field>
+                          link-type="anchor" parameter-map="{partyId:customerPartyId}"/></default-field></field>
 
                 <field name="facilityId">
                     <conditional-field title="Warehouse" condition="returnChangeable">
@@ -152,9 +152,9 @@ along with this software (see the LICENSE.md file). If not, see
             </form-single>
         </row-col><row-col lg="6">
             <link url="requestReturn" condition="returnHeader.statusId == 'ReturnCreated'" text="Set Requested"/>
-            <link url="approveReturn" condition="returnHeader.statusId in ['ReturnCreated', 'ReturnRequested']" text="Approve"
+            <link url="approveReturn" condition="['ReturnCreated', 'ReturnRequested'].includes(returnHeader.statusId)" text="Approve"
                     confirmation="Approve this return?"/>
-            <link url="cancelReturn" condition="returnHeader.statusId in ['ReturnCreated', 'ReturnRequested', 'ReturnApproved']" text="Cancel"
+            <link url="cancelReturn" condition="['ReturnCreated', 'ReturnRequested', 'ReturnApproved'].includes(returnHeader.statusId)" text="Cancel"
                     confirmation="Are you sure you want to cancel this return?"/>
             <section-include name="StatusHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
         </row-col></container-row>

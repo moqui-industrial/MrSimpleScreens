@@ -1,34 +1,26 @@
 define({
-    /* This software is in the public domain under CC0 1.0 Universal plus a Grant of Patent License. */
-    data: function() { return { activeOrg:null, userOrgList:null } },
+    /* CC0. Native organization menu for the supported Vue runtime. */
+    data: function() { return { activeOrg:null, userOrgList:[] } },
     template:
-    '<div id="active-org-menu" class="nav navbar-right dropdown">' +
-        '<a id="active-org-menu-link" href="#" class="dropdown-toggle btn btn-sm navbar-btn" :class="{ \'btn-success\':activeOrg, \'btn-default\':!activeOrg }" data-toggle="dropdown" title="Organization">' +
-            '<i class="fa fa-globe"></i> {{activeOrg ? activeOrg.pseudoId : ""}}</a>' +
-        '<ul v-if="userOrgList" class="dropdown-menu">' +
-            '<li v-if="activeOrg"><a @click.prevent="updateActive(null)">Clear Active Organization</a></li>' +
-            '<li v-for="userOrg in userOrgList"><a @click.prevent="updateActive(userOrg.partyId)">{{userOrg.pseudoId}}: {{userOrg.organizationName}}</a></li>' +
-        '</ul>' +
-    '</div>',
+        '<details id="active-org-menu"><summary title="Organization"><i class="fa fa-globe"></i> {{activeOrg ? activeOrg.pseudoId : "Organization"}}</summary>' +
+            '<ul><li v-if="activeOrg"><button type="button" @click="updateActive(null)">Clear Active Organization</button></li>' +
+            '<li v-for="userOrg in userOrgList" :key="userOrg.partyId"><button type="button" @click="updateActive(userOrg.partyId)">{{userOrg.pseudoId}}: {{userOrg.organizationName}}</button></li></ul>' +
+        '</details>',
     methods: {
         updateActive: function(partyId) {
-            var vm = this;
-            $.ajax({ type:'POST', url:'/apps/setPreference', error:moqui.handleAjaxError,
-                data:{ moquiSessionToken: this.$root.moquiSessionToken, preferenceKey:'ACTIVE_ORGANIZATION', preferenceValue:partyId },
-                success: function() {
-                    var orgList = vm.userOrgList;
-                    if (partyId) { for (var i=0; i<orgList.length; i++) { if (orgList[i].partyId === partyId) { vm.activeOrg = orgList[i]; break; } } }
-                    else { vm.activeOrg = null; }
-                    vm.$root.reloadSubscreens();
-                }
-            });
+            return moqui.request(this.$root.appRootPath + '/apps/setPreference', {
+                method:'POST', params:{preferenceKey:'ACTIVE_ORGANIZATION', preferenceValue:partyId || ''}
+            }).then(() => {
+                this.activeOrg = this.userOrgList.find(org => org.partyId === partyId) || null;
+                this.$root.reloadSubscreens();
+            }).catch(error => { console.error('Set active organization', error); this.$root.addNotify('Could not update active organization', 'danger'); });
         }
     },
     mounted: function() {
-        $('#active-org-menu-link').tooltip({ placement:'bottom', trigger:'hover' });
-        var vm = this;
-        $.ajax({ type:"GET", url:(this.$root.appRootPath + '/rest/s1/mantle/my/userOrgInfo'), error:moqui.handleAjaxError,
-            success: function(resp) { if (resp) { vm.activeOrg = resp.activeOrg; vm.userOrgList = resp.userOrgList; }}
-        });
+        moqui.request(this.$root.appRootPath + '/rest/s1/mantle/my/userOrgInfo').then(result => {
+            if (!result.json) throw new Error('Invalid organization response');
+            this.activeOrg = result.json.activeOrg;
+            this.userOrgList = result.json.userOrgList || [];
+        }).catch(error => { console.error('Load user organizations', error); this.$root.addNotify('Could not load organizations', 'danger'); });
     }
 });

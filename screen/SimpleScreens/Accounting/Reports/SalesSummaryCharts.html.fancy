@@ -1,0 +1,56 @@
+<#-- Ported from the original FreeMarker template; HTML interpolation is escaped.
+     has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
+<#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
+<#--
+This software is in the public domain under CC0 1.0 Universal plus a Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<#assign countSummaryConfig = JSON.stringify({ type:'line', data:{labels:orderLabelList,
+datasets:countSummaryDatasets },
+options:{ scales:{ yAxes:[{ position:'left', id:'leftSide', ticks:{beginAtZero:true} },
+    { position:'right', id:'rightSide', ticks:{beginAtZero:true}, gridLines:{drawOnChartArea:false} }] }, maintainAspectRatio:false } }).replace(/</g, "\\u003c")>
+<#assign orderAmountConfig = JSON.stringify({ type:'line', data:{labels:orderLabelList,
+datasets:orderAmountsDatasets },
+options:{ scales:{ yAxes:[{ position:'left', id:'leftSide', ticks:{beginAtZero:true} },
+    { position:'right', id:'rightSide', ticks:{beginAtZero:true}, gridLines:{drawOnChartArea:false} }] }, maintainAspectRatio:false } }).replace(/</g, "\\u003c")>
+<#assign invoiceMarginConfig = JSON.stringify({ type:'bar', data:{labels:invoiceLabelList,
+datasets:invoiceMarginDatasets },
+options:{ scales:{ yAxes:[{ ticks:{beginAtZero:true} }] }, maintainAspectRatio:false } }).replace(/</g, "\\u003c")>
+<#assign discountCostConfig = JSON.stringify({ type:'line', data:{labels:invoiceLabelList,
+datasets:discountCostDatasets },
+options:{ scales:{ yAxes:[{ ticks:{beginAtZero:true} }] }, maintainAspectRatio:false } }).replace(/</g, "\\u003c")>
+<#if sri.getRenderMode() == "vuet" || sri.getRenderMode() == "html">
+<div class="row"><div class="${statsChartColStyle}">
+    <div class="chart-container" style="position:relative; height:300px; width:100%;"><canvas id="CountSummaryChart"></canvas></div>
+</div><div class="${statsChartColStyle}">
+    <div class="chart-container" style="position:relative; height:300px; width:100%;"><canvas id="OrderAmountChart"></canvas></div>
+</div><div class="${statsChartColStyle}">
+    <div class="chart-container" style="position:relative; height:300px; width:100%;"><canvas id="InvoiceMarginChart"></canvas></div>
+</div><div class="${statsChartColStyle}">
+    <div class="chart-container" style="position:relative; height:300px; width:100%;"><canvas id="DiscountCostChart"></canvas></div>
+</div></div>
+<script>
+    var CountSummaryChart = new Chart(document.getElementById("CountSummaryChart"), ${raw(countSummaryConfig)});
+    var OrderAmountChart = new Chart(document.getElementById("OrderAmountChart"), ${raw(orderAmountConfig)});
+    var InvoiceMarginChart = new Chart(document.getElementById("InvoiceMarginChart"), ${raw(invoiceMarginConfig)});
+    var DiscountCostChart = new Chart(document.getElementById("DiscountCostChart"), ${raw(discountCostConfig)});
+</script>
+<#elseif sri.getRenderMode() == "qvt">
+<div class="row"><div class="${statsChartColStyle}">
+    <m-chart height="300px" :config="${countSummaryConfig}"></m-chart>
+</div><div class="${statsChartColStyle}">
+    <m-chart height="300px" :config="${orderAmountConfig}"></m-chart>
+</div><div class="${statsChartColStyle}">
+    <m-chart height="300px" :config="${invoiceMarginConfig}"></m-chart>
+</div><div class="${statsChartColStyle}">
+    <m-chart height="300px" :config="${discountCostConfig}"></m-chart>
+</div></div>
+</#if>

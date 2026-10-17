@@ -59,8 +59,8 @@ along with this software (see the LICENSE.md file). If not, see
             <field-map field-name="productStoreId" from="productStoreId"/>
         </entity-find-one>
         <set field="localeStringList" from="[]"/>
-        <iterate list="Locale.getAvailableLocales()" entry="lcl">
-            <script>if (lcl.toString()) localeStringList.add([locale:lcl.toString(), name:lcl.getDisplayName(ec.user.locale)])</script></iterate>
+        <iterate list="ec.l10n.getAvailableLocales()" entry="lcl">
+            <script>if (lcl.locale) localeStringList.push(lcl)</script></iterate>
         <order-map-list list="localeStringList"><order-by field-name="name"/></order-map-list>
     </actions>
     <widgets>
@@ -148,7 +148,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="storeDomain"><default-field title="Store Domain"><text-line size="30"/></default-field></field>
                 <field name="profileUrlPath"><default-field title="Profile Url Path"><text-line size="30"/></default-field></field>
                 <field name="wikiSpaceId"><default-field title="Wiki Space ID">
-                    <drop-down allow-empty="true"><entity-options key="${wikiSpaceId}" text="${wikiSpaceId}: ${description ?: ''}">
+                    <drop-down allow-empty="true"><entity-options key="${wikiSpaceId}" text="${wikiSpaceId}: ${description || ''}">
                         <entity-find entity-name="moqui.resource.wiki.WikiSpace">
                             <order-by field-name="wikiSpaceId"/>
                         </entity-find>
@@ -177,7 +177,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <drop-down allow-empty="true"><option key="Y"/><option key="N"/></drop-down>
                 </default-field></field>
                 <field name="taxGatewayConfigId"><default-field title="Tax Gateway">
-                    <drop-down allow-empty="true"><entity-options key="${taxGatewayConfigId}" text="${description ?: ''} [${taxGatewayConfigId}]">
+                    <drop-down allow-empty="true"><entity-options key="${taxGatewayConfigId}" text="${description || ''} [${taxGatewayConfigId}]">
                         <entity-find entity-name="mantle.other.tax.TaxGatewayConfig">
                             <order-by field-name="taxGatewayConfigId"/>
                         </entity-find>
@@ -235,7 +235,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <text-line size="4" format="0.00"/></default-field></field>
                             <field name="deleteButton" align="right"><default-field title="">
                                 <link url="deleteShippingOption" icon="fa fa-trash"
-                                      parameter-map="[productStoreId:productStoreId, carrierPartyId:carrierPartyId, shipmentMethodEnumId:shipmentMethodEnumId]"
+                                      parameter-map="{productStoreId:productStoreId, carrierPartyId:carrierPartyId, shipmentMethodEnumId:shipmentMethodEnumId}"
                                       confirmation="Are you sure you want to remove this Shipping Option?"/>
                             </default-field></field>
                             <field name="submitButton" align="right"><default-field title="Update"><submit/></default-field></field>
@@ -259,7 +259,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     </entity-find></entity-options></drop-down>
                                 </default-field></field>
                                 <field name="shippingGatewayConfigId"><default-field title="Gateway Config">
-                                    <drop-down><entity-options key="${shippingGatewayConfigId}" text="${description ?: ''} [${shippingGatewayConfigId}]">
+                                    <drop-down><entity-options key="${shippingGatewayConfigId}" text="${description || ''} [${shippingGatewayConfigId}]">
                                         <entity-find entity-name="mantle.shipment.carrier.ShippingGatewayConfig">
                                             <order-by field-name="shippingGatewayConfigId"/>
                                         </entity-find>
@@ -297,7 +297,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                                 <field name="carrierPartyId"><default-field title="Carrier">
                                     <display text=" "/>
-                                    <link url="editParty" text="PartyNameTemplate" entity-name="mantle.party.PartyDetail" parameter-map="[partyId:carrierPartyId]" link-type="anchor"/>
+                                    <link url="editParty" text="PartyNameTemplate" entity-name="mantle.party.PartyDetail" parameter-map="{partyId:carrierPartyId}" link-type="anchor"/>
                                 </default-field></field>
                                 <field name="shippingGatewayConfigId"><default-field title="Shipment Gateway">
                                     <display text=" "/>
@@ -326,7 +326,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <field name="submitButton"><default-field title=""><submit text="Update"/></default-field></field>
                                 <field name="deleteButton" align="right"><default-field title="">
                                     <link url="deleteShippingGateway" icon="fa fa-trash"
-                                          parameter-map="[productStoreId:productStoreId, carrierPartyId:carrierPartyId]"
+                                          parameter-map="{productStoreId:productStoreId, carrierPartyId:carrierPartyId}"
                                           confirmation="Are you sure you want to remove this Shipping Gateway?"/>
                                 </default-field></field>
 
@@ -356,7 +356,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <form-single name="NewPaymentGatewayForm" transition="createPaymentGateway">
                                 <field name="productStoreId"><default-field><hidden/></default-field></field>
                                 <field name="paymentInstrumentEnumId"><default-field title="Instrument">
-                                    <drop-down><entity-options key="${enumId}" text="${enumId}: ${description ?: ''}">
+                                    <drop-down><entity-options key="${enumId}" text="${enumId}: ${description || ''}">
                                         <entity-find entity-name="moqui.basic.Enumeration">
                                             <econdition field-name="enumTypeId" value="PaymentInstrument"/>
                                             <order-by field-name="enumId"/>
@@ -364,7 +364,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     </entity-options></drop-down>
                                 </default-field></field>
                                 <field name="paymentGatewayConfigId"><default-field title="Gateway Config">
-                                    <drop-down><entity-options key="${paymentGatewayConfigId}" text="${description ?: ''} [${paymentGatewayConfigId}]">
+                                    <drop-down><entity-options key="${paymentGatewayConfigId}" text="${description || ''} [${paymentGatewayConfigId}]">
                                         <entity-find entity-name="mantle.account.method.PaymentGatewayConfig">
                                             <order-by field-name="paymentGatewayConfigId"/>
                                         </entity-find>
@@ -384,7 +384,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 </field>
                                 <field name="deleteButton" align="right"><default-field title="">
                                     <link url="deletePaymentGateway" icon="fa fa-trash"
-                                          parameter-map="[productStoreId:productStoreId, paymentInstrumentEnumId:paymentInstrumentEnumId, paymentGatewayConfigId:paymentGatewayConfigId]"
+                                          parameter-map="{productStoreId:productStoreId, paymentInstrumentEnumId:paymentInstrumentEnumId, paymentGatewayConfigId:paymentGatewayConfigId}"
                                           confirmation="Are you sure you want to remove this Payment Gateway?"/>
                                 </default-field></field>
                             </form-list>
@@ -410,7 +410,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <form-single name="NewStoreDataDocumentForm" transition="createStoreDataDocument">
                                 <field name="productStoreId"><default-field><hidden/></default-field></field>
                                 <field name="typeEnumId"><default-field title="Store Data Document Type">
-                                    <drop-down><list-options list="storeDataDocumentTypeList.findAll{!storeDataDocumentList.typeEnumId.contains(it.enumId)}" key="${enumId}" text="${enumId}: ${description ?: ''}"/></drop-down>
+                                    <drop-down><list-options list="storeDataDocumentTypeList.filter(it => !storeDataDocumentList.some(doc => doc.typeEnumId == it.enumId))" key="${enumId}" text="${enumId}: ${description || ''}"/></drop-down>
                                 </default-field></field>
                                 <field name="dataDocumentId"><default-field title="Data Document">
                                     <drop-down><list-options list="dataDocumentList" key="${dataDocumentId}" text="${dataDocumentId} - ${documentName}"/></drop-down>

@@ -43,7 +43,7 @@ along with this software (see the LICENSE.md file). If not, see
         </filter-map-list>
     </actions>
     <widgets>
-        <section name="HasProjectsSection" condition="myProjectList">
+        <section name="HasProjectsSection" condition="(myProjectList?.length > 0)">
             <widgets>
                 <container-dialog id="CreateInvoiceDialog" button-text="Create Expense Invoice">
                     <form-single name="CreateInvoice" transition="createInvoice">
@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                         <field name="thruDate"><default-field><date-time type="date-time"/></default-field></field>
                         <field name="invoiceId"><default-field title="Existing Invoice"><drop-down allow-empty="true">
-                            <list-options list="openInvoiceList" key="${invoiceId}" text="${invoiceId} - ${invoiceDate}"/>
+                            <list-options list="openInvoiceList" key="${invoiceId}" text="${invoiceId} - ${ec.l10n.format(invoiceDate, 'yyyy-MM-dd')}"/>
                         </drop-down></default-field></field>
                         <field name="submitButton"><default-field title="Invoice Time"><submit/></default-field></field>
                     </form-single>
@@ -90,7 +90,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <form-list name="InvoiceList" list="invoiceList" skip-form="true">
             <row-actions>
-                <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal" in-map="[invoiceId:invoiceId]" out-map="context"/>
+                <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal" in-map="{invoiceId:invoiceId}" out-map="context"/>
             </row-actions>
             <field name="editInvoiceLink"><header-field show-order-by="case-insensitive" title="Edit"/><default-field>
                 <link url="editInvoice" text="Edit ${invoiceId}"/>

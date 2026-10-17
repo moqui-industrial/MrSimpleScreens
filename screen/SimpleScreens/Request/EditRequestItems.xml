@@ -53,7 +53,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- not yet generally supported for orders: <field name="selectedAmount"><default-field><text-line size="8"/></default-field></field> -->
                 <field name="maximumAmount"><default-field><text-line size="8"/></default-field></field>
                 <field name="supplierPartyId"><default-field title="Supplier"><drop-down allow-empty="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="[roleTypeId:'Supplier']"/>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="{roleTypeId:'Supplier'}"/>
                 </drop-down></default-field></field>
                 <field name="description"><default-field><text-area/></default-field></field>
                 <field name="submit"><default-field><submit text="Add"/></default-field></field>
@@ -87,7 +87,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="maximumAmount"><default-field title="Max Amt"><text-line size="5"/></default-field></field>
             <field name="description"><default-field><text-area cols="40" rows="3"/></default-field></field>
             <field name="supplierPartyId"><default-field title="Supplier"><drop-down allow-empty="true">
-                <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="[roleTypeId:'Supplier']"/>
+                <dynamic-options transition="searchPartyList" server-search="true" min-length="2" parameter-map="{roleTypeId:'Supplier'}"/>
             </drop-down></default-field></field>
             <field name="submit"><default-field>
                 <submit text="Update"/>
