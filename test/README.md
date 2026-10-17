@@ -72,6 +72,13 @@ Verified with system Chromium: randomly sampled `Survey/FindSurvey.xml` and `Ord
 
 ## Lint and host regressions
 
+The dependency-free order role-filter regression checks the actual XML expressions
+against Java's case-insensitive sales/purchase behavior, including Any/empty values:
+
+```sh
+node --test runtime/component/MrSimpleScreens/test/order-role-filters.test.mjs
+```
+
 ```sh
 target/debug/moqui lint --groovy runtime/component/MrSimpleScreens
 target/debug/moqui lint --screens /tmp/mrss-screen-lint.txt

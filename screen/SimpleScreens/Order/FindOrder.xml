@@ -192,8 +192,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <default-parameters partStatusId="OrderProposed,OrderRequested,OrderPlaced,OrderApproved,OrderHold" partStatusId_op="in"
                             entryDate_poffset="-3" entryDate_period="30d"/></search-form-inputs>
                 <date-filter from-field-name="customerClassFromDate" thru-field-name="customerClassThruDate" ignore="!customerClassificationId"/>
-                <econdition field-name="vendorRoleTypeId" value="OrgInternal" ignore="!orderType?.toLowerCase() === 'sales'"/>
-                <econdition field-name="customerRoleTypeId" value="OrgInternal" ignore="!orderType?.toLowerCase() === 'purchase'"/>
+                <econdition field-name="vendorRoleTypeId" value="OrgInternal" ignore="orderType?.toLowerCase() !== 'sales'"/>
+                <econdition field-name="customerRoleTypeId" value="OrgInternal" ignore="orderType?.toLowerCase() !== 'purchase'"/>
                 <econdition field-name="customerClassificationId" ignore-if-empty="true"/>
                 <econdition field-name="itemTypeEnumId" operator="in" ignore-if-empty="true" or-null="true"/>
                 <econdition field-name="productId" operator="in" from="findProductId" ignore-if-empty="true"/>
