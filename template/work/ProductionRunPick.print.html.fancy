@@ -156,9 +156,7 @@ along with this software (see the LICENSE.md file). If not, see
             </#if>
         </div>
     
-<div class="page-footer" style="font-size:8pt">
-            <div style="border-top:thin solid black">
-                <div style="text-align:center">Picklist for Run #${workEffortId} -- <#if (workEffort.estimatedStartDate != null)>${ec.l10n.format(workEffort.estimatedStartDate, dateTimeFormat)} -- </#if>Printed ${ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat)}</div>
-            </div>
-        </div>
+<#-- The XSL-FO region-after: a margin box of this document's page, so it prints at the foot of every page -->
+<style>@page mrss-ProductionRunPick { @bottom-center { content: ${cssString("Picklist for Run #" + workEffortId + " -- " + (workEffort.estimatedStartDate != null ? ec.l10n.format(workEffort.estimatedStartDate, dateTimeFormat) + " -- " : "") + "Printed " + ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat) + " -- Page ")} counter(page);
+    white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>

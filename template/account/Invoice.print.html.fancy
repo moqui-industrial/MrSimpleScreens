@@ -321,18 +321,8 @@ along with this software (see the LICENSE.md file). If not, see
 
         </div>
     
-<div class="page-footer" style="font-size:8pt">
-            <div style="border-top:thin solid black">
-                <div style="text-align:center">
-                <#if has(fromContactInfo?.postalAddress)>
-                    ${(fromContactInfo?.postalAddress?.address1 ?? "")}<#if has(fromContactInfo?.postalAddress?.unitNumber)> #${fromContactInfo.postalAddress.unitNumber}</#if><#if has(fromContactInfo?.postalAddress?.address2)>, ${fromContactInfo.postalAddress.address2}</#if>, ${((fromContactInfo.postalAddress.city ?? ""))}, ${(fromContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(fromContactInfo.postalAddress.postalCode ?? "")}<#if has(fromContactInfo?.postalAddress?.postalCodeExt)>-${fromContactInfo.postalAddress.postalCodeExt}</#if><#if has(fromContactInfo?.postalAddress?.countryGeoId)>, ${fromContactInfo.postalAddress.countryGeoId}</#if>
-                </#if>
-                <#if has(fromContactInfo?.telecomNumber)>
-                    -- <#if has(fromContactInfo?.telecomNumber?.countryCode)>${fromContactInfo.telecomNumber.countryCode}-</#if><#if has(fromContactInfo?.telecomNumber?.areaCode)>${fromContactInfo.telecomNumber.areaCode}-</#if>${(fromContactInfo.telecomNumber.contactNumber ?? "")}
-                </#if>
-                <#if has(fromContactInfo?.emailAddress)> -- ${fromContactInfo.emailAddress}</#if>
-                </div>
-                <div style="text-align:center">${(fromParty?.organizationName ?? "")}${(fromParty?.firstName ?? "")} ${(fromParty?.lastName ?? "")} Invoice #${invoiceId} -- ${ec.l10n.format(invoice.invoiceDate, dateFormat)}<#-- of --></div>
-            </div>
-        </div>
+<#-- The XSL-FO region-after: a margin box of this document's page, so it prints at the foot of every page -->
+<#assign footerContact = ec.resource.template("component://SimpleScreens/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>
+<style>@page mrss-Invoice { @bottom-center { content: ${cssString((footerContact ? footerContact + "\n" : "") + (fromParty?.organizationName ?? "") + (fromParty?.firstName ?? "") + " " + (fromParty?.lastName ?? "") + " Invoice #" + invoiceId + " -- " + ec.l10n.format(invoice.invoiceDate, dateFormat) + " -- Page ")} counter(page);
+    white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>

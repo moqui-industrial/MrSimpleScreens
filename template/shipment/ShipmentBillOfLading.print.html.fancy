@@ -170,10 +170,8 @@ along with this software (see the LICENSE.md file). If not, see
         -->
         </div>
     
-<div class="page-footer" style="font-size:8pt">
-            <div style="border-top:thin solid black">
-                <#-- TODO: show vendor's contact info (customer service or billing address, phone, email)? -->
-                <div style="text-align:center">Bill of Lading #${shipmentId} -- ${actualShipDate}</div>
-            </div>
-        </div>
+<#-- The XSL-FO region-after: a margin box of this document's page, so it prints at the foot of every page -->
+<#-- TODO: show vendor's contact info (customer service or billing address, phone, email)? -->
+<style>@page mrss-ShipmentBillOfLading { @bottom-center { content: ${cssString("Bill of Lading #" + shipmentId + " -- " + (actualShipDate ?? "") + " -- Page ")} counter(page);
+    white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>

@@ -237,9 +237,7 @@ along with this software (see the LICENSE.md file). If not, see
         </#if>
         </div>
     
-<div class="page-footer" style="font-size:8pt">
-            <div style="border-top:thin solid black">
-                <div style="text-align:center">Packages for Shipment #${shipmentId} -- <#if (shipment.estimatedShipDate != null)>${ec.l10n.format(shipment.estimatedShipDate, dateFormat)} -- </#if>Printed ${ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat)}</div>
-            </div>
-        </div>
+<#-- The XSL-FO region-after: a margin box of this document's page, so it prints at the foot of every page -->
+<style>@page mrss-ShipmentByPackage { @bottom-center { content: ${cssString("Packages for Shipment #" + shipmentId + " -- " + (shipment.estimatedShipDate != null ? ec.l10n.format(shipment.estimatedShipDate, dateFormat) + " -- " : "") + "Printed " + ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat) + " -- Page ")} counter(page);
+    white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>

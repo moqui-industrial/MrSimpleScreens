@@ -39,7 +39,8 @@ along with this software (see the LICENSE.md file). If not, see
 
 
 <#list paymentInfoList as paymentInfo>
-<section class="print-PaymentDetail" style="break-after:page">
+<#-- Each payment has a page of its own name, so its footer is its own -->
+<section class="print-PaymentDetail" style="break-after:page;page:mrss-PaymentDetail-${paymentInfo_index}">
         
 
             <div class="page-body">
@@ -141,10 +142,10 @@ along with this software (see the LICENSE.md file). If not, see
                     </#if>
                 </div>
             </div>
-        <div class="page-footer" style="font-size:8pt">
-                <div style="border-top:thin solid black">
-                    <div style="text-align:center"><#if has(paymentInfo?.payment?.paymentRefNum)>Check #${paymentInfo.payment.paymentRefNum} -- </#if>Payment #${paymentInfo.payment.paymentId} -- ${ec.l10n.format(paymentInfo.payment.effectiveDate, dateFormat)} -- ${ec.l10n.formatCurrency(paymentInfo.payment.amount, paymentInfo.payment.amountUomId)}<#-- Page numbers are supplied by the html-print page footer. --></div>
-                </div>
-            </div>
+<#-- The XSL-FO region-after: a margin box of this payment's page, so it prints at the foot of every page. XSL-FO
+     numbered the pages of each payment from 1; Chromium does not reset the page counter, so they number through. -->
+<style>@page mrss-PaymentDetail-${paymentInfo_index} { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in;
+    @bottom-center { content: ${cssString((has(paymentInfo?.payment?.paymentRefNum) ? "Check #" + paymentInfo.payment.paymentRefNum + " -- " : "") + "Payment #" + paymentInfo.payment.paymentId + " -- " + ec.l10n.format(paymentInfo.payment.effectiveDate, dateFormat) + " -- " + ec.l10n.formatCurrency(paymentInfo.payment.amount, paymentInfo.payment.amountUomId) + " -- Page ")} counter(page);
+    white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>
 </#list>

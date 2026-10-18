@@ -1,0 +1,7 @@
+<#-- A contact on one line of plain text, its postal address, phone and email joined with " -- ", as the first line of the
+     print footers (the XSL-FO region-after). Pass contactInfo. -->
+<#assign pa = contactInfo?.postalAddress>
+<#assign tel = contactInfo?.telecomNumber>
+<#assign addressText = pa ? (pa.address1 ?? "") + (pa.unitNumber ? " #" + pa.unitNumber : "") + (pa.address2 ? ", " + pa.address2 : "") + ", " + (pa.city ?? "") + ", " + (contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "") + " " + (pa.postalCode ?? "") + (pa.postalCodeExt ? "-" + pa.postalCodeExt : "") + (pa.countryGeoId ? ", " + pa.countryGeoId : "") : "">
+<#assign phoneText = tel ? (tel.countryCode ? tel.countryCode + "-" : "") + (tel.areaCode ? tel.areaCode + "-" : "") + (tel.contactNumber ?? "") : "">
+${[addressText, phoneText, contactInfo?.emailAddress ?? ""].filter((part) => part).join(" -- ")}
