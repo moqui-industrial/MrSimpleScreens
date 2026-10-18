@@ -6,6 +6,9 @@
 .print-ShipmentLoadPick table { border-collapse:collapse; table-layout:fixed; }
 .print-ShipmentLoadPick thead { display:table-header-group; }
 .print-ShipmentLoadPick tbody tr { break-inside:avoid; }
+table.print-running { width:100%; }
+table.print-running > tbody > tr { break-inside:auto; }
+table.print-running > * > tr > td { padding:0; vertical-align:top; }
 </style>
 <#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
      has(x): FreeMarker's ?has_content, an empty text, list or map is false -->

@@ -6,6 +6,9 @@
 .print-ReceivableStatement table { border-collapse:collapse; table-layout:fixed; }
 .print-ReceivableStatement thead { display:table-header-group; }
 .print-ReceivableStatement tbody tr { break-inside:avoid; }
+table.print-running { width:100%; }
+table.print-running > tbody > tr { break-inside:auto; }
+table.print-running > * > tr > td { padding:0; vertical-align:top; }
 </style>
 <section class="print-ReceivableStatement">
 <#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
@@ -41,7 +44,8 @@ along with this software (see the LICENSE.md file). If not, see
     <#assign unappliedPaymentList = receivableInfo.unappliedPaymentList>
     <#assign agingSummaryList = receivableInfo.agingSummaryList>
 
-    <div class="page-header">
+    <#-- The XSL-FO region-before: a table head, which Chromium repeats at the top of every page the body runs onto. -->
+<table class="print-running"><thead><tr><td><div class="page-header">
             <div style="font-size:16pt;text-align:center">${(fromParty?.organizationName ?? "")}${(fromParty?.firstName ?? "")} ${(fromParty?.lastName ?? "")}</div>
             <div style="font-size:12pt;text-align:center;margin-bottom:0.1in">${ec.l10n.localize('Billing Statement')}</div>
             <#if has(logoImageLocation)>
@@ -51,7 +55,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </div>
                 </div>
             </#if>
-        </div>
+        </div></td></tr></thead><tbody><tr><td>
         
 
         <div class="page-body">
@@ -174,7 +178,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </tbody>
             </table>
             </#if>
-        </div>
+        </div></td></tr></tbody></table>
 </section>
     </#list><#else>
 <div class="page-body">

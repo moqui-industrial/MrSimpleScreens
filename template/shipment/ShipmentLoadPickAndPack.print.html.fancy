@@ -6,6 +6,9 @@
 .print-ShipmentLoadPick table { border-collapse:collapse; table-layout:fixed; }
 .print-ShipmentLoadPick thead { display:table-header-group; }
 .print-ShipmentLoadPick tbody tr { break-inside:avoid; }
+table.print-running { width:100%; }
+table.print-running > tbody > tr { break-inside:auto; }
+table.print-running > * > tr > td { padding:0; vertical-align:top; }
 </style><style>
 @page mrss-ShipmentPack { size:8.5in 11in; margin:0.5in 0.5in 0.5in 0.5in; }
 .print-ShipmentPack { page:mrss-ShipmentPack; font:10pt Helvetica,Arial,sans-serif; }

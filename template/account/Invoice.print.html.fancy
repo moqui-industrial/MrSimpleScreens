@@ -6,6 +6,9 @@
 .print-Invoice table { border-collapse:collapse; table-layout:fixed; }
 .print-Invoice thead { display:table-header-group; }
 .print-Invoice tbody tr { break-inside:avoid; }
+table.print-running { width:100%; }
+table.print-running > tbody > tr { break-inside:auto; }
+table.print-running > * > tr > td { padding:0; vertical-align:top; }
 </style>
 <section class="print-Invoice">
 <#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
@@ -34,7 +37,8 @@ along with this software (see the LICENSE.md file). If not, see
 
 
 
-<div class="page-header">
+<#-- The XSL-FO region-before: a table head, which Chromium repeats at the top of every page the body runs onto. -->
+<table class="print-running"><thead><tr><td><div class="page-header">
             <div style="position:absolute;top:0in;left:0in;width:3in">
                 <#if has(logoImageLocation)>
                     <div style="text-align:left">
@@ -71,7 +75,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </div>
                 -->
             </div>
-        </div>
+        </div></td></tr></thead><tbody><tr><td>
         
 
         <#-- body starts 0.5in + 0.7in = 1.2in from top, 0.5in from left -->
@@ -319,7 +323,7 @@ along with this software (see the LICENSE.md file). If not, see
         <#if has(invoice?.invoiceMessage)><div style="margin-top:0.2in;font-size:10pt;font-weight:bold;white-space:pre-line">
             ${invoice.invoiceMessage}</div></#if>
 
-        </div>
+        </div></td></tr></tbody></table>
     
 <#-- The XSL-FO region-after: a margin box of this document's page, so it prints at the foot of every page -->
 <#assign footerContact = ec.resource.template("component://SimpleScreens/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>

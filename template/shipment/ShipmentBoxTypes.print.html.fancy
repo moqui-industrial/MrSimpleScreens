@@ -6,6 +6,9 @@
 .print-ShipmentBoxTypes table { border-collapse:collapse; table-layout:fixed; }
 .print-ShipmentBoxTypes thead { display:table-header-group; }
 .print-ShipmentBoxTypes tbody tr { break-inside:avoid; }
+table.print-running { width:100%; }
+table.print-running > tbody > tr { break-inside:auto; }
+table.print-running > * > tr > td { padding:0; vertical-align:top; }
 </style>
 <section class="print-ShipmentBoxTypes">
 <#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
@@ -29,10 +32,11 @@ along with this software (see the LICENSE.md file). If not, see
 <#assign cellPadding = "1pt">
 
 
-<div class="page-header">
+<#-- The XSL-FO region-before: a table head, which Chromium repeats at the top of every page the body runs onto. -->
+<table class="print-running"><thead><tr><td><div class="page-header">
         <#if has(fromPartyDetail)><div style="font-size:14pt;text-align:center">${(fromPartyDetail.organizationName ?? "")}${(fromPartyDetail.firstName ?? "")} ${(fromPartyDetail.lastName ?? "")}</div></#if>
             <div style="font-size:12pt;text-align:center;margin-bottom:0.1in">Box Types</div>
-        </div>
+        </div></td></tr></thead><tbody><tr><td>
 
         <div class="page-body">
             <table style="width:7.5in;border-bottom:solid black;margin-top:10pt">
@@ -55,6 +59,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </#list>
                 </tbody>
             </table>
-        </div>
+        </div></td></tr></tbody></table>
     
 </section>

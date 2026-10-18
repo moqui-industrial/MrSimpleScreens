@@ -16,7 +16,8 @@
     <#assign pageName = "mrss-ShipmentPack-" + String(shipmentId).replace(/[^A-Za-z0-9_-]/g, "_")>
 
     <section class="print-ShipmentPack" style="break-after:page;page:${pageName}">
-<div class="page-header">
+<#-- The XSL-FO region-before: a table head, which Chromium repeats at the top of every page the body runs onto. -->
+<table class="print-running"><thead><tr><td><div class="page-header">
             <#if has(logoImageLocation)>
                 <div style="position:absolute;top:0in;left:0.1in;width:2in">
                     <div style="text-align:left;margin-bottom:0.2in">
@@ -43,7 +44,7 @@
                     ${raw(ec.resource.code128Svg(shipmentId, {height: '0.4in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
                 </div>
             </div>
-        </div>
+        </div></td></tr></thead><tbody><tr><td>
         
 
         <div class="page-body">
@@ -156,7 +157,7 @@
                     </tbody>
                 </table>
             </#if></#list>
-        </div>
+        </div></td></tr></tbody></table>
     
 
 <#-- The XSL-FO region-after: a margin box of this shipment's page, so it prints at the foot of every page. The pages

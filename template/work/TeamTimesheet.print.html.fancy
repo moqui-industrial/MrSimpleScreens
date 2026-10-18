@@ -6,6 +6,9 @@
 .print-TeamTimesheet table { border-collapse:collapse; table-layout:fixed; }
 .print-TeamTimesheet thead { display:table-header-group; }
 .print-TeamTimesheet tbody tr { break-inside:avoid; }
+table.print-running { width:100%; }
+table.print-running > tbody > tr { break-inside:auto; }
+table.print-running > * > tr > td { padding:0; vertical-align:top; }
 </style>
 <section class="print-TeamTimesheet">
 <#-- Ported from the XSL-FO document by scripts/xslfo-to-html-print.py and by hand; the html-print mode writes the page.
@@ -31,7 +34,8 @@ along with this software (see the LICENSE.md file). If not, see
 <#assign dateTimeFormat = (dateTimeFormat ?? "yyyy-MM-dd HH:mm")>
 <#assign extraLines = (extraLines ?? 3)>
 
-<div class="page-header">
+<#-- The XSL-FO region-before: a table head, which Chromium repeats at the top of every page the body runs onto. -->
+<table class="print-running"><thead><tr><td><div class="page-header">
             <table style="width:7.5in;border:none"><tbody>
                 <tr>
                     <td style="width:3in;padding:2pt;border:solid black">
@@ -74,7 +78,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </td>
                 </tr>
             </tbody></table>
-        </div>
+        </div></td></tr></thead><tbody><tr><td>
         
 
         <div class="page-body">
@@ -126,7 +130,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </#list>
                 </tbody>
             </table>
-        </div>
+        </div></td></tr></tbody></table>
     
 <#-- The XSL-FO region-after: a margin box of this document's page, so it prints at the foot of every page -->
 <style>@page mrss-TeamTimesheet { @bottom-center { content: ${cssString("Timesheet for " + teamDetail.pseudoId + (clientDetail != null ? " -- " + clientDetail.pseudoId : "") + (facility != null ? " -- " + facility.pseudoId : "") + (workEffort != null ? " -- " + ec.l10n.format(workEffort.actualStartDate, "dd MMM yyyy") : "") + " -- Printed " + ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat) + " -- Page ")} counter(page);
