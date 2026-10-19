@@ -30,6 +30,8 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
                 <field-map field-name="partyId" from="term"/></entity-find-one>
+            <!-- another user's personal contact (Party.privateOwnerUserId) is not found -->
+            <if condition="partyDetail?.privateOwnerUserId &amp;&amp; partyDetail.privateOwnerUserId != ec.user.userId"><set field="partyDetail" from="null"/></if>
             <!-- <log message="====== ${term}:${roleTypeId}, partyDetail: ${partyDetail}"/> -->
             <if condition="partyDetail != null"><then>
                 <script>ec.web.sendJsonResponse([{value:partyDetail.partyId, label:ec.resource.expand("PartyNameTemplate", "", partyDetail)}])</script>
@@ -76,6 +78,8 @@ along with this software (see the LICENSE.md file). If not, see
 
             <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
                 <field-map field-name="partyId" from="term"/></entity-find-one>
+            <!-- another user's personal contact (Party.privateOwnerUserId) is not found -->
+            <if condition="partyDetail?.privateOwnerUserId &amp;&amp; partyDetail.privateOwnerUserId != ec.user.userId"><set field="partyDetail" from="null"/></if>
 
             <if condition="partyDetail != null"><then>
                 <script>
@@ -108,7 +112,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- <log level="warn" message="Got party search results: ${documentList}"/> -->
                 <script>
                     const outList = []
-                    for (const document of documentList) outList.push({value:document._id, label:ec.resource.expand("PartyNameTemplate", "", document)})
+                    for (const document of documentList) {
+                        // another user's personal contact (MantleParty privateOwnerUserId) is left out
+                        if (document.privateOwnerUserId && document.privateOwnerUserId !== ec.user.userId) continue
+                        outList.push({value:document._id, label:ec.resource.expand("PartyNameTemplate", "", document)})
+                    }
                     ec.web.sendJsonResponse(outList)
                 </script>
                 <!-- <log level="warn" message="Got party search outList: ${outList}"/> -->

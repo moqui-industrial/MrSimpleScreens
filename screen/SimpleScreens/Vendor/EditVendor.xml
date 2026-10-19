@@ -51,6 +51,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="getPersonList">
         <actions>
             <entity-find entity-name="mantle.party.PersonAndUserAccount" list="pauList" limit="20">
+                <!-- not another user's personal contact -->
+                <econdition field-name="privateOwnerUserId" from="ec.user.userId" or-null="true"/>
                 <econditions combine="or">
                     <econdition field-name="firstName" operator="like" value="%${term}%" ignore-case="true"/>
                     <econdition field-name="lastName" operator="like" value="%${term}%" ignore-case="true"/>
