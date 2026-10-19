@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- The current user's credentials for git (org.moqui.impl.UserServices): access tokens, the password for git over
+    HTTPS (and an api_key), and SSH public keys for git and SFTP over the built-in SSH server. New screen, no
+    SimpleScreens original. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Git Access" default-menu-index="10">
+
+    <transition name="createAccessToken"><service-call name="org.moqui.impl.UserServices.create#UserAccessToken"
+            out-map="tokenOut"/>
+        <actions><!-- shown once, after the redirect -->
+            <script>ec.web.sessionAttributes.newAccessToken = tokenOut.accessToken ?? ''</script></actions>
+        <default-response url="."/><error-response url="."/></transition>
+    <transition name="revokeAccessToken"><service-call name="org.moqui.impl.UserServices.revoke#UserAccessToken"/>
+        <default-response url="."/></transition>
+    <transition name="addSshKey"><service-call name="org.moqui.impl.UserServices.create#UserSshKey"/>
+        <default-response url="."/><error-response url="."/></transition>
+    <transition name="deleteSshKey"><service-call name="org.moqui.impl.UserServices.delete#UserSshKey"/>
+        <default-response url="."/></transition>
+
+    <actions>
+        <set field="newAccessToken" from="ec.web.sessionAttributes.remove('newAccessToken') || null"/>
+        <set field="username" from="ec.user.username"/>
+        <entity-find entity-name="moqui.security.UserLoginKey" list="tokenList">
+            <date-filter/><econdition field-name="userId" from="ec.user.userId"/>
+            <econdition field-name="description" operator="is-not-null"/>
+            <order-by field-name="-fromDate"/></entity-find>
+        <entity-find entity-name="moqui.security.UserSshKey" list="sshKeyList">
+            <date-filter/><econdition field-name="userId" from="ec.user.userId"/>
+            <order-by field-name="-fromDate"/></entity-find>
+    </actions>
+    <widgets>
+        <container-box><box-header title="Access Tokens"/><box-body>
+            <label text="Use an access token as the password when git asks, with your username ${username}: git clone https://host/git/repository.git" type="p"/>
+            <section name="NewAccessToken" condition="newAccessToken"><widgets>
+                <label text="Your new access token, shown only now; copy it somewhere safe:" type="strong"/>
+                <label text="${newAccessToken}" type="pre"/>
+            </widgets></section>
+            <container-dialog id="CreateAccessTokenDialog" button-text="New Access Token">
+                <form-single name="CreateAccessTokenForm" transition="createAccessToken">
+                    <field name="description"><default-field title="For"><text-line size="40"/></default-field></field>
+                    <field name="expireDays" from="90"><default-field title="Days"><text-line size="6"/></default-field></field>
+                    <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
+                </form-single>
+            </container-dialog>
+            <form-list name="AccessTokenList" list="tokenList" transition="revokeAccessToken">
+                <field name="loginKey"><default-field><hidden/></default-field></field>
+                <field name="description"><default-field title="For"><display/></default-field></field>
+                <field name="fromDate"><default-field title="Created"><display format="yyyy-MM-dd"/></default-field></field>
+                <field name="thruDate"><default-field title="Expires"><display format="yyyy-MM-dd"/></default-field></field>
+                <field name="submitButton"><default-field title="Revoke"><submit confirmation="Revoke this access token?"/></default-field></field>
+            </form-list>
+        </box-body></container-box>
+
+        <container-box><box-header title="SSH Keys"/><box-body>
+            <label text="Add the public key of a key pair (the line of ~/.ssh/id_ed25519.pub), then clone over SSH with your username: git clone ssh://${username}@host:port/repository.git" type="p"/>
+            <container-dialog id="AddSshKeyDialog" button-text="Add SSH Key">
+                <form-single name="AddSshKeyForm" transition="addSshKey">
+                    <field name="publicKey"><default-field title="Public Key"><text-area rows="4" cols="80"/></default-field></field>
+                    <field name="description"><default-field><text-line size="40"/></default-field></field>
+                    <field name="submitButton"><default-field title="Add"><submit/></default-field></field>
+                </form-single>
+            </container-dialog>
+            <form-list name="SshKeyList" list="sshKeyList" transition="deleteSshKey">
+                <field name="sshKeyId"><default-field><hidden/></default-field></field>
+                <field name="description"><default-field><display/></default-field></field>
+                <field name="fingerprint"><default-field><display/></default-field></field>
+                <field name="fromDate"><default-field title="Added"><display format="yyyy-MM-dd"/></default-field></field>
+                <field name="submitButton"><default-field title="Remove"><submit confirmation="Remove this SSH key?"/></default-field></field>
+            </form-list>
+        </box-body></container-box>
+    </widgets>
+</screen>

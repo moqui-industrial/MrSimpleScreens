@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- One commit of a git repository: its message, people and parents, the work efforts it is linked to, and the files it
+    changed with their line diffs (org.moqui.impl.GitServices get#GitCommit and get#GitCommitDiff, which check
+    AT_GIT_REPOSITORY view; a project's members may view its repositories). Past 25 changed files each diff is opened
+    on its own. New screen, no SimpleScreens original. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Commit" default-menu-include="false">
+
+    <parameter name="repositoryId" required="true"/>
+    <parameter name="commitId" required="true"/>
+    <parameter name="diffPath"/>
+
+    <transition name="gitCommit"><default-response url="."/></transition>
+    <transition name="taskSummary"><default-response url="../../Task/TaskSummary"/></transition>
+    <transition name="projectSummary"><default-response url="../ProjectSummary"/></transition>
+
+    <actions>
+        <service-call name="org.moqui.impl.GitServices.get#GitCommit" in-map="{repositoryId:repositoryId, commitId:commitId}"
+                out-map="found"/>
+        <set field="commit" from="found.commit"/>
+        <if condition="commit == null"><return error="true" message="No commit ${commitId} in repository ${repositoryId}"/></if>
+        <set field="fileList" from="found.fileList ?? []"/>
+        <set field="allDiffs" from="fileList.length &lt;= 25"/>
+        <if condition="allDiffs || diffPath">
+            <service-call name="org.moqui.impl.GitServices.get#GitCommitDiff" out-map="diffOut"
+                    in-map="{repositoryId:repositoryId, commitId:commit.commitId, path:allDiffs ? null : diffPath}"/>
+            <set field="fileDiffList" from="diffOut.fileDiffList ?? []"/>
+            <else><set field="fileDiffList" from="[]"/></else>
+        </if>
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitCommit" list="linkList">
+            <econdition field-name="repositoryId"/><econdition field-name="commitId" from="commit.commitId"/></entity-find>
+        <set field="linkedList" from="[]"/>
+        <iterate list="linkList" entry="link">
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="linked">
+                <field-map field-name="workEffortId" from="link.workEffortId"/></entity-find-one>
+            <script>linkedList.push({workEffortId:link.workEffortId, workEffortName:linked?.workEffortName,
+                workEffortTypeEnumId:linked?.workEffortTypeEnumId, linkSourceEnumId:link.linkSourceEnumId})</script>
+        </iterate>
+    </actions>
+    <widgets>
+        <container-box><box-header title="Commit ${commit.shortId} of ${repositoryId}"/><box-body>
+            <label text="${commit.summary}" type="h4"/>
+            <label text="${commit.body ?? ''}" type="pre" condition="commit.body"/>
+            <container-row>
+                <row-col md="6">
+                    <label text="Author: ${commit.authorName} &lt;${commit.authorEmail}&gt; on ${ec.l10n.format(commit.authorDate, 'yyyy-MM-dd HH:mm')}" type="div"/>
+                    <label text="Committer: ${commit.committerName} on ${ec.l10n.format(commit.committerDate, 'yyyy-MM-dd HH:mm')}" type="div"
+                            condition="commit.committerName != commit.authorName"/>
+                    <label text="${commit.commitId}" type="div"/>
+                </row-col>
+                <row-col md="6">
+                    <section-iterate name="CommitParents" list="commit.parentIds" entry="parentId">
+                        <widgets><link url="gitCommit" text="Parent ${parentId.substring(0, 10)}" link-type="anchor">
+                            <parameter name="repositoryId"/><parameter name="commitId" from="parentId"/></link></widgets>
+                    </section-iterate>
+                    <section-iterate name="CommitLinkedWorkEfforts" list="linkedList" entry="linked">
+                        <widgets>
+                            <link url="taskSummary" text="${linked.workEffortId}: ${linked.workEffortName ?? ''}" link-type="anchor"
+                                    condition="linked.workEffortTypeEnumId == 'WetTask'">
+                                <parameter name="workEffortId" from="linked.workEffortId"/></link>
+                            <link url="projectSummary" text="${linked.workEffortId}: ${linked.workEffortName ?? ''}" link-type="anchor"
+                                    condition="linked.workEffortTypeEnumId != 'WetTask'">
+                                <parameter name="workEffortId" from="linked.workEffortId"/></link>
+                        </widgets>
+                    </section-iterate>
+                </row-col>
+            </container-row>
+            <label text="${fileList.length} files changed, ${found.insertions ?? 0} insertions, ${found.deletions ?? 0} deletions" type="div"/>
+        </box-body></container-box>
+
+        <section name="CommitFilesWithoutDiff" condition="!allDiffs">
+            <widgets>
+                <section-iterate name="CommitFileLinks" list="fileList" entry="file">
+                    <widgets><container>
+                        <link url="gitCommit" text="${file.path}" link-type="anchor">
+                            <parameter name="repositoryId"/><parameter name="commitId" from="commit.commitId"/>
+                            <parameter name="diffPath" from="file.path"/></link>
+                        <label text=" ${file.changeType} +${file.insertions ?? 0} -${file.deletions ?? 0}"/>
+                    </container></widgets>
+                </section-iterate>
+            </widgets>
+        </section>
+        <section-iterate name="CommitFileDiffs" list="fileDiffList" entry="fileDiff">
+            <widgets>
+                <container-box><box-header title="${fileDiff.path}"/><box-body>
+                    <label text="${fileDiff.changeType}, +${fileDiff.insertions ?? 0} -${fileDiff.deletions ?? 0}" type="div"
+                            condition="!fileDiff.binary &amp;&amp; !fileDiff.tooLarge"/>
+                    <label text="${fileDiff.changeType}, a binary file" type="div" condition="fileDiff.binary"/>
+                    <label text="${fileDiff.changeType}, too large to show" type="div" condition="fileDiff.tooLarge"/>
+                    <section name="FileDiffTable" condition="fileDiff.html"><widgets>
+                        <render-mode><text type="html,vuet,qvt"><![CDATA[<div class="scroll">${fileDiff.html}</div>]]></text></render-mode>
+                    </widgets></section>
+                </box-body></container-box>
+            </widgets>
+        </section-iterate>
+    </widgets>
+</screen>

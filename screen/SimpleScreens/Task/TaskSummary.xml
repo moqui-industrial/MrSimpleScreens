@@ -23,6 +23,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="editParty"><default-response url="../../Party/EditParty"/></transition>
     <transition name="editRequest"><default-response url="../../Request/EditRequest"/></transition>
+    <transition name="gitCommit"><default-response url="../../Project/GitCommit"/></transition>
 
     <transition name="updateTaskField">
         <actions>
@@ -200,6 +201,12 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- Content -->
         <entity-find entity-name="mantle.work.effort.WorkEffortContent" list="contentList">
             <econdition field-name="workEffortId"/><order-by field-name="-contentDate"/></entity-find>
+        <!-- Commits, branches and tags (mantle.work.GitServices) -->
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitCommit" list="gitCommitList" limit="20">
+            <econdition field-name="workEffortId"/><order-by field-name="-commitDate"/></entity-find>
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitRef" list="gitRefList">
+            <econdition field-name="workEffortId"/><econdition field-name="thruDate" operator="is-null"/>
+            <order-by field-name="refName"/></entity-find>
     </actions>
     <widgets>
         <container-row><row-col md="3">
@@ -463,6 +470,30 @@ along with this software (see the LICENSE.md file). If not, see
                         <!-- NOTE: cannot use sparse paths along with extra path elements for screens like wiki.xml that allow extra paths, limit of current sparse path resolution approach -->
                         <link text="${wpawe.wikiSpaceId}" url="/apps/${appRoot}/Wiki/wiki/${wpawe.wikiSpaceId}" link-type="anchor"/>
                         <link text="/${wpawe.pagePath}" url="/apps/${appRoot}/Wiki/wiki/${wpawe.wikiSpaceId}/${wpawe.pagePath||''}" link-type="anchor"/>
+                    </container></widgets>
+                </section-iterate>
+            </box-body></container-box>
+
+            <container-box><box-header title="Commits"/><box-body>
+                <section-iterate name="TaskGitCommitList" list="gitCommitList" entry="gitCommit">
+                    <widgets><container>
+                        <link text="${gitCommit.commitId.substring(0, 10)}" url="gitCommit" link-type="anchor">
+                            <parameter name="repositoryId" from="gitCommit.repositoryId"/>
+                            <parameter name="commitId" from="gitCommit.commitId"/></link>
+                        <label text=" ${gitCommit.summary ?? ''}"/>
+                        <label text="${gitCommit.authorName ?? ''} ${gitCommit.commitDate ? ec.l10n.format(gitCommit.commitDate, 'yyyy-MM-dd HH:mm') : ''} in ${gitCommit.repositoryId}" type="div"/>
+                    </container></widgets>
+                </section-iterate>
+            </box-body></container-box>
+
+            <container-box><box-header title="Branches and Tags"/><box-body>
+                <section-iterate name="TaskGitRefList" list="gitRefList" entry="gitRef">
+                    <widgets><container>
+                        <label text="${gitRef.refType == 'tag' ? 'tag' : 'branch'} ${gitRef.refName.replace('refs/heads/', '').replace('refs/tags/', '')}"/>
+                        <link text=" ${gitRef.objectId?.substring(0, 10) ?? ''}" url="gitCommit" link-type="anchor" condition="gitRef.objectId">
+                            <parameter name="repositoryId" from="gitRef.repositoryId"/>
+                            <parameter name="commitId" from="gitRef.objectId"/></link>
+                        <label text="in ${gitRef.repositoryId}" type="div"/>
                     </container></widgets>
                 </section-iterate>
             </box-body></container-box>

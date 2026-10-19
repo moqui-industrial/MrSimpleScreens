@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- The commits, branches and tags of a task: linked by hand here, or by the conventions of mantle-usl's
+    Work.gitecas.xml (a task ID in a commit message, a Task trailer, a branch or tag named for the task) in the
+    repositories of the task's project. New screen, no SimpleScreens original. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Source" default-menu-index="7">
+
+    <parameter name="workEffortId" required="true"/>
+
+    <transition name="addCommit"><service-call name="mantle.work.GitServices.add#TaskCommit" in-map="context"/>
+        <default-response url="."/></transition>
+    <transition name="removeCommit"><service-call name="mantle.work.GitServices.remove#TaskCommit" in-map="context"/>
+        <default-response url="."/></transition>
+    <transition name="addRef"><service-call name="mantle.work.GitServices.add#WorkEffortRef" in-map="context"/>
+        <default-response url="."/></transition>
+    <transition name="removeRef"><service-call name="mantle.work.GitServices.remove#WorkEffortRef" in-map="context"/>
+        <default-response url="."/></transition>
+    <transition name="gitCommit"><default-response url="../../Project/GitCommit"/></transition>
+
+    <transition name="getRepositoryRefs">
+        <actions>
+            <service-call name="org.moqui.impl.GitServices.get#GitRefs" in-map="{repositoryId:repositoryId}" out-map="refsOut"/>
+            <script>ec.web.sendJsonResponse((refsOut.refList ?? []).map(ref => ({refName:ref.refName,
+                label:(ref.refType == 'tag' ? 'tag ' : '') + ref.shortName})))</script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <actions>
+        <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="task"/>
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitRepository" list="projectRepoList">
+            <date-filter/><econdition field-name="workEffortId" from="task?.rootWorkEffortId"/>
+            <order-by field-name="repositoryId"/></entity-find>
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitCommit" list="commitList">
+            <econdition field-name="workEffortId"/><order-by field-name="-commitDate"/></entity-find>
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitRef" list="refList">
+            <econdition field-name="workEffortId"/><order-by field-name="refName"/></entity-find>
+    </actions>
+    <widgets>
+        <container>
+            <container-dialog id="AddCommitDialog" button-text="Add Commit">
+                <form-single name="AddCommitForm" transition="addCommit">
+                    <field name="workEffortId"><default-field><hidden/></default-field></field>
+                    <field name="repositoryId"><default-field title="Repository"><drop-down>
+                        <list-options list="projectRepoList" key="${repositoryId}" text="${repositoryId}"/>
+                    </drop-down></default-field></field>
+                    <field name="commitId"><default-field title="Commit"><text-line size="40"/></default-field></field>
+                    <field name="submitButton"><default-field title="Add"><submit/></default-field></field>
+                </form-single>
+            </container-dialog>
+            <container-dialog id="AddRefDialog" button-text="Add Branch or Tag">
+                <form-single name="AddRefForm" transition="addRef">
+                    <field name="workEffortId"><default-field><hidden/></default-field></field>
+                    <field name="repositoryId"><default-field title="Repository"><drop-down>
+                        <list-options list="projectRepoList" key="${repositoryId}" text="${repositoryId}"/>
+                    </drop-down></default-field></field>
+                    <field name="refName"><default-field title="Branch or Tag"><drop-down>
+                        <dynamic-options transition="getRepositoryRefs" value-field="refName" label-field="label">
+                            <depends-on field="repositoryId"/></dynamic-options>
+                    </drop-down></default-field></field>
+                    <field name="submitButton"><default-field title="Add"><submit/></default-field></field>
+                </form-single>
+            </container-dialog>
+        </container>
+
+        <label text="No repository is linked to this task's project yet: add one on the project's Repositories tab."
+                type="p" condition="!projectRepoList.length"/>
+
+        <label text="Commits" type="h5"/>
+        <form-list name="TaskCommitList" list="commitList" transition="removeCommit">
+            <field name="workEffortId"><default-field><hidden/></default-field></field>
+            <field name="repositoryId"><default-field title="Repository"><display/></default-field></field>
+            <field name="commitId"><default-field title="Commit">
+                <link url="gitCommit" text="${commitId.substring(0, 10)}" link-type="anchor">
+                    <parameter name="repositoryId"/><parameter name="commitId"/></link>
+            </default-field></field>
+            <field name="summary"><default-field><display/></default-field></field>
+            <field name="authorName"><default-field title="Author"><display/></default-field></field>
+            <field name="commitDate"><default-field title="Date"><display format="yyyy-MM-dd HH:mm"/></default-field></field>
+            <field name="refName"><default-field title="On"><display text="${(refName ?? '').replace('refs/heads/', '').replace('refs/tags/', '')}"/></default-field></field>
+            <field name="linkSourceEnumId"><default-field title="Linked By"><display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
+            <field name="submitButton"><default-field title="Remove"><submit/></default-field></field>
+        </form-list>
+
+        <label text="Branches and Tags" type="h5"/>
+        <form-list name="TaskRefList" list="refList" transition="removeRef">
+            <field name="workEffortId"><default-field><hidden/></default-field></field>
+            <field name="repositoryId"><default-field title="Repository"><display/></default-field></field>
+            <field name="refName"><default-field title="Name"><display text="${refName.replace('refs/heads/', '').replace('refs/tags/', '')}"/></default-field></field>
+            <field name="refType"><default-field title="Type"><display/></default-field></field>
+            <field name="objectId"><default-field title="Commit">
+                <link url="gitCommit" text="${objectId?.substring(0, 10) ?? ''}" link-type="anchor" condition="objectId">
+                    <parameter name="repositoryId"/><parameter name="commitId" from="objectId"/></link>
+            </default-field></field>
+            <field name="linkSourceEnumId"><default-field title="Linked By"><display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>
+            <field name="thruDate"><default-field title="Deleted"><display format="yyyy-MM-dd HH:mm"/></default-field></field>
+            <field name="submitButton"><default-field title="Remove"><submit/></default-field></field>
+        </form-list>
+    </widgets>
+</screen>

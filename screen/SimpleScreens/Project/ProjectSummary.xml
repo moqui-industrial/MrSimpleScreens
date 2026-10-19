@@ -25,6 +25,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="milestoneSummary"><default-response url="../MilestoneSummary"/></transition>
 
     <transition name="taskSummary"><default-response url="//${taskRoot||appRoot}/Task/TaskSummary"/></transition>
+    <transition name="gitCommit"><default-response url="../GitCommit"/></transition>
 
     <pre-actions>
         <if condition="rootWorkEffortId"><set field="workEffortId" from="rootWorkEffortId"/></if>
@@ -55,6 +56,12 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="workEffortId"/></entity-find>
         <entity-find entity-name="mantle.work.effort.WorkEffortPartyAndPerson" list="wepapList">
             <econdition field-name="workEffortId" from="rootWorkEffortId"/></entity-find>
+        <!-- git repositories and tags (mantle.work.GitServices) -->
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitRepository" list="gitRepositoryList">
+            <date-filter/><econdition field-name="workEffortId"/><order-by field-name="repositoryId"/></entity-find>
+        <entity-find entity-name="mantle.work.effort.WorkEffortGitRef" list="gitTagList" limit="10">
+            <econdition field-name="workEffortId"/><econdition field-name="refType" value="tag"/>
+            <econdition field-name="thruDate" operator="is-null"/><order-by field-name="-linkedDate"/></entity-find>
     </actions>
     <widgets>
         <section-iterate name="ActiveProjectSection" list="projectList" entry="project" paginate="true"><actions>
@@ -331,6 +338,20 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="pagePath"><default-field title="Page"><display text=""/>
                     <link text="${pagePath}" url="//${appRoot}/Wiki/wiki/${wikiSpaceId}/${pagePath||''}"/>
                 </default-field></field>
+            </form-list>
+
+            <form-list name="ViewGitRepositoryList" list="gitRepositoryList" skip-form="true">
+                <field name="repositoryId"><default-field title="Repository"><display/></default-field></field>
+                <field name="fromDate"><default-field title="Linked"><display format="yyyy-MM-dd"/></default-field></field>
+            </form-list>
+            <form-list name="ViewGitTagList" list="gitTagList" skip-form="true">
+                <field name="refName"><default-field title="Tag"><display text="${refName.replace('refs/tags/', '')}"/></default-field></field>
+                <field name="repositoryId"><default-field title="Repository"><display/></default-field></field>
+                <field name="objectId"><default-field title="Commit">
+                    <link url="gitCommit" text="${objectId?.substring(0, 10) ?? ''}" link-type="anchor" condition="objectId">
+                        <parameter name="repositoryId"/><parameter name="commitId" from="objectId"/></link>
+                </default-field></field>
+                <field name="linkedDate"><default-field title="Linked"><display format="yyyy-MM-dd"/></default-field></field>
             </form-list>
 
             <form-list name="ViewUserAssignForm" list="wepapList" skip-form="true">
