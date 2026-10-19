@@ -23,47 +23,37 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="versionNameRhs" from="versionNameRhs || versionNameLhs"/>
         <entity-find-one entity-name="mantle.product.ProductContent" value-field="productContent"/>
         <set field="resourceRef" from="ec.resource.getLocationReference(productContent?.contentLocation)"/>
-
-        <set field="pageTextLhs" from="resourceRef?.getText(versionNameLhs) || ''"/>
-        <set field="pageTextRhs" from="resourceRef?.getText(versionNameRhs) || ''"/>
+        <!-- one version is shown as its text; two are compared on the server (ResourceReference.getVersionDiff), an
+            HTML table with every text escaped, where the Java screen diffed characters in the browser with jsdiff -->
+        <script><![CDATA[
+            versionText = null
+            diffHtml = ''
+            if (versionNameLhs == versionNameRhs) {
+                versionText = resourceRef?.getText(versionNameLhs) || ''
+            } else {
+                try {
+                    const diff = resourceRef?.getVersionDiff(versionNameLhs, versionNameRhs)
+                    if (diff) {
+                        diffHtml = diff.html
+                        diffStats = diff.stats.insertions + ' added, ' + diff.stats.deletions + ' removed'
+                    }
+                } catch (err) {
+                    ec.message.addError('Cannot compare: ' + err.message)
+                }
+            }
+        ]]></script>
     </actions>
     <widgets>
-        <container-box><box-header title="Compare versions ${versionNameLhs} and ${versionNameRhs}"/><box-body>
-            <render-mode><text type="html,vuet,qvt"><![CDATA[
-                <pre id="result" class="compare"></pre>
-                <textarea id="pageTextLhs" style="display: none;">${WebUtilities.encodeHtml(pageTextLhs)}</textarea>
-                <textarea id="pageTextRhs" style="display: none;">${WebUtilities.encodeHtml(pageTextRhs)}</textarea>
-
-                <script>
-    var a = document.getElementById('pageTextLhs');
-    var b = document.getElementById('pageTextRhs');
-    var result = document.getElementById('result');
-    // diffChars, diffWords, diffLines
-	var diff = JsDiff['diffChars'](a.textContent, b.textContent);
-	var fragment = document.createDocumentFragment();
-	for (var i=0; i < diff.length; i++) {
-		if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
-			var swap = diff[i];
-			diff[i] = diff[i + 1];
-			diff[i + 1] = swap;
-		}
-		var node;
-		if (diff[i].removed) {
-			node = document.createElement('del');
-			node.appendChild(document.createTextNode(diff[i].value));
-		} else if (diff[i].added) {
-			node = document.createElement('ins');
-			node.appendChild(document.createTextNode(diff[i].value));
-		} else {
-			node = document.createTextNode(diff[i].value);
-		}
-		fragment.appendChild(node);
-	}
-
-	result.textContent = '';
-	result.appendChild(fragment);
-                </script>
-            ]]></text></render-mode>
-        </box-body></container-box>
+        <section name="OneVersion" condition="versionText != null"><widgets>
+            <container-box><box-header title="Version ${versionNameLhs.substring(0, 12)}"/><box-body>
+                <label text="${versionText}" type="pre" style="pre-plain"/>
+            </box-body></container-box>
+        </widgets><fail-widgets>
+            <container-box><box-header title="Compare versions ${versionNameLhs.substring(0, 12)} and ${versionNameRhs.substring(0, 12)}"/><box-toolbar>
+                <label text="${diffStats || ''}" type="span"/>
+            </box-toolbar><box-body>
+                <render-mode><text type="html,vuet,qvt"><![CDATA[<div class="scroll">${diffHtml}</div>]]></text></render-mode>
+            </box-body></container-box>
+        </fail-widgets></section>
     </widgets>
 </screen>

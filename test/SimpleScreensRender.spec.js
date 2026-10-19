@@ -136,3 +136,29 @@ feature("render Simple Screens screen (#screenPath, #containsTextList)", {
         containsAll
     },
 })
+
+// The wiki screens over a space made here: a page with two versions, viewed by version and compared. The compare is
+// the server-side diff (ResourceReference.getVersionDiff), a moqui-diff table, where the Java screen ran jsdiff.
+feature("wiki page versions render: #screenPath", {
+    given() {
+        if (!ec.entity.find("moqui.resource.wiki.WikiSpace").condition("wikiSpaceId", "SSWT").one()) {
+            call("org.moqui.impl.WikiServices.create#WikiSpace", { wikiSpaceId: "SSWT", description: "Screen test space" })
+            for (const pageText of ["first text of the page\n", "second text of the page\n"])
+                call("org.moqui.impl.WikiServices.update#WikiPage", { wikiSpaceId: "SSWT", pageName: "Page1", pageText })
+        }
+    },
+    where: [
+        { screenPath: "Wiki/wiki/SSWT/Page1", containsText: "second text" },
+        { screenPath: "Wiki/wiki/SSWT/Page1?versionName=01", containsText: "first text" },
+        { screenPath: "Wiki/ViewWikiPage?wikiSpaceId=SSWT&pagePath=Page1&versionName=01", containsText: "first text" },
+        { screenPath: "Wiki/WikiCompare?wikiSpaceId=SSWT&pagePath=Page1&versionNameLhs=01&versionNameRhs=02", containsText: "moqui-diff" },
+        { screenPath: "Wiki/EditWikiPage?wikiSpaceId=SSWT&pagePath=Page1", containsText: "second text" },
+    ],
+    expect({ screenPath, containsText }) {
+        const str = screens.render(screenPath, { lastStandalone: "-2" }, null)
+        if (!str.output?.includes(containsText)) log.info(`In ${screenPath} text [${containsText}] not found:\n${str.output}`)
+        !str.errorMessages.length
+        str.status == 200
+        str.output.includes(containsText)
+    },
+})

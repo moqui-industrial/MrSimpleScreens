@@ -23,64 +23,28 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <!-- <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/> -->
         <service-call name="org.moqui.impl.WikiServices.get#WikiPageInfo" in-map="context" out-map="context"/>
-        <set field="pageTextLhs" from="pageReference?.getText(versionNameLhs) || ''"/>
-        <set field="pageTextRhs" from="pageReference?.getText(versionNameRhs) || ''"/>
         <set field="wikiType" from="wikiType || 'md'"/>
+        <!-- the line diff is made on the server (ResourceReference.getVersionDiff): an HTML table with every text escaped;
+            the Java screen diffed characters in the browser with jsdiff from a CDN -->
+        <script><![CDATA[
+            diffHtml = ''
+            try {
+                const diff = pageReference?.getVersionDiff(versionNameLhs, versionNameRhs)
+                if (diff) {
+                    diffHtml = diff.html
+                    diffStats = diff.stats.insertions + ' added, ' + diff.stats.deletions + ' removed'
+                }
+            } catch (err) {
+                ec.message.addError('Cannot compare: ' + err.message)
+            }
+        ]]></script>
     </actions>
     <widgets>
-        <container-box><box-header title="Compare ${pageName} versions ${versionNameLhs} and ${versionNameRhs}"/><box-toolbar>
+        <container-box><box-header title="Compare ${pageName} versions ${versionNameLhs.substring(0, 12)} and ${versionNameRhs.substring(0, 12)}"/><box-toolbar>
+            <label text="${diffStats || ''}" type="span"/>
             <link url="../wiki" text="Back to View"/>
         </box-toolbar><box-body>
-        <render-mode><text type="html,vuet,qvt"><![CDATA[
-            <pre id="result" class="compare"></pre>
-            <textarea id="pageTextLhs" style="display: none;">${WebUtilities.encodeHtml(pageTextLhs)}</textarea>
-            <textarea id="pageTextRhs" style="display: none;">${WebUtilities.encodeHtml(pageTextRhs)}</textarea>
-
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/3.2.0/diff.min.js" type="text/javascript"></script>
-            <script>
-    var a = document.getElementById('pageTextLhs');
-    var b = document.getElementById('pageTextRhs');
-    var result = document.getElementById('result');
-    // diffChars, diffWords, diffLines
-	var diff = JsDiff['diffChars'](a.textContent, b.textContent);
-	var fragment = document.createDocumentFragment();
-	for (var i=0; i < diff.length; i++) {
-		if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
-			var swap = diff[i];
-			diff[i] = diff[i + 1];
-			diff[i + 1] = swap;
-		}
-		var node;
-		if (diff[i].removed) {
-			node = document.createElement('del');
-			node.appendChild(document.createTextNode(diff[i].value));
-		} else if (diff[i].added) {
-			node = document.createElement('ins');
-			node.appendChild(document.createTextNode(diff[i].value));
-		} else {
-			node = document.createTextNode(diff[i].value);
-		}
-		fragment.appendChild(node);
-	}
-
-	result.textContent = '';
-	result.appendChild(fragment);
-            </script>
-        ]]></text></render-mode>
+        <render-mode><text type="html,vuet,qvt"><![CDATA[<div class="scroll">${diffHtml}</div>]]></text></render-mode>
         </box-body></container-box>
-        <!--
-        Would be nice to use Mergely, but doesn't appear to be on any CDN and don't want to include the JS in the repo
-        Depends on codemirror and jQuery
-
-        https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.22.2/codemirror.min.css
-        https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.22.2/codemirror.min.js
-
-        https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.22.2/mode/markdown/markdown.min.js
-
-        https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.22.2/mode/htmlmixed/htmlmixed.min.js
-        https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.22.2/mode/xml/xml.min.js
-        https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.22.2/mode/css/css.min.js
-        https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.22.2/mode/javascript/javascript.min.js
-        -->
     </widgets>
 </screen>
