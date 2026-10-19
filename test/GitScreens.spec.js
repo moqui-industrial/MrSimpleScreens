@@ -5,6 +5,7 @@ const PROJECT = "GITS"
 let screens, my, tools, taskId, commitId
 
 spec({
+    requires: ["git"],
     stepwise: true,
     setupSpec() {
         login("john.doe")
