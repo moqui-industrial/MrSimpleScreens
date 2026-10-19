@@ -114,7 +114,7 @@ along with this software (see the LICENSE.md file). If not, see
                     const outList = []
                     for (const document of documentList) {
                         // another user's personal contact (MantleParty privateOwnerUserId) is left out
-                        if (document.privateOwnerUserId && document.privateOwnerUserId !== ec.user.userId) continue
+                        if (document.privateOwnerUserId &amp;&amp; document.privateOwnerUserId !== ec.user.userId) continue
                         outList.push({value:document._id, label:ec.resource.expand("PartyNameTemplate", "", document)})
                     }
                     ec.web.sendJsonResponse(outList)
