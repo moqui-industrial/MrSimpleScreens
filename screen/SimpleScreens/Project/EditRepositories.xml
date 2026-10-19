@@ -24,7 +24,8 @@ along with this software (see the LICENSE.md file). If not, see
             in-map="{workEffortId:rootWorkEffortId, repositoryId:repositoryId}"/>
         <default-response url="."/></transition>
     <transition name="createRepository"><service-call name="mantle.work.GitServices.create#ProjectRepository"
-            in-map="{workEffortId:rootWorkEffortId, repositoryId:repositoryId, repositoryKind:repositoryKind, description:description}"/>
+            in-map="{workEffortId:rootWorkEffortId, repositoryId:repositoryId, repositoryKind:repositoryKind, description:description,
+                contentRepository:contentRepository == 'Y'}"/>
         <default-response url="."/></transition>
     <transition name="removeRepository"><service-call name="mantle.work.GitServices.remove#ProjectRepository"
             in-map="{workEffortId:rootWorkEffortId, repositoryId:repositoryId}"/>
@@ -79,6 +80,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <option key="local" text="On disk (for code: clone and push it with git)"/>
                         <option key="db" text="In the database (kept with the database backup)"/>
                     </radio></default-field></field>
+                    <field name="contentRepository"><default-field title="Content"
+                            tooltip="Keep images, video, audio, PDFs and archives in Git LFS, as for a web site's content">
+                        <check><option key="Y" text=" "/></check></default-field></field>
                     <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
                 </form-single>
             </container-dialog>
