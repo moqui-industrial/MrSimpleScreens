@@ -37,14 +37,14 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="opOptions" from="['equals', 'not-equals', 'less', 'greater', 'less-equals', 'greater-equals', 'in', 'not-in',
             'between', 'not-between', 'like', 'not-like', 'is-null', 'is-not-null']"/>
         <set field="funcOptions" from="['min', 'max', 'sum', 'avg', 'count', 'count-distinct', 'upper', 'lower']"/>
-        <set field="knownFields" from="new Set()"/>
+        <set field="knownFields" from="[]"/>
 
         <!-- here instead of under FieldList form-list because used for validation of condition fields -->
         <entity-find entity-name="moqui.entity.document.DataDocumentField" list="ddFieldList">
             <econdition field-name="dataDocumentId"/><order-by field-name="sequenceNum,fieldPath"/></entity-find>
-        <set field="fieldAliasSet" from="new Set()"/>
+        <set field="fieldAliasSet" from="[]"/>
         <iterate list="ddFieldList" entry="ddf">
-            <script>fieldAliasSet.add(ddf.fieldNameAlias || (ddf.fieldPath.includes(':') ? ddf.fieldPath.substring(ddf.fieldPath.lastIndexOf(':')+1) : ddf.fieldPath))</script>
+            <script>const alias = ddf.fieldNameAlias || (ddf.fieldPath.includes(':') ? ddf.fieldPath.substring(ddf.fieldPath.lastIndexOf(':')+1) : ddf.fieldPath); if (!fieldAliasSet.includes(alias)) fieldAliasSet.push(alias)</script>
         </iterate>
     </actions>
     <widgets>
