@@ -71,7 +71,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <label text="${accountCode||''}" style="text-strong" condition="!acctgTransId"/>
                 </default-field></field>
                 <field name="glJournalId"><default-field title="Jrnl">
-                    <display-entity entity-name="mantle.ledger.transaction.GlJournal" text="${glJournalName?.take(3)}"/></default-field></field>
+                    <display-entity entity-name="mantle.ledger.transaction.GlJournal" text="${glJournalName ? glJournalName.substring(0, 3) : ''}"/></default-field></field>
 
                 <field name="transactionDate"><default-field title="Trans Date" container-style="${acctgTransId ? '' : 'text-strong'}">
                     <display format="yyyy-MM-dd"/></default-field></field>

@@ -90,14 +90,14 @@ along with this software (see the LICENSE.md file). If not, see
                                 <div class="progress-bar progress-bar-info" style="width: ${estimatedRemainingPercentString}%;" aria-valuenow="${estimatedRemainingPercentString}" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                             ]]></text><text type="qvt" template="true"><![CDATA[
-                                <q-linear-progress size="xl" class="q-mt-xs" :value="${pstats.estimatedCompletePercent/100}" :buffer="${pstats.estimatedRemainingPercent/100}"
+                                <q-linear-progress size="xl" class="q-mt-xs" :value="${toNumber(pstats.estimatedCompletePercent)/100}" :buffer="${toNumber(pstats.estimatedRemainingPercent)/100}"
                                     color="<#if pstats.actualPlusRemainingOverEstimated>negative<#else>positive</#if>" track-color="info"/>
                             ]]></text></render-mode>
                     </row-col><row-col sm="3">
                         <label text="${ec.l10n.format(pstats.estimatedCompletePercent, '00.00')}%"/>
                         <render-mode><text type="html,vuet,qvt" template="true"><![CDATA[<i class="fa <#if pstats.actualPlusRemainingOverEstimated>fa-exclamation-circle text-danger<#else>fa-check-circle text-success</#if>"></i>]]></text></render-mode>
                     </row-col></container-row>
-                    <section name="TimeBudgetGraphs" condition="project.totalTimeAllowed"><widgets>
+                    <section name="TimeBudgetGraphs" condition="toNumber(project.totalTimeAllowed)"><widgets>
                         <container-row><row-col sm="2">
                             <label text="Hrs Budget" type="strong"/>
                         </row-col><row-col sm="7">
@@ -107,7 +107,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     <div class="progress-bar progress-bar-info" style="width: ${timeBudgetRemainingPercentString}%;" aria-valuenow="${timeBudgetRemainingPercentString}" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                                 ]]></text><text type="qvt" template="true"><![CDATA[
-                                    <q-linear-progress size="xl" class="q-mt-xs" :value="${pstats.timeBudgetCompletePercent/100}" :buffer="${pstats.timeBudgetRemainingPercent/100}"
+                                    <q-linear-progress size="xl" class="q-mt-xs" :value="${toNumber(pstats.timeBudgetCompletePercent)/100}" :buffer="${toNumber(pstats.timeBudgetRemainingPercent)/100}"
                                         color="<#if pstats.actualPlusRemainingOverTimeBudget>negative<#else>positive</#if>" track-color="info"/>
                                 ]]></text></render-mode>
                         </row-col><row-col sm="3">
@@ -115,13 +115,13 @@ along with this software (see the LICENSE.md file). If not, see
                             <render-mode><text type="html,vuet,qvt" template="true"><![CDATA[<i class="fa <#if pstats.actualPlusRemainingOverEstimated>fa-exclamation-circle text-danger<#else>fa-check-circle text-success</#if>"></i>]]></text></render-mode>
                         </row-col></container-row>
                     </widgets></section>
-                    <section name="CostBudgetGraphs" condition="project.totalClientCostAllowed"><widgets>
+                    <section name="CostBudgetGraphs" condition="toNumber(project.totalClientCostAllowed)"><widgets>
                         <container-row><row-col sm="2"><label text="Cost Budget" type="strong"/>
                         </row-col><row-col sm="7">
                             <render-mode><text type="html,vuet" template="true"><![CDATA[
                                 <div class="progress middle"><div class="progress-bar <#if pstats.clientActualOverBudget>progress-bar-danger<#else>progress-bar-success</#if>" style="width: ${clientBudgetUsedPercentString}%;" aria-valuenow="${clientBudgetUsedPercentString}" aria-valuemin="0" aria-valuemax="100"></div></div>
                                 ]]></text><text type="qvt" template="true"><![CDATA[
-                                    <q-linear-progress size="xl" class="q-mt-xs" :value="${pstats.clientBudgetUsedPercent/100}"
+                                    <q-linear-progress size="xl" class="q-mt-xs" :value="${toNumber(pstats.clientBudgetUsedPercent)/100}"
                                         color="<#if pstats.clientActualOverBudget>negative<#else>positive</#if>"/>
                                 ]]></text></render-mode>
                         </row-col><row-col sm="3">
@@ -135,9 +135,9 @@ along with this software (see the LICENSE.md file). If not, see
                                 <div class="progress xs" style="height:6px;"><div class="progress-bar <#if pstats.estimatedCompleteOverBudget>progress-bar-warning<#else>progress-bar-success</#if>" style="width: ${estimatedCompletePercentString}%;" aria-valuenow="${estimatedCompletePercentString}" aria-valuemin="0" aria-valuemax="100"></div></div>
                                 <div class="progress xs" style="height:6px;"><div class="progress-bar <#if pstats.estimatedCompleteOverBudget>progress-bar-warning<#else>progress-bar-success</#if>" style="width: ${clientBudgetUsedPercentString}%;" aria-valuenow="${clientBudgetUsedPercentString}" aria-valuemin="0" aria-valuemax="100"></div></div>
                                 ]]></text><text type="qvt" template="true"><![CDATA[
-                                    <q-linear-progress size="sm" class="q-mt-xs" :value="${pstats.estimatedCompletePercent/100}"
+                                    <q-linear-progress size="sm" class="q-mt-xs" :value="${toNumber(pstats.estimatedCompletePercent)/100}"
                                         color="<#if pstats.estimatedCompleteOverBudget>negative<#else>positive</#if>"/>
-                                    <q-linear-progress size="sm" class="q-mt-xs" :value="${pstats.clientBudgetUsedPercent/100}"
+                                    <q-linear-progress size="sm" class="q-mt-xs" :value="${toNumber(pstats.clientBudgetUsedPercent)/100}"
                                         color="<#if pstats.estimatedCompleteOverBudget>negative<#else>positive</#if>"/>
                                 ]]></text></render-mode>
                         </row-col><row-col sm="3">
@@ -162,11 +162,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <row-col sm="4"><label text="Actual Cost ${ec.l10n.formatCurrency(project.actualClientCost, project.costUomId, 2)}" type="strong" style="${pstats.clientActualOverBudget ? 'text-danger' : 'text-success'}"/></row-col>
                         <row-col sm="4"><label text="Est Cost ${ec.l10n.formatCurrency(pstats.clientEstimatedCost, project.costUomId, 2)}" type="strong"/></row-col>
                     </container-row>
-                    <section name="CostBudgetStats" condition="project.totalClientCostAllowed"><widgets>
+                    <section name="CostBudgetStats" condition="toNumber(project.totalClientCostAllowed)"><widgets>
                         <container-row>
                             <row-col sm="4"><label text="Budget ${ec.l10n.formatCurrency(project.totalClientCostAllowed, project.costUomId, 2)}" type="strong"/></row-col>
                             <row-col sm="4"><label text="Rem ${ec.l10n.formatCurrency(pstats.clientBudgetRemaining, project.costUomId, 2)}" type="strong"/></row-col>
-                            <row-col sm="4"><label text="Est ${ec.l10n.formatCurrency(pstats.clientBudgetEstimateDiff?.abs(), project.costUomId, 2)} ${pstats.clientBudgetEstimateDiff &lt; 0 ? 'over' : 'under'}" type="strong" style="${pstats.clientBudgetEstimateDiff &lt; 0 ? 'text-warning' : 'text-success'}"/></row-col>
+                            <row-col sm="4"><label text="Est ${ec.l10n.formatCurrency(pstats.clientBudgetEstimateDiff?.abs(), project.costUomId, 2)} ${toNumber(pstats.clientBudgetEstimateDiff) &lt; 0 ? 'over' : 'under'}" type="strong" style="${toNumber(pstats.clientBudgetEstimateDiff) &lt; 0 ? 'text-warning' : 'text-success'}"/></row-col>
                         </container-row>
                     </widgets></section>
                     <container-row>

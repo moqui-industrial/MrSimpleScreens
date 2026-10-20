@@ -204,7 +204,7 @@ along with this software (see the LICENSE.md file). If not, see
             </field>
             <field name="handlingInstructions">
                 <header-field title="Shipping Instructions" show-order-by="true"><text-find/></header-field>
-                <default-field><display text="${handlingInstructions?.take(35)||''}${handlingInstructions?.length() &gt; 35 ? '...' : ''}" style="text-strong"/></default-field>
+                <default-field><display text="${handlingInstructions ? handlingInstructions.substring(0, 35) : ''}${handlingInstructions &amp;&amp; handlingInstructions.length &gt; 35 ? '...' : ''}" style="text-strong"/></default-field>
             </field>
 
             <field name="fromPartyId">
