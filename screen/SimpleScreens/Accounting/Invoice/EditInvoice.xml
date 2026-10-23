@@ -426,7 +426,7 @@ along with this software (see the LICENSE.md file). If not, see
             <section-include name="StatusHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
 
             <container-box><box-header title="Payment Applications"/><box-toolbar>
-                <container-dialog id="NewCreditMemoDialog" button-text="New Credit Memo" condition="unpaidTotal">
+                <container-dialog id="NewCreditMemoDialog" button-text="New Credit Memo" condition="!toDecimal(unpaidTotal ?? 0).isZero()">
                     <form-single name="NewCreditMemoForm" transition="createCreditMemo">
                         <field name="originalInvoiceId" from="invoiceId"><default-field><display/></default-field></field>
 
@@ -455,7 +455,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </form-single>
                 </container-dialog>
 
-                <container-dialog id="RecordPaymentContainer" button-text="New Payment for Invoice" condition="unpaidTotal">
+                <container-dialog id="RecordPaymentContainer" button-text="New Payment for Invoice" condition="!toDecimal(unpaidTotal ?? 0).isZero()">
                     <form-single name="RecordPaymentForm" transition="recordPayment">
                         <field name="invoiceId"><default-field><display/></default-field></field>
                         <field name="statusId" from="paymentStatusId"><default-field title="Payment Status">
