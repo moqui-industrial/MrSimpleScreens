@@ -1,0 +1,14 @@
+<#-- the terminal twin of ContactInfo.html.fancy: one text node per line of the contact (postal address, phone, email, web) -->
+<#assign pa = contactInfo?.postalAddress>
+<#assign tel = contactInfo?.telecomNumber>
+<#assign stateGeo = contactInfo?.postalAddressStateGeo>
+<#assign lines = []>
+<#if pa?.toName><#assign lines = lines.concat([ec.l10n.localize('To') + ': ' + pa.toName])></#if>
+<#if pa?.attnName><#assign lines = lines.concat([ec.l10n.localize('Attn') + ': ' + pa.attnName])></#if>
+<#if pa?.address1><#assign lines = lines.concat([pa.address1 + (pa.unitNumber ? ' #' + pa.unitNumber : '')])></#if>
+<#if pa?.address2><#assign lines = lines.concat([pa.address2])></#if>
+<#if pa><#assign lines = lines.concat([((pa.city ?? '') + (stateGeo?.geoCodeAlpha2 ? ', ' + stateGeo.geoCodeAlpha2 + ' ' : (stateGeo?.geoName ? ' ' + stateGeo.geoName + ' ' : '')) + (pa.postalCode ?? '') + (pa.postalCodeExt ? '-' + pa.postalCodeExt : '') + (contactInfo?.postalAddressCountryGeo?.geoCodeAlpha3 ? ' ' + contactInfo.postalAddressCountryGeo.geoCodeAlpha3 : '')).trim()])></#if>
+<#if tel><#assign lines = lines.concat([ec.l10n.localize('Phone') + ': ' + (tel.countryCode ? tel.countryCode + '-' : '') + (tel.areaCode ? tel.areaCode + '-' : '') + (tel.contactNumber ?? '') + (contactInfo?.telecomPartyContactMech?.extension ? ' x' + contactInfo.telecomPartyContactMech.extension : '')])></#if>
+<#if contactInfo?.emailAddress><#assign lines = lines.concat([contactInfo.emailAddress])></#if>
+<#if contactInfo?.webAddress><#assign lines = lines.concat([contactInfo.webAddress])></#if>
+${JSON.stringify(lines.map((line, i) => ({t: 'text', id: 'ContactLine' + i, text: line})))}

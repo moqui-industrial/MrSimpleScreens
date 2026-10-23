@@ -19,6 +19,32 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="eventDetail"><default-response url="."/></transition><!-- TODO add when implemented -->
     <transition name="taskDetail"><default-response url="."/></transition><!-- TODO add when implemented -->
+    <parameter name="month"/>
+    <!-- the terminal twin of the browser calendar: a month of this party's events (blue) and task due dates (yellow) for the TUI's calendar component -->
+    <transition name="events" method="get" read-only="true">
+        <actions><script><![CDATA[
+            const pad = (n) => String(n).padStart(2, '0')
+            const now = new Date()
+            const monthText = month && /^\d{4}-\d{2}$/.test(String(month)) ? String(month) : `${now.getFullYear()}-${pad(now.getMonth() + 1)}`
+            const year = Number(monthText.slice(0, 4)), monthNum = Number(monthText.slice(5, 7))
+            const lastDay = new Date(year, monthNum, 0).getDate()
+            const asText = (value) => String(value || '').replace('T', ' ').slice(0, 16)
+            const events = []
+            const read = (service, kind) => {
+                try {
+                    const out = ec.service.sync().name(service).parameters({start: `${monthText}-01`, end: `${monthText}-${pad(lastDay)}`, partyId: partyId}).call()
+                    for (const e of (out?.eventList || [])) {
+                        const start = asText(e.start) || asText(e.end)
+                        events.push({id: kind + '-' + e.id, title: e.title, kind: kind, start: start, end: asText(e.end) || start})
+                    }
+                } catch (err) { ec.logger.warn(`Calendar ${kind} not shown for ${monthText}: ${err.message}`) }
+            }
+            read('mantle.work.EventServices.get#FullCalendarData', 'meeting')
+            read('mantle.work.TaskServices.get#FullCalendarData', 'deadline')
+            ec.web.sendJsonResponse({month: monthText, events: events})
+        ]]></script></actions>
+        <default-response type="none"/>
+    </transition>
     <transition name="getCalendarEvents">
         <service-call name="mantle.work.EventServices.get#FullCalendarData" web-send-json-response="eventList"
                       in-map="context"/><!-- TODO: + [urlGString:(sri.buildUrl('eventDetail').url + '?workEffortId=${workEffort.workEffortId}')] -->
@@ -34,7 +60,10 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party"/>
     </actions>
     <widgets>
-        <render-mode><text type="html,vuet,qvt"><![CDATA[
+        <render-mode>
+            <!-- the party goes in the source's query: the client asks the transition by the screen's path, without this screen's parameters -->
+            <text type="tui"><![CDATA[${JSON.stringify({t: 'component', name: 'calendar', props: {source: 'events?partyId=' + encodeURIComponent(partyId), events: 'events', month: 'month'}})}]]></text>
+            <text type="html,vuet,qvt"><![CDATA[
             <mr-calendar lang="${ec.user.locale.toString().replace('_', '-')}"
                 data-events-url="/rest/s1/mantle/workEfforts/calendar/events" data-tasks-url="/rest/s1/mantle/workEfforts/calendar/tasks"
                 data-event-detail-url="/apps/my/User/Calendar/EventDetail" data-task-detail-url="/apps/my/User/Task/TaskDetail"
