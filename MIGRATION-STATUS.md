@@ -1,12 +1,14 @@
 # MrSimpleScreens migration status
 
-Revalidated 2026-10-23 against the local MR-Moqui working tree (component HEAD `12f3796`, clean and in step with origin/master). **767 features in 80 specs: 766 pass, 1 fails** (see Known failure). The original 2026-10-16/17 validation was 411 features in 45 specs; the growth is Mantle specs added since and three SimpleScreens specs (80 features: `SimpleScreensRender` 54, `MyAccountScreens` 18, `GitScreens` 8). This is a working migration, not a claim of complete browser/authorization/print-layout parity or a released artifact.
+Revalidated 2026-10-23 against the local MR-Moqui working tree after the screen migration batches. **772 features in 80 specs: all pass.** 366 of the 371 screen rows are ticked Migrated (exercised through the TUI); none is Validated. The original 2026-10-16/17 validation was 411 features in 45 specs; the growth is Mantle specs added since and three SimpleScreens specs (80 features: `SimpleScreensRender` 54, `MyAccountScreens` 18, `GitScreens` 8). This is a working migration, not a claim of complete browser/authorization/print-layout parity or a released artifact.
 
 Component name remains `SimpleScreens`; the repository/directory is `MrSimpleScreens` (`git@github.com:moqui/MrSimpleScreens.git`). The unchanged upstream baseline is `5aed7ffba7231babdccfb0bd46cb6db66195487c`. `MIGRATION-INVENTORY.md` is the frozen pre-port inventory (its line numbers and counts describe that upstream source, not the current files). Process: `plans/ScreenMigrationTutorial.md` in MR-Moqui.
 
 ## Known failure
 
-None known at the last full run. The `EditInvoice` check for invoice 55400 that failed on 2026-10-23 was a stale expectation, not a regression: `ORG_ZIZI_RETAIL` had come only from the GL-account drop-downs in the New Credit Memo / New Payment for Invoice dialogs, which commit `633faeb` correctly hides on a zero unpaid total. The spec now expects `ZIRET: Ziziwork Retail`, `Payment Sent` and `Applied Payments $23,830.00`. The counts below are from 2026-10-23 and are not yet refreshed.
+None at the last full run. The `EditInvoice` check for invoice 55400 that failed earlier on 2026-10-23 was a stale expectation, not a regression: `ORG_ZIZI_RETAIL` had come only from the GL-account drop-downs in the New Credit Memo / New Payment for Invoice dialogs, which commit `633faeb` correctly hides on a zero unpaid total. The spec now expects `ZIRET: Ziziwork Retail`, `Payment Sent` and `Applied Payments $23,830.00`.
+
+Open items found by the migration batches, for the review pass, are in `MIGRATION-REVIEW-NOTES.md`.
 
 ## Implemented
 
@@ -24,12 +26,12 @@ None known at the last full run. The `EditInvoice` check for invoice 55400 that 
 | Check | Result |
 | --- | --- |
 | Current framework debug build (`cargo build -p moqui`) | Pass |
-| All Mantle + SimpleScreens specs (`moqui test mantle-usl SimpleScreens`) | **766 passed, 1 failed; 80 specs** (see Known failure) |
-| Component Groovy lint (`moqui lint --groovy`) | **0 parse failures**, 384 files / 9,903 expression sites; 64 flagged sites (14 `gstring-dollar-name`, 47 `static-class`, 3 `empty-collection-truthiness`) |
-| Runtime screen lint (`moqui lint --screens`) | **0 parse failures**, 919 files / 20,522 expression sites (whole runtime, base components included) |
+| All Mantle + SimpleScreens specs (`moqui test mantle-usl SimpleScreens`) | **772 passed, 0 failed; 80 specs** |
+| Component Groovy lint (`moqui lint --groovy`) | **0 parse failures**, 384 files / 9,929 expression sites; 64 flagged sites (14 `gstring-dollar-name`, 47 `static-class`, 3 `empty-collection-truthiness`) |
+| Runtime screen lint (`moqui lint --screens`) | **0 parse failures**, 919 files / 20,546 expression sites (whole runtime, base components included) |
 | Component XML syntax | 0 files that do not parse |
 
-Not rerun on 2026-10-23 and carried from the first validation (2026-10-16/17): MR-Moqui core unit tests (939 passed, 0 failed, 1 ignored), host print regressions (18), Code 128 library tests (3), webroot JS tests (27), and the Chromium browser/PDF checks below. The feature count includes 687 Mantle features and 80 screen features; the discovery feature loops over many screens, so feature count is not unique-screen count.
+Not rerun on 2026-10-23 and carried from the first validation (2026-10-16/17): MR-Moqui core unit tests (939 passed, 0 failed, 1 ignored), host print regressions (18), Code 128 library tests (3), webroot JS tests (27), and the Chromium browser/PDF checks below. The feature count includes 687 Mantle features and 85 screen features; the discovery feature loops over many screens, so feature count is not unique-screen count.
 
 The one Groovy file the lint does not parse is `src/test/groovy/MyAccountScreenTests.groovy`, the retained original test, which the JS runner does not execute. The 14 `$` form-location strings (the `gstring-dollar-name` flags) and the three Boolean `hasNoItems` conditions are false positives and were not changed to hide warnings. Eight legacy `.ftl` locations are compatibility-adapter expressions, not direct rendering of those original files (lint reports 8 FreeMarker locations not compiled). Dynamic locations still require runtime testing.
 
