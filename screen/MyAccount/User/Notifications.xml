@@ -72,7 +72,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field show-order-by="true"><drop-down allow-empty="true">
                     <list-options list="notificationTopicList" key="${topic}" text="${description}"/>
                 </drop-down></header-field>
-                <default-field><display-entity entity-name="moqui.security.user.NotificationTopic" also-hidden="false"/></default-field>
+                <default-field><display-entity entity-name="moqui.security.user.NotificationTopic" text="${description}" also-hidden="false"/></default-field>
             </field>
             <field name="sentDate"><header-field title="Sent" show-order-by="true"><date-period allow-empty="true"/></header-field>
                 <default-field><display also-hidden="false"/></default-field></field>

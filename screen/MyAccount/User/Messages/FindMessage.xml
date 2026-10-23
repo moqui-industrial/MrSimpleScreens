@@ -70,6 +70,12 @@ along with this software (see the LICENSE.md file). If not, see
             <row-actions>
                 <entity-find entity-name="mantle.party.communication.CommunicationEventPurpose" list="cepList">
                     <econdition field-name="communicationEventId"/><order-by field-name="purposeEnumId"/></entity-find>
+                <set field="purposeDescriptions" from="[]"/>
+                <iterate list="cepList" entry="cep">
+                    <entity-find-one entity-name="moqui.basic.Enumeration" value-field="purpEnum" cache="true">
+                        <field-map field-name="enumId" from="cep.purposeEnumId"/></entity-find-one>
+                    <script>purposeDescriptions.push(purpEnum?.description || cep.purposeEnumId)</script>
+                </iterate>
             </row-actions>
             <hidden-parameters><parameter name="partyId"/></hidden-parameters>
 
@@ -118,13 +124,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="enumTypeId" value="CommunicationPurpose"/><set field="allowMultiple" value="true"/></widget-template-include>
                 </header-field>
                 <default-field>
-                    <section-iterate name="PurposeListSection" list="cepList" entry="cep">
-                        <actions>
-                            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="purpEnum">
-                                <field-map field-name="enumId" from="cep.purposeEnumId"/></entity-find-one>
-                        </actions>
-                        <widgets><label text="${purpEnum.description}" type="p"/></widgets>
-                    </section-iterate>
+                    <!-- a text of the row's purposes, not a section-iterate: a list cell of the TUI and text renders cannot hold a section -->
+                    <label text="${purposeDescriptions.join(', ')}"/>
                 </default-field>
             </field>
 

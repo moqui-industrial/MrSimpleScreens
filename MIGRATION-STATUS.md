@@ -63,6 +63,15 @@ A full automated test suite is not a goal of this migration. Agents do the testi
 4. Tick Migrated for the screen, and note in the commit what was run and anything left over. Add a JS spec feature only where a regression guard is cheap, such as a screen with real fixture data or a bug that was easy to reintroduce; do not add one per screen.
 5. Screens that need fixtures (wiki, shipments ready to receive, organization preferences) get the fixtures created in the test runtime as part of testing them.
 
+Practical notes from the TUI passes (BasicHandheld, MyAccount):
+
+- `plans/ScreenMigrationTutorial.md` does not exist; use the other `plans/` documents and the screens already ticked as examples.
+- Use a scratch runtime in a short path under `/tmp` (the embedded Postgres socket path must stay under 108 bytes): a copy of `conf/MoquiDevConf.xml` with `ssh_port` 0, symlinks to the repository's `base-component` and each component, and a test-only component for mounts, grants and fixtures. Run `MOQUI_RUNTIME=<scratch> target/debug/moqui tui --agent --user john.doe --size 130x32` with the commands piped on stdin; a run boots in about 5 s and the database persists between runs. Keep test mounts, grants and fixtures out of committed component data, and delete the scratch runtime and throwaway specs when done. A non-admin user (the `worker` of WorkPlanToCashBasicFlow) needs a scratch ALL_USERS grant on the screens to be used; john.doe's ADMIN skips an old-password check, so test those as a plain user.
+- Make fixtures with a throwaway spec in the test-only component and `moqui test <thatcomponent> --keep`, then run the TUI on the kept runtime it leaves in `/tmp/mt-*`. `--spec` follows `dependsOn` only inside one component, so a SimpleScreens spec that depends on Mantle specs cannot be selected alone (the README example fails); copy the spec into the test-only component without its `dependsOn` and name the Mantle flow specs in `--spec`, or run the whole suite. In a repository runtime `MrSimpleScreens` sorts before `mr-mantle-usl`, so load order matters for the same reason.
+- `moqui load location=<file.xml>` loads a seed file (an `ArtifactAuthz` grant, a `ScreenScheduled` row) into the scratch database between runs; the Tools data screen (`/apps/tools/Entity/DataEdit/EntityDataFind?selectedEntity=...`) checks what a screen wrote.
+- The JavaScript templates under `runtime/base-component/framework/template/screen` are embedded with `include_str!`: rebuild (`cargo build -p moqui`) after editing them, and update the goldens (`UPDATE_GOLDEN=1 cargo test -p moqui-core --lib golden`, `UPDATE_GOLDEN=1 cargo test -p moqui-host --test tui_screens`) when a render changes. Component XML is read at run time and needs no rebuild.
+- After a failed form submit the form is dirty and the next `go` shows a "leave with unsaved changes" confirm: `do Discard`, or start a new session. A dialog or row editor takes a command to settle: `set`/`do` by element number (`set #3 ...`, `elements` lists them) is the reliable way to fill a dialog whose fields have no titles.
+
 Validated rows are done later in a browser by the same method, with the print outputs checked as PDF.
 
 | Screen | Migrated | Validated |
@@ -78,37 +87,37 @@ Validated rows are done later in a browser by the same method, with the print ou
 | `email/InvoicesPastDue` | [ ] | [ ] |
 | `email/OrderPlaced` | [ ] | [ ] |
 | `email/ShipmentShipped` | [ ] | [ ] |
-| `MyAccount` | [ ] | [ ] |
-| `MyAccount/Expense` | [ ] | [ ] |
-| `MyAccount/Expense/EditExpenseInvoice` | [ ] | [ ] |
-| `MyAccount/Expense/EditExpenseInvoiceItems` | [ ] | [ ] |
-| `MyAccount/Expense/FindExpenseInvoice` | [ ] | [ ] |
-| `MyAccount/User` | [ ] | [ ] |
-| `MyAccount/User/Account` | [ ] | [ ] |
-| `MyAccount/User/Calendar` | [ ] | [ ] |
-| `MyAccount/User/Calendar/EventDetail` | [ ] | [ ] |
-| `MyAccount/User/Calendar/MyCalendar` | [ ] | [ ] |
-| `MyAccount/User/ContactInfo` | [ ] | [ ] |
-| `MyAccount/User/ContactInfo/UpdateContactInfo` | [ ] | [ ] |
-| `MyAccount/User/GitAccess` | [ ] | [ ] |
-| `MyAccount/User/Messages` | [ ] | [ ] |
-| `MyAccount/User/Messages/EditMessage` | [ ] | [ ] |
-| `MyAccount/User/Messages/FindMessage` | [ ] | [ ] |
-| `MyAccount/User/Messages/MessageThread` | [ ] | [ ] |
-| `MyAccount/User/Messages/MessageThread/SingleMessage` | [ ] | [ ] |
-| `MyAccount/User/Notifications` | [ ] | [ ] |
-| `MyAccount/User/Request` | [ ] | [ ] |
-| `MyAccount/User/Request/EditRequest` | [ ] | [ ] |
-| `MyAccount/User/Request/EditRequest/RequestCommentNested` | [ ] | [ ] |
-| `MyAccount/User/Request/EditRequest/RequestCommentReply` | [ ] | [ ] |
-| `MyAccount/User/Request/EditRequest/RequestCommentUpdate` | [ ] | [ ] |
-| `MyAccount/User/Request/MyRequests` | [ ] | [ ] |
-| `MyAccount/User/ScheduledFinds` | [ ] | [ ] |
-| `MyAccount/User/ScheduledFinds/EditScheduledFind` | [ ] | [ ] |
-| `MyAccount/User/Task` | [ ] | [ ] |
-| `MyAccount/User/Task/MyTasks` | [ ] | [ ] |
-| `MyAccount/User/Task/TaskDetail` | [ ] | [ ] |
-| `MyAccount/User/TimeEntries` | [ ] | [ ] |
+| `MyAccount` | [x] | [ ] |
+| `MyAccount/Expense` | [x] | [ ] |
+| `MyAccount/Expense/EditExpenseInvoice` | [x] | [ ] |
+| `MyAccount/Expense/EditExpenseInvoiceItems` | [x] | [ ] |
+| `MyAccount/Expense/FindExpenseInvoice` | [x] | [ ] |
+| `MyAccount/User` | [x] | [ ] |
+| `MyAccount/User/Account` | [x] | [ ] |
+| `MyAccount/User/Calendar` | [x] | [ ] |
+| `MyAccount/User/Calendar/EventDetail` | [x] | [ ] |
+| `MyAccount/User/Calendar/MyCalendar` | [x] | [ ] |
+| `MyAccount/User/ContactInfo` | [x] | [ ] |
+| `MyAccount/User/ContactInfo/UpdateContactInfo` | [x] | [ ] |
+| `MyAccount/User/GitAccess` | [x] | [ ] |
+| `MyAccount/User/Messages` | [x] | [ ] |
+| `MyAccount/User/Messages/EditMessage` | [x] | [ ] |
+| `MyAccount/User/Messages/FindMessage` | [x] | [ ] |
+| `MyAccount/User/Messages/MessageThread` | [x] | [ ] |
+| `MyAccount/User/Messages/MessageThread/SingleMessage` | [x] | [ ] |
+| `MyAccount/User/Notifications` | [x] | [ ] |
+| `MyAccount/User/Request` | [x] | [ ] |
+| `MyAccount/User/Request/EditRequest` | [x] | [ ] |
+| `MyAccount/User/Request/EditRequest/RequestCommentNested` | [x] | [ ] |
+| `MyAccount/User/Request/EditRequest/RequestCommentReply` | [x] | [ ] |
+| `MyAccount/User/Request/EditRequest/RequestCommentUpdate` | [x] | [ ] |
+| `MyAccount/User/Request/MyRequests` | [x] | [ ] |
+| `MyAccount/User/ScheduledFinds` | [x] | [ ] |
+| `MyAccount/User/ScheduledFinds/EditScheduledFind` | [x] | [ ] |
+| `MyAccount/User/Task` | [x] | [ ] |
+| `MyAccount/User/Task/MyTasks` | [x] | [ ] |
+| `MyAccount/User/Task/TaskDetail` | [x] | [ ] |
+| `MyAccount/User/TimeEntries` | [x] | [ ] |
 | `SimpleScreens` | [ ] | [ ] |
 | `SimpleScreens/Accounting` | [ ] | [ ] |
 | `SimpleScreens/Accounting/Budget` | [ ] | [ ] |

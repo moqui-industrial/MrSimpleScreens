@@ -15,6 +15,35 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd">
 
+    <parameter name="month"/>
+
+    <!-- the terminal twin of the browser calendar: a month of this user's events (blue) and task due dates (yellow) for the TUI's calendar component -->
+    <transition name="events" method="get" read-only="true">
+        <actions><script><![CDATA[
+            const pad = (n) => String(n).padStart(2, '0')
+            const now = new Date()
+            const monthText = month && /^\d{4}-\d{2}$/.test(String(month)) ? String(month) : `${now.getFullYear()}-${pad(now.getMonth() + 1)}`
+            const year = Number(monthText.slice(0, 4)), monthNum = Number(monthText.slice(5, 7))
+            const lastDay = new Date(year, monthNum, 0).getDate()
+            const partyId = ec.user.userAccount?.partyId
+            const asText = (value) => String(value || '').replace('T', ' ').slice(0, 16)
+            const events = []
+            const read = (service, kind) => {
+                try {
+                    const out = ec.service.sync().name(service).parameters({start: `${monthText}-01`, end: `${monthText}-${pad(lastDay)}`, partyId: partyId}).call()
+                    for (const e of (out?.eventList || [])) {
+                        const start = asText(e.start) || asText(e.end)
+                        events.push({id: kind + '-' + e.id, title: e.title, kind: kind, start: start, end: asText(e.end) || start})
+                    }
+                } catch (err) { ec.logger.warn(`Calendar ${kind} not shown for ${monthText}: ${err.message}`) }
+            }
+            read('mantle.work.EventServices.get#FullCalendarData', 'meeting')
+            read('mantle.work.TaskServices.get#FullCalendarData', 'deadline')
+            ec.web.sendJsonResponse({month: monthText, events: events})
+        ]]></script></actions>
+        <default-response type="none"/>
+    </transition>
+
     <transition name="eventDetail"><default-response url="../EventDetail"/></transition>
     <transition name="taskDetail"><default-response url="../../Task/TaskDetail"/></transition>
     <transition name="createEvent"><service-call name="mantle.work.EventServices.create#Event"/><default-response url="../EventDetail"/></transition>
@@ -63,6 +92,7 @@ along with this software (see the LICENSE.md file). If not, see
         </container-dialog>
 
         <render-mode>
+            <text type="tui" location="component://SimpleScreens/screen/MyAccount/User/Calendar/MyCalendar.tui.json" template="false"/>
             <text type="html,vuet,qvt"><![CDATA[
                 <mr-calendar lang="${ec.user.locale.toString().replace('_', '-')}"
                     data-events-url="/rest/s1/mantle/workEfforts/calendar/events" data-tasks-url="/rest/s1/mantle/workEfforts/calendar/tasks"

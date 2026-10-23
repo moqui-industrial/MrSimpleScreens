@@ -57,7 +57,7 @@ along with this software (see the LICENSE.md file). If not, see
             <container-box><box-header title="Task ${workEffortId}"/><box-toolbar>
                 <link url="timeEntries" text="Task Time Entries" parameter-map="{workEffortId:workEffortId}"/>
                 <link url="cloneWorkEffort" text="Clone Task" parameter-map="{baseWorkEffortId:workEffortId,
-                        clearDates:true, copyAssetAssign:true}"/>
+                        clearDates:true, copyAssetAssign:true, copyParty:true}"/>
             </box-toolbar><box-body>
                 <form-single name="UpdateEvent" transition="updateTask" map="workEffort">
                     <field name="workEffortId"><default-field><hidden/></default-field></field>

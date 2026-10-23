@@ -41,7 +41,7 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find>
     </actions>
     <widgets>
-        <section name="SubmitInvoiceSection" condition="invoice.statusId == 'InvoiceIncoming' &amp;&amp; invoiceTotal"><widgets>
+        <section name="SubmitInvoiceSection" condition="invoice.statusId == 'InvoiceIncoming' &amp;&amp; !toDecimal(invoiceTotal ?? 0).isZero()"><widgets>
             <link url="updateInvoice" text="Submit Invoice" parameter-map="{invoiceId:invoiceId, statusId:'InvoiceReceived'}"/>
         </widgets></section>
         <section name="CancelInvoiceSection" condition="invoice.statusId == 'InvoiceIncoming'"><widgets>
