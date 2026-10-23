@@ -95,7 +95,7 @@ feature("render Simple Screens screen (#screenPath, #containsTextList)", {
         // Accounting/Invoice
         { screenPath: "Accounting/Invoice/FindInvoice?statusId_op=in&statusId=InvoiceReceived,InvoiceApproved&toPartyId=ORG_ZIZI_RETAIL", containsTextList: ['Ziddleman', 'Ziziwork Retail', 'Sales/Purchase'] },
         { screenPath: "Accounting/Invoice/EditInvoice?invoiceId=55100", containsTextList: ['Approved', 'Unpaid $1,824.25', 'ORG_ZIZI_RETAIL'] },
-        { screenPath: "Accounting/Invoice/EditInvoice?invoiceId=55400", containsTextList: ['ORG_ZIZI_RETAIL', 'Payment Sent', 'Applied Payments $23,830.00'] },
+        { screenPath: "Accounting/Invoice/EditInvoice?invoiceId=55400", containsTextList: ['ZIRET: Ziziwork Retail', 'Payment Sent', 'Applied Payments $23,830.00'] }, // fully paid: no payment dialogs, so no ORG_ZIZI_RETAIL from their GL account lists
         { screenPath: "Accounting/Invoice/EditInvoiceItems?invoiceId=55400", containsTextList: ['Demo Product One-One', 'Shipping and Handling'] },
         { screenPath: "Accounting/Invoice/PrintInvoice?invoiceId=55400&renderMode=xsl-fo", containsTextList: ['1350 E. Flamingo Rd. #9876, Las Vegas, NV 89119-5263', 'Asset - Inventory'] },
         // Accounting/Payment
@@ -110,13 +110,16 @@ feature("render Simple Screens screen (#screenPath, #containsTextList)", {
         { screenPath: "Accounting/OrgSettings/AcctgPreference?partyId=ORG_ZIZI_RETAIL", containsTextList: ['Ziziwork Industries', 'Clone Accounting Settings'] },
         // Accounting/Reports
         // NOTE: these are designed to handle account masks of ###-###-### or even down to the 5 digit ###-##
-        { screenPath: "Accounting/Reports/BalanceSheet?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100&detail=true", containsTextList: ["Finished Good Inventory", "212-00"] },
+        { screenPath: "Accounting/Reports/BalanceSheet?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100&detail=true", containsTextList: ["Finished Good Inventory", "212-00", "saveFilename=BalanceSheet.csv"] },
         { screenPath: "Accounting/Reports/IncomeStatement?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100&detail=true", containsTextList: ["Product Sales", "614-20"] },
         { screenPath: "Accounting/Reports/CashFlowStatement?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100&detail=true", containsTextList: ["Finished Good Inventory", "111-10"] },
         { screenPath: "Accounting/Reports/RetainedEarningsStatement?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100", containsTextList: ["Net Earnings", "ZIRET F"] },
         { screenPath: "Accounting/Reports/FinancialRatios?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodIdList=55100", containsTextList: ["Total Assets", "Accounts Receivable"] },
         { screenPath: "Accounting/Reports/PostedAmountSummary?organizationPartyId=ORG_ZIZI_RETAIL&dateRange_poffset=0&dateRange_period=Year", containsTextList: ["Accounts Payable", "Depreciation - Equipment"] },
         { screenPath: "Accounting/Reports/PostedBalanceSummary?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodId=55100", containsTextList: ["Customer Service Credits (Discounts and Write-downs)", "Net Income"] },
+        // a class and its descendants (a Set of enum ids made a find that failed); a lateral sub-select member needs a selected field
+        { screenPath: "Accounting/Reports/AccountBalance?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodTypeId=FiscalMonth&classAndDescendants=GEN_ADMIN_EXPENSE", containsTextList: ["Utilities - Heating", "Utilities Expense"] },
+        { screenPath: "Accounting/Reports/InvoiceReconciliation?organizationPartyId=ORG_ZIZI_RETAIL&timePeriodId=55100", containsTextList: ["Aging - GL Difference", "Receivable Aging Unpaid", "Invoices where Unpaid different from GL Amount"] },
         // Vendor
         { screenPath: "Party/EditParty?partyId=ORG_ZIZI_RETAIL", containsTextList: ['Ziziwork Retail', 'Internal', 'payment.biziwork.retail@test.com'] },
     ],
@@ -160,5 +163,24 @@ feature("wiki page versions render: #screenPath", {
         !str.errorMessages.length
         str.status == 200
         str.output.includes(containsText)
+    },
+})
+
+// getOrgFiscalPeriods feeds the time period drop-downs (Budget, FindBudget): plain maps with the value and label fields (entity
+// values did not serialize, a label read "<object>"), and the drop-down's current value as term gives that period alone.
+feature("fiscal period drop-down options are plain maps, a term picks its period", {
+    expect() {
+        const all = screens.render("Accounting/Budget/FindBudget/getOrgFiscalPeriods",
+                { organizationPartyId: "ORG_ZIZI_RETAIL", timePeriodTypeId: "FiscalMonth", lastStandalone: "-2" }, null)
+        !all.errorMessages.length
+        const rows = all.jsonObject
+        Array.isArray(rows)
+        rows.length > 1
+        rows.every(row => typeof row == "object" && row.timePeriodId && row.periodName)
+        const one = screens.render("Accounting/Budget/FindBudget/getOrgFiscalPeriods",
+                { organizationPartyId: "ORG_ZIZI_RETAIL", timePeriodTypeId: "FiscalMonth", term: "55100", lastStandalone: "-2" }, null)
+        one.jsonObject.length == 1
+        one.jsonObject[0].timePeriodId == "55100"
+        one.jsonObject[0].periodName.includes("FY2026m10")
     },
 })

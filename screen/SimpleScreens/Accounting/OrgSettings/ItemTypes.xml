@@ -36,9 +36,9 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find entity-name="moqui.basic.Enumeration" list="typeEnumList">
             <econdition field-name="enumTypeId" value="ItemType"/><order-by field-name="description"/></entity-find>
-        <set field="allItemTypeEnumIds" from="typeEnumList.enumId"/>
-        <set field="configTypeEnumIds" from="allConfigList.itemTypeEnumId"/>
-        <set field="noConfigTypeEnumIds" from="allItemTypeEnumIds - configTypeEnumIds"/>
+        <set field="allItemTypeEnumIds" from="typeEnumList.map(it => it.enumId)"/>
+        <set field="configTypeEnumIds" from="allConfigList.map(it => it.itemTypeEnumId)"/>
+        <set field="noConfigTypeEnumIds" from="allItemTypeEnumIds.filter(it => !configTypeEnumIds.includes(it))"/>
     </actions>
     <widgets>
         <container-dialog id="AddConfigDialog" button-text="Add Item Type Account">

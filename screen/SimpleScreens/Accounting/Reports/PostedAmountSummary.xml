@@ -34,8 +34,9 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
                 in-map="{organizationPartyId:organizationPartyId}"/>
 
-        <if condition="dateRange_period">
-            <set field="rangeList" from="ec.user.getPeriodRange(dateRange_period, dateRange_poffset, dateRange_pdate)"/>
+        <!-- the date-period field posts a period and offset, or a custom range as dateRange_from and dateRange_thru -->
+        <if condition="dateRange_period || dateRange_from || dateRange_thru">
+            <set field="rangeList" from="ec.user.getPeriodRange('dateRange', context)"/>
             <set field="fromDate" from="rangeList[0]"/>
             <set field="thruDate" from="rangeList[1]"/>
         </if>

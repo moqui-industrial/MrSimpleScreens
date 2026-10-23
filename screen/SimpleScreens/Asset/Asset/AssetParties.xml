@@ -57,7 +57,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="assetId"><default-field><hidden/></default-field></field>
 
             <field name="partyId"><default-field title="Party">
-                <link url="editParty" text="PartyNameTemplate" link-type="anchor"/></default-field></field>
+                <link url="editParty" text="PartyNameTemplate" link-type="anchor"/><hidden/></default-field></field>
 
             <field name="username"><header-field show-order-by="case-insensitive"/>
                 <default-field><display/></default-field></field>

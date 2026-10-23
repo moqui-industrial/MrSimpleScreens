@@ -31,7 +31,10 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="statusId_op" value="in"/>
         <set field="referenceNumber" from="refNum"/>
         <!-- FUTURE: [OrgTimeZoneMarker] instead of using Java system default TimeZone use one configured for the organization -->
-        <set field="asOfDate" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS') : ec.user.nowTimestamp"/>
+        <!-- asOfTimestamp is the end of the day in the session time zone; asOfDate stays the day as text for the date field,
+            which shows a time stamp in UTC (a late evening would show as the next day) -->
+        <set field="asOfTimestamp" from="asOfDate ? ec.l10n.parseTimestamp(asOfDate + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS') : ec.user.nowTimestamp"/>
+        <set field="asOfDate" from="asOfDate || ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')"/>
     </actions>
     <widgets>
         <form-single name="ReportOptions" transition=".">
@@ -58,17 +61,17 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- NOTE: adjustment items are posted to GL by itemDate, all other items posted by invoiceDate; do query to match that -->
                     <econditions>
                         <econdition field-name="isAdjustment" operator="not-equals" value="Y" or-null="true"/>
-                        <econdition field-name="itemInvoiceDate" operator="less-equals" from="asOfDate"/>
+                        <econdition field-name="itemInvoiceDate" operator="less-equals" from="asOfTimestamp"/>
                     </econditions>
                     <econditions>
                         <econdition field-name="isAdjustment" value="Y"/>
-                        <econdition field-name="itemDate" operator="less-equals" from="asOfDate"/>
+                        <econdition field-name="itemDate" operator="less-equals" from="asOfTimestamp"/>
                     </econditions>
                 </econditions>
                 <!-- PAPP sub-select conditions -->
-                <econdition field-name="appliedDate" operator="less-equals" from="asOfDate"/>
+                <econdition field-name="appliedDate" operator="less-equals" from="asOfTimestamp"/>
                 <!-- TPAPP sub-select conditions -->
-                <econdition field-name="toAppliedDate" operator="less-equals" from="asOfDate"/>
+                <econdition field-name="toAppliedDate" operator="less-equals" from="asOfTimestamp"/>
                 <!-- main select condition -->
                 <econdition field-name="fromRoleTypeId" ignore-if-empty="true"/>
                 <econdition field-name="toRoleTypeId" ignore-if-empty="true"/>
@@ -87,7 +90,7 @@ along with this software (see the LICENSE.md file). If not, see
                     unpaidAmount = toDecimal(itemsTotal ?? 0).subtract(amountApplied ?? 0).subtract(toAmountApplied ?? 0);
                     agingList = [null, null, null, null, null, null];
                     const dateTs = context[dateField];
-                    const dateDays = dateTs != null ? Math.trunc((Number(asOfDate) - Number(dateTs)) / 86400000) : null;
+                    const dateDays = dateTs != null ? Math.trunc((Number(asOfTimestamp) - Number(dateTs)) / 86400000) : null;
                     const dateIdx = dateDays == null ? null : Math.min(5, dateDays < 0 ? 0 : Math.trunc(dateDays / periodDays) + 1);
                     if (dateIdx != null) agingList[dateIdx] = unpaidAmount;
                 ]]></script>

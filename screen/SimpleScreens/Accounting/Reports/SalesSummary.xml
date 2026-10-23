@@ -102,6 +102,14 @@ along with this software (see the LICENSE.md file). If not, see
             ]
             ]]></script>
 
+        <script>
+            if (sri.getRenderMode() == 'tui') {
+                const salesTui = ec.resource.script('component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryTui.js')
+                salesSummaryTui = salesTui.statsNodes()
+                salesSummaryChartsTui = salesTui.chartNodes()
+            }
+        </script>
+
         <set field="statsPanelColStyle" value="col-lg-3 col-md-4 col-sm-4 col-xs-6"/>
         <set field="statsChartColStyle" value="col-md-6 col-sm-6"/>
 
@@ -190,9 +198,11 @@ along with this software (see the LICENSE.md file). If not, see
             <label text="Products: ${selectedProductList.map(it => ec.resource.expand('ProductNameTemplate', '', it)).join(', ')}" condition="(selectedProductList?.length > 0)" type="h5"/>
         </container>
 
-        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats.html.fancy"/></render-mode>
+        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats.html.fancy"/>
+            <text type="tui" template="true"><![CDATA[${JSON.stringify(salesSummaryTui)}]]></text></render-mode>
 
-        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryCharts.html.fancy"/></render-mode>
+        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryCharts.html.fancy"/>
+            <text type="tui" template="true"><![CDATA[${JSON.stringify(salesSummaryChartsTui)}]]></text></render-mode>
 
         <container-box><box-header title="Top Products Ordered (${{d:'Day', w:'Week', M:'Month', q:'Quarter', y:'Year'}[interval||'w']} from ${ec.l10n.format(topProductStart, 'dd MMM yyyy')} to ${ec.l10n.format((topProductEnd ? topProductEnd - 1 : null), 'dd MMM yyyy')})"/><box-body-nopad>
             <form-list name="TopProductList" list="topProductList" skip-form="true">
@@ -211,7 +221,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <container-box><box-header title="Sales Orders by Placed Date"/><box-body-nopad>
             <form-list name="SalesOrderSummaryList" list="salesOrderSummaryList" skip-form="true">
-                <row-actions><set field="rowStyle" from="dateKey?.charAt(0)?.letter ? 'text-strong' : ''"/></row-actions>
+                <row-actions><set field="rowStyle" from="/^\p{L}/u.test(dateKey ?? '') ? 'text-strong' : ''"/></row-actions>
                 <field name="dateKey"><default-field title="Period" container-style="${rowStyle}">
                     <display/></default-field></field>
                 <field name="orderCount" align="right"><default-field title="Orders" container-style="${rowStyle}">
@@ -277,7 +287,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <container-box><box-header title="Sales Invoices by Invoice Date"/><box-body-nopad>
             <form-list name="SalesInvoiceSummaryList" list="salesInvoiceSummaryList" skip-form="true">
-                <row-actions><set field="rowStyle" from="dateKey?.charAt(0)?.letter ? 'text-strong' : ''"/></row-actions>
+                <row-actions><set field="rowStyle" from="/^\p{L}/u.test(dateKey ?? '') ? 'text-strong' : ''"/></row-actions>
                 <field name="dateKey"><default-field title="Period" container-style="${rowStyle}">
                     <display/></default-field></field>
                 <field name="invoiceCount" align="right"><default-field title="Invoices" container-style="${rowStyle}">

@@ -72,7 +72,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <header-field title="Received Date" show-order-by="true"><date-period/></header-field>
                 <default-field><display/></default-field>
             </field>
-            <field name="daysReceived" from="ec.user.nowTimestamp - receivedDate">
+            <field name="daysReceived" from="receivedDate ? Math.trunc((Number(ec.user.nowTimestamp) - Number(receivedDate)) / 86400000) : null">
                 <default-field title="Days Since Receipt"><display/></default-field></field>
 
             <field name="ownerPartyId">

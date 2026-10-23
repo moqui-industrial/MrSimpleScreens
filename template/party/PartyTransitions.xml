@@ -20,11 +20,11 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <if condition="partyClassificationId">
                 <entity-find-one entity-name="mantle.party.PartyClassification" value-field="partyClass"/>
-                <script>if (partyClass != null) ec.web.sendJsonResponse([partyClass])</script>
+                <script>if (partyClass != null) ec.web.sendJsonResponse([partyClass.getMap()])</script>
             </if>
             <entity-find entity-name="mantle.party.PartyClassification" list="classList">
                 <econdition field-name="classificationTypeEnumId"/><order-by field-name="description"/></entity-find>
-            <script>ec.web.sendJsonResponse(classList)</script>
+            <script>ec.web.sendJsonResponse(classList.map((row) => row.getMap()))</script>
         </actions>
         <default-response type="none"/>
     </transition>
@@ -36,7 +36,7 @@ along with this software (see the LICENSE.md file). If not, see
         </then><else>
             <entity-find entity-name="moqui.basic.Enumeration" list="settingOptionList">
                 <econdition field-name="enumTypeId" from="settingType.enumTypeId"/><order-by field-name="sequenceNum,description"/></entity-find>
-            <script>ec.web.sendJsonResponse(settingOptionList)</script>
+            <script>ec.web.sendJsonResponse(settingOptionList.map((row) => row.getMap()))</script>
         </else></if>
     </actions><default-response type="none"/></transition>
 
@@ -78,10 +78,16 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
     <transition name="getOrgFiscalPeriods">
         <parameter name="timePeriodTypeId"/>
+        <parameter name="term"/>
         <actions>
             <service-call name="mantle.ledger.LedgerServices.get#OrganizationFiscalTimePeriods" out-map="context" in-map="context"/>
             <order-map-list list="timePeriodList"><order-by field-name="-thruDate"/><order-by field-name="-timePeriodTypeId"/></order-map-list>
-            <script>ec.web.sendJsonResponse(timePeriodList)</script>
+            <!-- plain maps: the entity values would not serialize; a term (the drop-down's current value) is looked up first, as the label lookup reads the first row -->
+            <script>
+                const periods = timePeriodList.map(tp => Object.assign({}, tp))
+                const termPeriod = term ? periods.find(tp => tp.timePeriodId == term) : null
+                ec.web.sendJsonResponse(termPeriod ? [termPeriod] : periods)
+            </script>
         </actions>
         <default-response type="none"/>
     </transition>

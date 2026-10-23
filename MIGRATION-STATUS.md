@@ -6,7 +6,7 @@ Component name remains `SimpleScreens`; the repository/directory is `MrSimpleScr
 
 ## Known failure
 
-`SimpleScreensRender` renders `Accounting/Invoice/EditInvoice?invoiceId=55400` and expects `ORG_ZIZI_RETAIL`, `Payment Sent` and `Applied Payments $23,830.00`; one of those is missing from the output (no error messages). It fails in the full run on 2026-10-23. The most recent commit (`633faeb`, 2026-10-23, the payment dialogs now hide on a zero unpaid total) touched this screen and is the first suspect, but this was not bisected.
+None known at the last full run. The `EditInvoice` check for invoice 55400 that failed on 2026-10-23 was a stale expectation, not a regression: `ORG_ZIZI_RETAIL` had come only from the GL-account drop-downs in the New Credit Memo / New Payment for Invoice dialogs, which commit `633faeb` correctly hides on a zero unpaid total. The spec now expects `ZIRET: Ziziwork Retail`, `Payment Sent` and `Applied Payments $23,830.00`. The counts below are from 2026-10-23 and are not yet refreshed.
 
 ## Implemented
 
@@ -119,116 +119,116 @@ Validated rows are done later in a browser by the same method, with the print ou
 | `MyAccount/User/Task/TaskDetail` | [x] | [ ] |
 | `MyAccount/User/TimeEntries` | [x] | [ ] |
 | `SimpleScreens` | [ ] | [ ] |
-| `SimpleScreens/Accounting` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Budget` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Budget/BudgetAccountsEntry` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Budget/BudgetReport` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Budget/EditBudget` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Budget/EditBudgetItems` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Budget/FindBudget` | [ ] | [ ] |
-| `SimpleScreens/Accounting/dashboard` | [ ] | [ ] |
-| `SimpleScreens/Accounting/dashboard/OrgInternalSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/FinancialAccount` | [ ] | [ ] |
-| `SimpleScreens/Accounting/FinancialAccount/EditFinancialAccount` | [ ] | [ ] |
-| `SimpleScreens/Accounting/FinancialAccount/FinancialAccountStatement` | [ ] | [ ] |
-| `SimpleScreens/Accounting/FinancialAccount/FinancialAccountTrans` | [ ] | [ ] |
-| `SimpleScreens/Accounting/FinancialAccount/FindFinancialAccount` | [ ] | [ ] |
-| `SimpleScreens/Accounting/FindJournal` | [ ] | [ ] |
-| `SimpleScreens/Accounting/GlAccount` | [ ] | [ ] |
-| `SimpleScreens/Accounting/GlAccount/EditGlAccount` | [ ] | [ ] |
-| `SimpleScreens/Accounting/GlAccount/FindGlAccount` | [ ] | [ ] |
-| `SimpleScreens/Accounting/GlAccount/GlAccountTree` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/Aging` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/EditInvoice` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/EditInvoiceItemDetails` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/EditInvoiceItemOrders` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/EditInvoiceItems` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/EditInvoiceItemShipments` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/FindInvoice` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/PrintInvoice` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Invoice/ReceivableStatement` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/AcctgPreference` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/AssetTypes` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/FinAcctReasons` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/FinAcctTypes` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/GlAccounts` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/InvoiceTypes` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/ItemTypes` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/PaymentInstruments` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/PaymentTypes` | [ ] | [ ] |
-| `SimpleScreens/Accounting/OrgSettings/TypeDefaults` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Payment` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Payment/BulkPaymentCheck` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Payment/EditPayment` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Payment/FindPayment` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Payment/PaymentCheck` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Payment/PaymentDetail` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/AccountBalance` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/AccountLedger` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/ArAgingSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/AssetOnHand` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/AssetOnHandSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/AssetReceiptTransaction` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/AssetStatusByReceipt` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/AssetValuation` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/BalanceSheet` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/CashFlowStatement` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/FinancialRatios` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/IncomeStatement` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/InvoiceAgingDetail` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/InvoiceItemSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/InvoiceReconciliation` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/OrderIssuedInvoiced` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/OrderItemSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/PostedAmountSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/PostedBalanceSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/ReportList` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/RetainedEarningsStatement` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/SalesAnalysis` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/SalesInvoiceAnalysis` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/SalesSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Reports/ShipmentPackageSummary` | [ ] | [ ] |
-| `SimpleScreens/Accounting/TimePeriod` | [ ] | [ ] |
-| `SimpleScreens/Accounting/TimePeriod/EditTimePeriod` | [ ] | [ ] |
-| `SimpleScreens/Accounting/TimePeriod/FindTimePeriod` | [ ] | [ ] |
-| `SimpleScreens/Accounting/TimePeriod/ViewPeriodGlAccounts` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Transaction` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Transaction/EditTransaction` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Transaction/EditTransaction/MoveEntry` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Transaction/FindTransaction` | [ ] | [ ] |
-| `SimpleScreens/Accounting/Transaction/FindTransactionEntry` | [ ] | [ ] |
-| `SimpleScreens/Asset` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetCalendar` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetDetail` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetMaintenance` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetMaintenance/EditAssetMaintenance` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetMaintenance/FindAssetMaintenance` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetMeters` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetParties` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/AssetRegistrations` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/DetailHistory` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/FindAsset` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/FindSummary` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/FindSummary/PhysicalChange` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/FindSummary/PhysicalQuantity` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/MoveAsset` | [ ] | [ ] |
-| `SimpleScreens/Asset/Asset/SelectAsset` | [ ] | [ ] |
-| `SimpleScreens/Asset/AssetPool` | [ ] | [ ] |
-| `SimpleScreens/Asset/AssetPool/EditAssetPool` | [ ] | [ ] |
-| `SimpleScreens/Asset/AssetPool/FindAssetPool` | [ ] | [ ] |
-| `SimpleScreens/Asset/Container` | [ ] | [ ] |
-| `SimpleScreens/Asset/Container/EditContainer` | [ ] | [ ] |
-| `SimpleScreens/Asset/Container/FindContainer` | [ ] | [ ] |
-| `SimpleScreens/Asset/Container/MoveContainer` | [ ] | [ ] |
-| `SimpleScreens/Asset/dashboard` | [ ] | [ ] |
-| `SimpleScreens/Asset/EditLots` | [ ] | [ ] |
-| `SimpleScreens/Asset/PhysicalInventory` | [ ] | [ ] |
-| `SimpleScreens/Asset/PhysicalInventory/EditPhysicalInventory` | [ ] | [ ] |
-| `SimpleScreens/Asset/PhysicalInventory/FindPhysicalInventory` | [ ] | [ ] |
+| `SimpleScreens/Accounting` | [x] | [ ] |
+| `SimpleScreens/Accounting/Budget` | [x] | [ ] |
+| `SimpleScreens/Accounting/Budget/BudgetAccountsEntry` | [x] | [ ] |
+| `SimpleScreens/Accounting/Budget/BudgetReport` | [x] | [ ] |
+| `SimpleScreens/Accounting/Budget/EditBudget` | [x] | [ ] |
+| `SimpleScreens/Accounting/Budget/EditBudgetItems` | [x] | [ ] |
+| `SimpleScreens/Accounting/Budget/FindBudget` | [x] | [ ] |
+| `SimpleScreens/Accounting/dashboard` | [x] | [ ] |
+| `SimpleScreens/Accounting/dashboard/OrgInternalSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/FinancialAccount` | [x] | [ ] |
+| `SimpleScreens/Accounting/FinancialAccount/EditFinancialAccount` | [x] | [ ] |
+| `SimpleScreens/Accounting/FinancialAccount/FinancialAccountStatement` | [x] | [ ] |
+| `SimpleScreens/Accounting/FinancialAccount/FinancialAccountTrans` | [x] | [ ] |
+| `SimpleScreens/Accounting/FinancialAccount/FindFinancialAccount` | [x] | [ ] |
+| `SimpleScreens/Accounting/FindJournal` | [x] | [ ] |
+| `SimpleScreens/Accounting/GlAccount` | [x] | [ ] |
+| `SimpleScreens/Accounting/GlAccount/EditGlAccount` | [x] | [ ] |
+| `SimpleScreens/Accounting/GlAccount/FindGlAccount` | [x] | [ ] |
+| `SimpleScreens/Accounting/GlAccount/GlAccountTree` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/Aging` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/EditInvoice` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/EditInvoiceItemDetails` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/EditInvoiceItemOrders` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/EditInvoiceItems` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/EditInvoiceItemShipments` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/FindInvoice` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/PrintInvoice` | [x] | [ ] |
+| `SimpleScreens/Accounting/Invoice/ReceivableStatement` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/AcctgPreference` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/AssetTypes` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/FinAcctReasons` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/FinAcctTypes` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/GlAccounts` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/InvoiceTypes` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/ItemTypes` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/PaymentInstruments` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/PaymentTypes` | [x] | [ ] |
+| `SimpleScreens/Accounting/OrgSettings/TypeDefaults` | [x] | [ ] |
+| `SimpleScreens/Accounting/Payment` | [x] | [ ] |
+| `SimpleScreens/Accounting/Payment/BulkPaymentCheck` | [x] | [ ] |
+| `SimpleScreens/Accounting/Payment/EditPayment` | [x] | [ ] |
+| `SimpleScreens/Accounting/Payment/FindPayment` | [x] | [ ] |
+| `SimpleScreens/Accounting/Payment/PaymentCheck` | [x] | [ ] |
+| `SimpleScreens/Accounting/Payment/PaymentDetail` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/AccountBalance` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/AccountLedger` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/ArAgingSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/AssetOnHand` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/AssetOnHandSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/AssetReceiptTransaction` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/AssetStatusByReceipt` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/AssetValuation` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/BalanceSheet` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/CashFlowStatement` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/FinancialRatios` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/IncomeStatement` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/InvoiceAgingDetail` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/InvoiceItemSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/InvoiceReconciliation` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/OrderIssuedInvoiced` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/OrderItemSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/PostedAmountSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/PostedBalanceSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/ReportList` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/RetainedEarningsStatement` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/SalesAnalysis` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/SalesInvoiceAnalysis` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/SalesSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/Reports/ShipmentPackageSummary` | [x] | [ ] |
+| `SimpleScreens/Accounting/TimePeriod` | [x] | [ ] |
+| `SimpleScreens/Accounting/TimePeriod/EditTimePeriod` | [x] | [ ] |
+| `SimpleScreens/Accounting/TimePeriod/FindTimePeriod` | [x] | [ ] |
+| `SimpleScreens/Accounting/TimePeriod/ViewPeriodGlAccounts` | [x] | [ ] |
+| `SimpleScreens/Accounting/Transaction` | [x] | [ ] |
+| `SimpleScreens/Accounting/Transaction/EditTransaction` | [x] | [ ] |
+| `SimpleScreens/Accounting/Transaction/EditTransaction/MoveEntry` | [x] | [ ] |
+| `SimpleScreens/Accounting/Transaction/FindTransaction` | [x] | [ ] |
+| `SimpleScreens/Accounting/Transaction/FindTransactionEntry` | [x] | [ ] |
+| `SimpleScreens/Asset` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetCalendar` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetDetail` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetMaintenance` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetMaintenance/EditAssetMaintenance` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetMaintenance/FindAssetMaintenance` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetMeters` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetParties` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/AssetRegistrations` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/DetailHistory` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/FindAsset` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/FindSummary` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/FindSummary/PhysicalChange` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/FindSummary/PhysicalQuantity` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/MoveAsset` | [x] | [ ] |
+| `SimpleScreens/Asset/Asset/SelectAsset` | [x] | [ ] |
+| `SimpleScreens/Asset/AssetPool` | [x] | [ ] |
+| `SimpleScreens/Asset/AssetPool/EditAssetPool` | [x] | [ ] |
+| `SimpleScreens/Asset/AssetPool/FindAssetPool` | [x] | [ ] |
+| `SimpleScreens/Asset/Container` | [x] | [ ] |
+| `SimpleScreens/Asset/Container/EditContainer` | [x] | [ ] |
+| `SimpleScreens/Asset/Container/FindContainer` | [x] | [ ] |
+| `SimpleScreens/Asset/Container/MoveContainer` | [x] | [ ] |
+| `SimpleScreens/Asset/dashboard` | [x] | [ ] |
+| `SimpleScreens/Asset/EditLots` | [x] | [ ] |
+| `SimpleScreens/Asset/PhysicalInventory` | [x] | [ ] |
+| `SimpleScreens/Asset/PhysicalInventory/EditPhysicalInventory` | [x] | [ ] |
+| `SimpleScreens/Asset/PhysicalInventory/FindPhysicalInventory` | [x] | [ ] |
 | `SimpleScreens/Catalog` | [ ] | [ ] |
 | `SimpleScreens/Catalog/Category` | [ ] | [ ] |
 | `SimpleScreens/Catalog/Category/Content` | [ ] | [ ] |

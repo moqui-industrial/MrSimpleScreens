@@ -25,16 +25,19 @@ along with this software (see the LICENSE.md file). If not, see
         <script>
             const ledger = ec.resource.script('component://SimpleScreens/template/ledger/LedgerReport.js')
             ledgerTable = ledger.incomeStatement(sri.buildUrl('accountLedger'))
+            if (sri.getRenderMode() == 'tui') ledgerTui = ledger.tui(ledgerTable)
             if (sri.getRenderMode() == 'csv') ledgerCsv = ledger.csv(ledgerTable)
         </script>
-        <set field="csvUrl" from="sri.getScreenUrlInstance().cloneUrlInstance().addParameter('renderMode', 'csv').addParameter('saveFilename', 'IncomeStatement.csv')"/>
+        <!-- the path as text: a URL object does not survive being put in the context -->
+        <set field="csvPath" from="sri.getScreenUrlInstance().cloneUrlInstance().addParameter('renderMode', 'csv').addParameter('saveFilename', 'IncomeStatement.csv').getPathWithParams()"/>
     </actions>
     <widgets>
-        <link url="${csvUrl.pathWithParams}" url-type="plain" text="Get CSV"/>
+        <link url="${csvPath}" url-type="plain" text="Get CSV"/>
         <render-mode>
             <text type="html,vuet,qvt" location="component://SimpleScreens/template/ledger/LedgerTable.html.fancy"
                     template="true" encode="false" no-boundary-comment="true"/>
-            <text type="csv" template="true"><![CDATA[${ledgerCsv}]]></text>
+            <text type="tui" template="true"><![CDATA[${JSON.stringify(ledgerTui)}]]></text>
+            <text type="csv" template="true" no-boundary-comment="true"><![CDATA[${ledgerCsv}]]></text>
         </render-mode>
     </widgets>
 </screen>

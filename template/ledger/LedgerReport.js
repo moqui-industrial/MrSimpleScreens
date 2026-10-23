@@ -426,6 +426,21 @@ function financialRatios() {
     return table(ec.l10n.localize('Financial Ratios'), headers, rows, { noDate: true })
 }
 
+// ---- the statement table as terminal (tui) nodes: a heading and a list, the amount links kept ----
+
+function tui(ledgerTable) {
+    const title = ledgerTable.title + (ledgerTable.noDate ? '' : ' (' + ledgerTable.asOf + ')')
+    const columns = [{ title: '' }].concat(ledgerTable.headers.map(header => ({ title: header.text, align: (header.cls ?? '').includes('right') ? 'right' : '' })))
+    const rows = ledgerTable.rows.map((row, rowIndex) => ({
+        id: String(rowIndex),
+        cells: [' '.repeat(Math.max(0, Math.round(row.indent ?? 0))) + row.label + (row.note ? ' ' + row.note : '')].concat(row.cells.map((cell, cellIndex) =>
+            cell.href ? { t: 'link', id: 'amount_' + rowIndex + '_' + cellIndex, text: cell.text, url: String(cell.href) } : cell.text)),
+    }))
+    return [{ t: 'text', id: 'LedgerTitle', style: 'h3', text: title },
+        { t: 'formList', id: 'LedgerList', name: 'LedgerList', columns: columns, rows: rows,
+            paging: { index: 0, size: Math.max(rows.length, 1), count: rows.length } }]
+}
+
 // ---- CSV of a statement table: the label indented with spaces, then the cell texts ----
 
 function csv(ledgerTable) {
@@ -441,4 +456,4 @@ function csv(ledgerTable) {
     return lines.join('\n') + '\n'
 }
 
-return { balanceSheet, incomeStatement, cashFlowStatement, retainedEarningsStatement, financialRatios, csv, money, table }
+return { balanceSheet, incomeStatement, cashFlowStatement, retainedEarningsStatement, financialRatios, csv, tui, money, table }

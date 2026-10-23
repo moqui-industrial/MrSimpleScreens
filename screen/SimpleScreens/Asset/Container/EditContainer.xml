@@ -106,7 +106,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <form-list name="AssetListForm" list="assetList" skip-form="true">
                     <entity-find entity-name="mantle.product.asset.AssetAndProduct" list="assetList">
                         <econdition field-name="containerId"/>
-                        <select-field field-name="assetId,productId,pseudoId,productName"/>
+                        <select-field field-name="assetId,productId,pseudoId,productName,availableToPromiseTotal,quantityOnHandTotal"/>
                         <order-by field-name="assetId"/>
                     </entity-find>
 

@@ -48,7 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="recDesc" value=""/>
                 <iterate list="recInvList" entry="recInv">
                     <if condition="recDesc"><set field="recDesc" from="recDesc + ', '"/></if>
-                    <set field="recDesc" from="recDesc + recInv.invoiceCount + ' Invoice' + (recInv.invoiceCount ? 's ' : ' ') + ec.l10n.formatCurrency(recInv.unpaidTotal, recInv.currencyUomId)"/>
+                    <set field="recDesc" from="recDesc + recInv.invoiceCount + ' Invoice' + (recInv.invoiceCount > 1 ? 's ' : ' ') + ec.l10n.formatCurrency(recInv.unpaidTotal, recInv.currencyUomId)"/>
                 </iterate>
 
                 <filter-map-list list="allPblInvList" to-list="pblInvList">
@@ -56,7 +56,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="pblDesc" value=""/>
                 <iterate list="pblInvList" entry="pblInv">
                     <if condition="pblDesc"><set field="pblDesc" from="pblDesc + ', '"/></if>
-                    <set field="pblDesc" from="pblDesc + pblInv.invoiceCount + ' Invoice' + (pblInv.invoiceCount ? 's ' : ' ') + ec.l10n.formatCurrency(pblInv.unpaidTotal, pblInv.currencyUomId)"/>
+                    <set field="pblDesc" from="pblDesc + pblInv.invoiceCount + ' Invoice' + (pblInv.invoiceCount > 1 ? 's ' : ' ') + ec.l10n.formatCurrency(pblInv.unpaidTotal, pblInv.currencyUomId)"/>
                 </iterate>
 
                 <entity-find entity-name="mantle.account.method.PaymentMethod" list="paymentMethodList">

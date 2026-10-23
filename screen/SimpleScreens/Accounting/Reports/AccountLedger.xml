@@ -41,9 +41,15 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="mantle.ledger.LedgerReportServices.get#AccountLedgerInfo" out-map="context"
                     in-map="{timePeriodId:timePeriodId, glAccountIdList:glAccountIdList, showReverses:showReverses}"/>
         </if>
+        <!-- a period's from and thru are dates, which a script holds as the epoch millis of that day in UTC -->
+        <script><![CDATA[
+            const dayText = (value) => value == null ? '' : (/^\d{12,13}$/.test(String(value)) ? new Date(Number(value)).toISOString().substring(0, 10) : String(value))
+            periodFromText = dayText(timePeriod?.fromDate)
+            periodThruText = dayText(timePeriod?.thruDate)
+        ]]></script>
     </actions>
     <widgets>
-        <container-box><box-header title="${timePeriod?.periodName || 'No Period Selected'} ${timePeriod?.fromDate ? '(from ' + timePeriod.fromDate : ''}${timePeriod?.thruDate ? ' thru ' + timePeriod.thruDate + ')': ''}"/><box-body-nopad>
+        <container-box><box-header title="${timePeriod?.periodName || 'No Period Selected'} ${periodFromText ? '(from ' + periodFromText : ''}${periodThruText ? ' thru ' + periodThruText + ')': ''}"/><box-body-nopad>
             <form-list name="AccountLedger" list="entryInfoList" skip-form="true" header-dialog="true"
                     select-columns="true" saved-finds="true" show-csv-button="true" show-xlsx-button="true">
                 <field name="glAccountIdList">
@@ -74,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <display-entity entity-name="mantle.ledger.transaction.GlJournal" text="${glJournalName ? glJournalName.substring(0, 3) : ''}"/></default-field></field>
 
                 <field name="transactionDate"><default-field title="Trans Date" container-style="${acctgTransId ? '' : 'text-strong'}">
-                    <display format="yyyy-MM-dd"/></default-field></field>
+                    <display text="${ec.l10n.format(transactionDate, 'yyyy-MM-dd')}"/></default-field></field>
 
                 <field name="acctgTransTypeEnumId"><default-field title="TX Type">
                     <display-entity entity-name="moqui.basic.Enumeration"/></default-field></field>

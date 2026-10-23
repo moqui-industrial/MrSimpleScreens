@@ -32,6 +32,9 @@ along with this software (see the LICENSE.md file). If not, see
 
         <if condition="timePeriodId"><then>
             <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="{timePeriodId:timePeriodId}" out-map="periodInfo"/>
+            <!-- the period's range, for the Payment Applications with Invoice after Period list (fromDate and thruDate were never set) -->
+            <set field="fromDate" from="periodInfo.fromTimestamp"/>
+            <set field="thruDate" from="periodInfo.thruTimestamp"/>
             <set field="asOfDate" from="periodInfo.thruTimestamp"/>
             <set field="organizationPartyId" from="organizationPartyId || periodInfo.timePeriod.partyId"/>
         </then><else>
@@ -196,7 +199,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="creditTransactionDate" operator="less-equals" from="asOfDate"/>
                     <econdition field-name="unpaidAmount" operator="not-equals" to-field-name="debitMinusCredit" ignore="invoiceType != 'Receivable'"/>
                     <econdition field-name="unpaidAmount" operator="not-equals" to-field-name="creditMinusDebit" ignore="invoiceType != 'Payable'"/>
-                    <select-field field-name="itemsTotal,amountApplied,debitTotal,creditTotal,debitMinusCredit,creditMinusDebit"/>
+                    <!-- toAmountApplied: a lateral sub-select member (TPAPP) needs a selected field, the toAppliedDate condition does not count -->
+                    <select-field field-name="itemsTotal,amountApplied,toAmountApplied,debitTotal,creditTotal,debitMinusCredit,creditMinusDebit"/>
                     <order-by field-name="invoiceDate"/>
                 </entity-find>
 

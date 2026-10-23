@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="classAndDescendants">
             <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="descOut"
                     in-map="{parentEnumId:classAndDescendants, includeNested:true}"/>
-            <set field="glAccountClassEnumId" from="descOut.enumIdSet"/>
+            <set field="glAccountClassEnumId" from="Array.from(descOut.enumIdSet).join(',')"/>
             <set field="glAccountClassEnumId_op" value="in"/>
         </if>
 

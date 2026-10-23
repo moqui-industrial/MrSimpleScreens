@@ -24,12 +24,14 @@ along with this software (see the LICENSE.md file). If not, see
         <script>
             const ledger = ec.resource.script('component://SimpleScreens/template/ledger/LedgerReport.js')
             ledgerTable = ledger.retainedEarningsStatement()
+            if (sri.getRenderMode() == 'tui') ledgerTui = ledger.tui(ledgerTable)
         </script>
     </actions>
     <widgets>
         <render-mode>
             <text type="html,vuet,qvt" location="component://SimpleScreens/template/ledger/LedgerTable.html.fancy"
                     template="true" encode="false" no-boundary-comment="true"/>
+            <text type="tui" template="true"><![CDATA[${JSON.stringify(ledgerTui)}]]></text>
         </render-mode>
     </widgets>
 </screen>
