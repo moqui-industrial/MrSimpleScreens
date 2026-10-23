@@ -89,3 +89,7 @@ cargo test -p moqui-lib barcode
 Current component/runtime screen lint has zero parse failures. Component lint retains 17 known false positives: literal `$` form-location strings and Boolean `hasNoItems` checks. Legacy `.ftl` location detections are compatibility adapters; originals remain as oracles. Dynamic/custom template locations need runtime tests.
 
 Host result: **939 passed, 0 failed, 1 ignored**; includes 18 print tests and nested-map/entity flattening regression. Barcode library: three passed. Required host changes are currently uncommitted, as is the component migration; this is not released-framework or clean-checkout certification.
+
+## Screen report
+
+`python3 runtime/component/MrSimpleScreens/test/screen-report.py --out /tmp/mrss-report.md` (from the MR-Moqui root, with a built `target/debug/moqui`) lists every screen with whether the discovery render, a targeted spec feature or the browser smoke reaches it. It is a report for choosing work; the Migrated/Validated checklist in `../MIGRATION-STATUS.md` is ticked by hand.
