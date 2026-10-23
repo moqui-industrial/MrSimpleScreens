@@ -28,10 +28,12 @@ along with this software (see the LICENSE.md file). If not, see
             the Java screen diffed characters in the browser with jsdiff from a CDN -->
         <script><![CDATA[
             diffHtml = ''
+            diffUnified = ''
             try {
                 const diff = pageReference?.getVersionDiff(versionNameLhs, versionNameRhs)
                 if (diff) {
                     diffHtml = diff.html
+                    diffUnified = diff.unifiedDiff
                     diffStats = diff.stats.insertions + ' added, ' + diff.stats.deletions + ' removed'
                 }
             } catch (err) {
@@ -44,7 +46,8 @@ along with this software (see the LICENSE.md file). If not, see
             <label text="${diffStats || ''}" type="span"/>
             <link url="../wiki" text="Back to View"/>
         </box-toolbar><box-body>
-        <render-mode><text type="html,vuet,qvt"><![CDATA[<div class="scroll">${diffHtml}</div>]]></text></render-mode>
+        <render-mode><text type="html,vuet,qvt"><![CDATA[<div class="scroll">${diffHtml}</div>]]></text>
+            <text type="tui"><![CDATA[{"t":"text","style":"pre","text":${JSON.stringify(diffUnified || '')}}]]></text></render-mode>
         </box-body></container-box>
     </widgets>
 </screen>

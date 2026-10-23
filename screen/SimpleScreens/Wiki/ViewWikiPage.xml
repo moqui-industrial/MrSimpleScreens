@@ -28,6 +28,15 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="basePath" from="sri.getCurrentScreenUrl().getScreenOnlyPath()"/>
         <set field="baseLinkPath" from="basePath + '/' + wikiSpaceId"/>
         <set field="baseLinkUrl" from="sri.getCurrentScreenUrl().getScreenPathUrl() + '/' + wikiSpaceId"/>
+        <script><![CDATA[
+            tuiPageText = ''
+            try {
+                if (pageReference) {
+                    tuiPageText = (versionName && currentVersionName != versionName ? pageReference.getText(versionName) : pageReference.getText()) || ''
+                    if (wikiType && wikiType.startsWith('html')) tuiPageText = tuiPageText.replace(/<[^>]*>/g, '')
+                }
+            } catch (err) { ec.logger.warn(`Could not read the text of wiki page ${pageLocation}: ${err.message}`) }
+        ]]></script>
         <!-- this is only used for the WikiPageTree.ftl file, not needed otherwise: -->
         <!-- <service-call name="org.moqui.impl.WikiServices.get#WikiSpacePages" in-map="context" out-map="context"/> -->
     </actions>
@@ -39,7 +48,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <condition><expression>!wikiSpace?.decoratorScreenLocation</expression></condition>
                 <actions><script>sri.baseLinkUrl(baseLinkUrl)</script></actions>
                 <widgets><render-mode><text type="html,vuet,qvt" template="true"
-                        location="${pageLocation||''}${versionName &amp;&amp; currentVersionName != versionName ? '#' + versionName.substring(0, 12) : ''}"/></render-mode></widgets>
+                        location="${pageLocation||''}${versionName &amp;&amp; currentVersionName != versionName ? '#' + versionName.substring(0, 12) : ''}"/>
+                    <text type="tui"><![CDATA[{"t":"text","style":"pre","text":${JSON.stringify(tuiPageText || '')}}]]></text></render-mode></widgets>
                 <fail-widgets><include-screen location="${wikiSpace.decoratorScreenLocation}"/></fail-widgets>
             </section>
             <section name="ResetBaseLink"><actions><script>sri.baseLinkUrl(null)</script></actions><widgets/></section>
