@@ -40,7 +40,7 @@
                         </#if>
                         <#if (workEffort.estimatedWorkDuration != null)>
                             <div style="font-weight:bold">Est. Hours</div>
-                            <div>${workEffort.estimatedWorkDuration}</div>
+                            <div>${ec.l10n.format(workEffort.estimatedWorkDuration, "#,##0.###")}</div>
                         </#if>
                     </td>
                     <td style="padding:3pt;width:3in">

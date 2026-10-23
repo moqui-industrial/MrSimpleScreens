@@ -43,7 +43,7 @@
                 <tr style="font-size:9pt">
                     <td colspan="8" style="padding:${cellPadding}"><div> </div></td>
                     <td style="padding:${cellPadding}"><div style="text-align:center">${(binLocationNumber ?? " ")}</div></td>
-                    <td style="padding:${cellPadding}"><div style="text-align:right">${productInfo.quantityByBin[binLocationNumber ?? ""]}</div></td>
+                    <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.format(productInfo.quantityByBin[binLocationNumber ?? ""], "#,##0.###")}</div></td>
                 </tr>
             </#list>
         </#list>

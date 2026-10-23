@@ -48,6 +48,7 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="statusId_op" value="in"/>
 
         <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="shipmentTypeOut" in-map="{parentEnumId:'ShpTpOutgoing'}"/>
+        <set field="shipmentTypeSet" from="shipmentTypeOut.enumIdSet"/>
     </actions>
     <widgets>
         <form-list name="AddShipmentList" list="shipmentList" transition="addShipmentToLoad" multi="true"

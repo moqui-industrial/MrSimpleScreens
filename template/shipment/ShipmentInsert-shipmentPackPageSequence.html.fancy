@@ -122,9 +122,9 @@
                             <tr style="font-size:10pt">
                                 <td style="padding:2pt"><div style="text-align:left">${ec.resource.expand("ProductNameTemplate", "", contentInfo.productInfo)}</div>
                                     <#if has(contentInfo?.otherPartyProductId)><div>Your Product: ${contentInfo.otherPartyProductId}</div></#if></td>
-                                <td style="padding:2pt"><div style="text-align:center;font-weight:bold">${(contentInfo.quantityOrdered ?? "")}</div></td>
-                                <td style="padding:2pt"><div style="text-align:center;font-weight:bold">${contentInfo.packageContent.quantity}</div></td>
-                                <td style="padding:2pt"><div style="text-align:center;font-weight:bold">${(contentInfo.quantityShipped ?? "")}</div></td>
+                                <td style="padding:2pt"><div style="text-align:center;font-weight:bold">${ec.l10n.format((contentInfo.quantityOrdered ?? ""), "#,##0.###")}</div></td>
+                                <td style="padding:2pt"><div style="text-align:center;font-weight:bold">${ec.l10n.format(contentInfo.packageContent.quantity, "#,##0.###")}</div></td>
+                                <td style="padding:2pt"><div style="text-align:center;font-weight:bold">${ec.l10n.format((contentInfo.quantityShipped ?? ""), "#,##0.###")}</div></td>
                             </tr>
                         </#list>
                     </tbody>
@@ -142,10 +142,10 @@
                 <#list productInfoList as productInfo>
                     <tr style="font-size:9pt;border-top:solid black">
                         <td style="padding:${cellPadding}"><div style="text-align:left">${ec.resource.expand("ProductNameTemplate", "", productInfo)}</div></td>
-                        <td style="padding:${cellPadding}"><div style="text-align:center">${productInfo.quantity}</div></td>
+                        <td style="padding:${cellPadding}"><div style="text-align:center">${ec.l10n.format(productInfo.quantity, "#,##0.###")}</div></td>
                         <td style="padding:${cellPadding}">
                             <#if Object.keys(productInfo.priceQuantityMap).length == 1>
-                                <div style="text-align:center">${ec.l10n.format(Object.keys(productInfo.priceQuantityMap)[0], "#,##0.00#")}</div>
+                                <div style="text-align:center">${ec.l10n.format(toDecimal(Object.keys(productInfo.priceQuantityMap)[0]), "#,##0.00#")}</div>
                             <#else>
                                 <#list Object.keys(productInfo.priceQuantityMap) as curPrice>
                                 <div style="text-align:center">${ec.l10n.format(productInfo.priceQuantityMap[curPrice], "#,##0.###")} @ ${ec.l10n.format(toDecimal(curPrice), "#,##0.00#")}</div>

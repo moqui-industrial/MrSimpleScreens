@@ -122,7 +122,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 ${raw(ec.resource.code128Svg(productInfo.pseudoId, {height: '0.4in', moduleWidth: '0.25mm', fontSize: '7pt', humanReadable: true}))}
                             </div></td>
                             <td colspan="5" style="padding:${cellPadding}"><div style="text-align:left">${ec.resource.expand("ProductNameTemplate", "", productInfo)}</div></td>
-                            <td style="padding:${cellPadding}"><div style="text-align:right">${productInfo.quantity}</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.format(productInfo.quantity, "#,##0.###")}</div></td>
                         </tr>
                         <#if has(productInfo?.reservedLocationInfoList)><#list productInfo.reservedLocationInfoList as locationInfo>
                             <tr style="font-size:9pt;border-top:thin solid black">
@@ -141,7 +141,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <tr style="font-size:9pt">
                                     <td colspan="8" style="padding:${cellPadding}"><div> </div></td>
                                     <td style="padding:${cellPadding}"><div style="text-align:center">${(binLocationNumber ?? " ")}</div></td>
-                                    <td style="padding:${cellPadding}"><div style="text-align:right">${locationInfo.quantityByBin[binLocationNumber ?? ""]}</div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.format(locationInfo.quantityByBin[binLocationNumber ?? ""], "#,##0.###")}</div></td>
                                 </tr>
                             </#list>
                         </#list></#if>
@@ -162,7 +162,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <tr style="font-size:9pt">
                                     <td colspan="8" style="padding:${cellPadding}"><div> </div></td>
                                     <td style="padding:${cellPadding}"><div style="text-align:center">${(binLocationNumber ?? " ")}</div></td>
-                                    <td style="padding:${cellPadding}"><div style="text-align:right">${locationInfo.quantityByBin[binLocationNumber ?? ""]}</div></td>
+                                    <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.format(locationInfo.quantityByBin[binLocationNumber ?? ""], "#,##0.###")}</div></td>
                                 </tr>
                             </#list>
                         </#list></#if>

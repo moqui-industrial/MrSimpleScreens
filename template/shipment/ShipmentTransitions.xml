@@ -40,8 +40,8 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentShippingOptions" out-map="shipOptsOut"
                 in-map="{shipmentId:shipmentId, getRates:true}"/>
         <script>
-            outList = []
-            for (sop in shipOptsOut.shippingOptions) outList.add({value:`${sop.carrierPartyId}:${sop.shipmentMethodEnumId}`.toString(),
+            const outList = []
+            for (const sop of shipOptsOut.shippingOptions) outList.push({value:`${sop.carrierPartyId}:${sop.shipmentMethodEnumId}`.toString(),
                     label:`${sop.description ? sop.description : (sop.carrierPartyId != '_NA_' ? (sop.carrierName + ' - ') : '') + sop.shipmentMethodDescription}${sop.shippingTotal != null ? ' ' + ec.l10n.format(sop.shippingTotal, '#,##0.00') : ''}`.toString()})
             ec.web.sendJsonResponse(outList)
         </script>

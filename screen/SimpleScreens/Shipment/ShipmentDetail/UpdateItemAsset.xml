@@ -36,7 +36,7 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <service-call name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>
         <service-call name="org.moqui.impl.BasicServices.find#Enumeration" in-map="{enumTypeId:'RejectionReason'}" out-map="reasonOut"/>
-        <set field="facilityId" from="shipmentRouteSegmentList?.first?.destinationFacilityId"/>
+        <set field="facilityId" from="shipmentRouteSegmentList?.[0]?.destinationFacilityId"/>
 
         <set field="passedStatusId" from="statusId"/>
         <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset"/>
@@ -54,7 +54,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="assetId"/><econdition field-name="shipmentId"/>
             <order-by field-name="assetReceiptId"/>
         </entity-find>
-        <set field="originalAssetReceipt" from="assetReceiptList?.first"/>
+        <set field="originalAssetReceipt" from="assetReceiptList?.[0]"/>
         <script>if (originalAssetReceipt) Object.assign(context, originalAssetReceipt)</script>
         <set field="rejectionReasonEnumId" from="originalAssetReceipt?.rejectionReasonEnumId"/>
     </actions>

@@ -409,7 +409,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <container type="dl" style="dl-horizontal">
                     <label text="Destination Address" type="dt"/>
                     <container type="dd">
-                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                        <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                         <dynamic-dialog id="UpdatePostalInfo" button-text="Update Address" transition="UpdateContactInfo" width="800"
                                 condition="allowUpdate || shipment.statusId == 'ShipPacked'"
                                 parameter-map="{partyId:toPartyId, postalContactMechId:contactInfo.postalContactMechId,
@@ -442,7 +442,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <container type="dl" style="dl-horizontal">
                     <label text="Origin Address" type="dt"/>
                     <container type="dd">
-                        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                        <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                         <dynamic-dialog id="UpdatePostalInfoOrigin" button-text="Update Address" transition="UpdateContactInfo" width="800" condition="allowUpdate"
                                 parameter-map="{partyId:fromPartyId, postalContactMechId:contactInfo.postalContactMechId,
                                             postalContactMechPurposeId:contactInfo.postalContactMechPurposeId, shipmentId:shipmentId}"/>
@@ -630,7 +630,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <section name="ShippedShippingInfo" condition="curDestPaInfo"><actions><set field="contactInfo" from="curDestPaInfo"/></actions><widgets>
                             <label text="Destination" type="dt"/>
                             <container type="dd">
-                                <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                                <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                                 <container><label text="Trust: ${contactInfo.postalTrustLevelEnum?.description ?: 'New'}" type="strong"/></container>
                                 <label text="${contactInfo.postalContactMech.validateMessage?:''}" type="div"/>
                             </container>

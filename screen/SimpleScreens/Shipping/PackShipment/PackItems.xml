@@ -166,7 +166,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </widgets></section>
                     </row-col>
                     <row-col lg="7">
-                        <section name="ShipItemPackageSection" condition="quantityNotInPackage"><widgets>
+                        <section name="ShipItemPackageSection" condition="!quantityNotInPackage.isZero()"><widgets>
                             <form-single name="AddItemToPackageForm" transition="addItemToPackage" map="sid" pass-through-parameters="true">
                                 <field name="shipmentId"><default-field><hidden/></default-field></field>
                                 <field name="productId"><default-field><hidden/></default-field></field>
