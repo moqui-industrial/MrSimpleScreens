@@ -96,10 +96,19 @@ along with this software (see the LICENSE.md file). If not, see
                     <field name="estimatedStartDate"><header-field title="Start Date" show-order-by="true"><date-period/></header-field>
                         <default-field><display/></default-field></field>
 
+                    <!-- produceProductId and consumeProductId are fields of the find entity: as columns they would be selected,
+                        and a run would be listed once for each product pair; they are only find fields, and the columns
+                        below list the products from the row-actions -->
                     <field name="produceProductId">
                         <header-field title="Produce"><drop-down allow-empty="true">
                             <dynamic-options transition="getProductList" server-search="true" min-length="0"/></drop-down></header-field>
-                        <default-field>
+                    </field>
+                    <field name="consumeProductId">
+                        <header-field title="Consume"><drop-down allow-empty="true">
+                            <dynamic-options transition="getProductList" server-search="true" min-length="0"/></drop-down></header-field>
+                    </field>
+                    <field name="produceColumn">
+                        <default-field title="Produce">
                             <section-iterate name="ProduceList" list="produceList" entry="product"><widgets>
                                 <link url="editProduct" text="${product.pseudoId}" link-type="anchor" parameter-map="{productId:product.productId}"/>
                                 <label text="${product.productName}" type="p" style="no-margin"/>
@@ -107,10 +116,8 @@ along with this software (see the LICENSE.md file). If not, see
                             </widgets></section-iterate>
                         </default-field>
                     </field>
-                    <field name="consumeProductId">
-                        <header-field title="Consume"><drop-down allow-empty="true">
-                            <dynamic-options transition="getProductList" server-search="true" min-length="0"/></drop-down></header-field>
-                        <default-field>
+                    <field name="consumeColumn">
+                        <default-field title="Consume">
                             <section-iterate name="ConsumeList" list="consumeList" entry="product"><widgets>
                                 <link url="editProduct" text="${product.pseudoId}" link-type="anchor" parameter-map="{productId:product.productId}"/>
                                 <label text="${product.productName}" type="p" style="no-margin"/>

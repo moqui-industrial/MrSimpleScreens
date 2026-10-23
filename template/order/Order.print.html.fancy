@@ -170,7 +170,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 </td>
                                 <#if showUpc><td style="padding:${cellPadding}"><div>${(itemUpc ?? "")}</div></td></#if>
                                 <td style="padding:${cellPadding}"><div>${ec.l10n.format(orderItem.requiredByDate, dateFormat)}</div></td>
-                                <td style="padding:${cellPadding}"><div style="text-align:center">${(orderItem.quantity ?? "1")}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:center">${ec.l10n.format(orderItem.quantity ?? 1, "#,##0.###")}</div></td>
                                 <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency((orderItem.unitAmount ?? 0), orderHeader.currencyUomId, 2)}</div></td>
                                 <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency(orderItemTotalOut.itemTotal, orderHeader.currencyUomId, 2)}</div></td>
                             </tr>

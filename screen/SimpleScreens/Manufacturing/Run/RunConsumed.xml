@@ -24,7 +24,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="issueAssetToWorkEffort"><service-call name="mantle.product.AssetServices.issue#AssetToWorkEffort"/>
         <default-response url="."/></transition>
     <transition name="issueAnyAssetToWorkEffort"><service-call name="mantle.product.AssetServices.issue#AnyAssetToWorkEffort"/>
-        <default-response url=".."/></transition>
+        <default-response url="."/></transition>
     <transition name="receiveAsset"><service-call name="mantle.product.AssetServices.receive#Asset"/><default-response url="."/></transition>
 
     <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>

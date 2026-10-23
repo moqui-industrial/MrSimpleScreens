@@ -132,6 +132,8 @@ along with this software (see the LICENSE.md file). If not, see
             </container-dialog>
         </box-toolbar><box-body>
             <form-list name="EquipmentList" list="equipmentList" transition="updateAssetAssign">
+                <row-actions><entity-find-one entity-name="moqui.basic.StatusItem" value-field="currentAssignStatus">
+                    <field-map field-name="statusId"/></entity-find-one></row-actions>
                 <field name="workEffortId"><default-field><hidden/></default-field></field>
                 <field name="assetId"><default-field><hidden/></default-field></field>
                 <field name="fromDate"><default-field><hidden/></default-field></field>
@@ -139,8 +141,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="assetName"><default-field><link url="equipmentDetail" text="AssetNameTemplate" link-type="anchor"/></default-field></field>
                 <field name="statusId"><default-field title="Status">
                     <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#statusTransitionDropDown">
-                        <set field="currentDescription" from="equipmentList_entry?.['WorkEffortAssetAssign#moqui.basic.StatusItem']?.description"/>
-                        <set field="statusId" from="invoice?.statusId"/></widget-template-include>
+                        <set field="currentDescription" from="currentAssignStatus?.description"/></widget-template-include>
                 </default-field></field>
                 <field name="comments"><default-field><text-area cols="50" rows="2"/></default-field></field>
                 <field name="submitButton" align="right"><default-field title="Update"><submit/>
@@ -181,7 +182,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <default-field><display-entity entity-name="mantle.party.RoleType"/></default-field></field>
                 <field name="statusId"><default-field title="Status">
                     <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#statusTransitionDropDown">
-                        <set field="currentDescription" from="currentStatus?.description"/><set field="statusId"/></widget-template-include>
+                        <set field="currentDescription" from="currentStatus?.description"/></widget-template-include>
                 </default-field></field>
                 <field name="submitButton" align="right"><default-field title="Update"><submit/>
                     <link url="updateAssignment" icon="fa fa-trash"

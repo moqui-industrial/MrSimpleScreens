@@ -197,8 +197,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <label text="Recurring Order: ${recurCronDescription}" condition="recurCronDescription" type="h4" style="text-success"/>
 
                 <section name="PlaceSection" condition="['OrderOpen', 'OrderProposed', 'OrderBeingChanged', 'OrderHold'].includes(orderHeader.statusId)"><widgets>
-                    <link url="placeOrder" text="Place" link-type="hidden-form" condition="!placeWarnings" style="btn-success"/>
-                    <container-dialog id="PlaceOrderDialog" button-text="Place Warnings" condition="placeWarnings" type="success">
+                    <link url="placeOrder" text="Place" link-type="hidden-form" condition="!placeWarnings?.length" style="btn-success"/>
+                    <container-dialog id="PlaceOrderDialog" button-text="Place Warnings" condition="placeWarnings?.length" type="success">
                         <section-iterate name="PlaceWarningsSection" list="placeWarnings" entry="placeWarning"><widgets>
                             <label text="${placeWarning}" type="p"/></widgets></section-iterate>
                         <link url="placeOrder" text="Place Order Anyway" link-type="hidden-form"/>
@@ -206,8 +206,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </widgets></section>
                 <section name="ApproveSection" condition="['OrderPlaced', 'OrderProcessing', 'OrderHold'].includes(orderHeader.statusId)"><widgets>
                     <link url="approveOrder" text="Approve" link-type="hidden-form" style="btn-success"
-                            condition="ec.user.hasPermission('ORDER_APPROVE') &amp;&amp; !approveWarnings"/>
-                    <container-dialog id="ApproveOrderDialog" button-text="Approve Warnings" condition="approveWarnings" type="success">
+                            condition="ec.user.hasPermission('ORDER_APPROVE') &amp;&amp; !approveWarnings?.length"/>
+                    <container-dialog id="ApproveOrderDialog" button-text="Approve Warnings" condition="approveWarnings?.length" type="success">
                         <section-iterate name="ApproveWarningsSection" list="approveWarnings" entry="approveWarning"><widgets>
                             <label text="${approveWarning}" type="p"/></widgets></section-iterate>
                         <link url="approveOrder" text="Approve Order Anyway" link-type="hidden-form"
@@ -899,35 +899,35 @@ along with this software (see the LICENSE.md file). If not, see
                         <label text="${orderPartInfo.orderPart.priority || 5}" type="dd" style="${orderPartInfo.orderPart.priority == 1 ? 'text-strong text-danger' : (orderPartInfo.orderPart.priority == 2 || orderPartInfo.orderPart.priority == 3 ? 'text-strong text-warning' : '')}"/>
 
                         <label text="Ship After" type="dt" condition="orderPartInfo.orderPart.shipAfterDate"/>
-                        <label text="${ec.l10n.format(orderPartInfo.orderPart.shipAfterDate, 'yyyy-MM-dd HH:mm') || '\u00a0'}" type="dd"
+                        <label text="${ec.l10n.format(orderPartInfo.orderPart.shipAfterDate, 'yyyy-MM-dd HH:mm') || '&#160;'}" type="dd"
                                 condition="orderPartInfo.orderPart.shipAfterDate"/>
                         <label text="Ship Before" type="dt" condition="orderPartInfo.orderPart.shipBeforeDate"/>
-                        <label text="${ec.l10n.format(orderPartInfo.orderPart.shipBeforeDate, 'yyyy-MM-dd HH:mm') || '\u00a0'}" type="dd"
+                        <label text="${ec.l10n.format(orderPartInfo.orderPart.shipBeforeDate, 'yyyy-MM-dd HH:mm') || '&#160;'}" type="dd"
                                 condition="orderPartInfo.orderPart.shipBeforeDate"/>
                         <label text="Delivery Date" type="dt" condition="orderPartInfo.orderPart.estimatedDeliveryDate"/>
-                        <label text="${ec.l10n.format(orderPartInfo.orderPart.estimatedDeliveryDate, 'yyyy-MM-dd HH:mm') || '\u00a0'}" type="dd"
+                        <label text="${ec.l10n.format(orderPartInfo.orderPart.estimatedDeliveryDate, 'yyyy-MM-dd HH:mm') || '&#160;'}" type="dd"
                                 condition="orderPartInfo.orderPart.estimatedDeliveryDate"/>
                         <label text="Pick Up Date" type="dt" condition="orderPartInfo.orderPart.estimatedPickUpDate"/>
-                        <label text="${ec.l10n.format(orderPartInfo.orderPart.estimatedPickUpDate, 'yyyy-MM-dd HH:mm') || '\u00a0'}" type="dd"
+                        <label text="${ec.l10n.format(orderPartInfo.orderPart.estimatedPickUpDate, 'yyyy-MM-dd HH:mm') || '&#160;'}" type="dd"
                                 condition="orderPartInfo.orderPart.estimatedPickUpDate"/>
 
                         <label text="Their Order ID" type="dt"/>
-                        <label text="${orderPartInfo.orderPart.otherPartyOrderId || '\u00a0'}" type="dd"/>
+                        <label text="${orderPartInfo.orderPart.otherPartyOrderId || '&#160;'}" type="dd"/>
                         <label text="Their Order Date" type="dt" condition="orderPartInfo.orderPart.otherPartyOrderDate"/>
-                        <label text="${ec.l10n.format(orderPartInfo.orderPart.otherPartyOrderDate, 'yyyy-MM-dd HH:mm') || '\u00a0'}" type="dd"
+                        <label text="${ec.l10n.format(orderPartInfo.orderPart.otherPartyOrderDate, 'yyyy-MM-dd HH:mm') || '&#160;'}" type="dd"
                                 condition="orderPartInfo.orderPart.otherPartyOrderDate"/>
                         <section name="DuplicatesByOtherPartyOrderIdSection" condition="orderPartInfo.duplicateOrderPartList?.length"><widgets>
                             <label text="Duplicate Order Parts" type="dt" style="text-danger"/>
                             <label text="${orderPartInfo.duplicateOrderPartList.map(it => it.orderId + ':' + it.orderPartSeqId).join(', ')}" type="dd" style="text-danger"/>
                         </widgets></section>
                         <label text="Shipping Instructions" type="dt"/>
-                        <label text="${orderPartInfo.orderPart.shippingInstructions || '\u00a0'}" type="dd"/>
+                        <label text="${orderPartInfo.orderPart.shippingInstructions || '&#160;'}" type="dd"/>
                         <label text="Signature Required" type="dt" condition="orderPartInfo.orderPart.signatureRequiredEnumId"/>
                         <label text="${orderPartInfo.orderPart.signatureRequiredEnum?.description}" type="dd" condition="orderPartInfo.orderPart.signatureRequiredEnumId"/>
                         <label text="Is Gift" type="dt"/>
                         <label text="${orderPartInfo.orderPart.isGift || 'N'}" type="dd"/>
                         <label text="Gift Message" type="dt"/>
-                        <label text="${orderPartInfo.orderPart.giftMessage || '\u00a0'}" type="dd"/>
+                        <label text="${orderPartInfo.orderPart.giftMessage || '&#160;'}" type="dd"/>
 
                         <label text="Disable Promotions" type="dt" condition="orderPartInfo.orderPart.disablePromotions == 'Y'"/>
                         <label text="Y" type="dd" condition="orderPartInfo.orderPart.disablePromotions == 'Y'"/>
@@ -946,7 +946,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <link url="editFacility" text="FacilityNameTemplate" text-map="orderPartInfo.facility"
                                     parameter-map="{facilityId:orderPartInfo.facility.facilityId}" link-type="anchor"
                                     condition="orderPartInfo.facility"/>
-                            <text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/>
+                            <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                         </container>
                     </container>
                     <section-iterate name="OrderPartRoleSection" list="orderPartInfo.orderPartPartyList" entry="orderPartParty"><widgets>
@@ -1067,7 +1067,7 @@ along with this software (see the LICENSE.md file). If not, see
                                                 condition="partPaymentInfo.partPayment.paymentMethodId != null"/>
                                     </container>
 
-                                    <text type="html,vuet,qvt" location="component://SimpleScreens/template/party/PaymentMethodInfo.html.fancy"/>
+                                    <render-mode><text type="tui" location="component://SimpleScreens/template/party/PaymentMethodInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/PaymentMethodInfo.html.fancy"/></render-mode>
                                     <label text="CIM ID: ${methodInfo.paymentMethod.gatewayCimId}" type="div" condition="methodInfo.paymentMethod?.gatewayCimId"/>
                                     <label text="Gateway: ${methodInfo.paymentMethod.gatewayConfig?.description}" type="div" condition="methodInfo.paymentMethod?.paymentGatewayConfigId"/>
                                 </container>
@@ -1086,7 +1086,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="contactInfo" from="shippingAddressInfo"/>
                         </actions><widgets>
                             <container style="row"><container style="col-sm-6">
-                                <text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/>
+                                <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
                             </container><container style="col-sm-6">
                                 <dynamic-dialog id="UpdatePostalInfo" button-text="Update Address" transition="UpdateContactInfo"
                                         width="800" condition="orderPartInfo.partEditable"

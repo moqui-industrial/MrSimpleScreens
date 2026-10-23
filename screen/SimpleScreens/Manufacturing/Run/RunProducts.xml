@@ -128,7 +128,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <field-map field-name="productId" from="bomProductId"/></entity-find-one>
                         </actions><widgets>
                             <link url="addRunProduct" link-type="hidden-form-link" condition="toDecimal(bomDetail.quantityRemaining ?? 0).compare(0) &gt; 0"
-                                  text="Add Consume ${bomDetail.quantityRemaining} ${ec.resource.expand('ProductNameTemplate','',bomProduct)}"
+                                  text="Add Consume ${ec.l10n.format(bomDetail.quantityRemaining, null)} ${ec.resource.expand('ProductNameTemplate','',bomProduct)}"
                                   parameter-map="{workEffortId:workEffortId, typeEnumId:'WeptConsume', productId:bomProductId, estimatedQuantity:bomDetail.quantityRemaining}"/>
                             <label text="ProductNameTemplate" text-map="bomProduct" style="text-warning" condition="toDecimal(bomDetail.quantityRemaining ?? 0).compare(0) &lt; 0"/>
                             <label text=" or " condition="bomProductId_has_next &amp;&amp; !toDecimal(bomDetail.quantityRemaining ?? 0).isZero()"/>

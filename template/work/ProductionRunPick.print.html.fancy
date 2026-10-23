@@ -66,7 +66,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </#if>
                         <#if (workEffort.estimatedWorkDuration != null)>
                             <div style="font-weight:bold">Est. Hours</div>
-                            <div>${workEffort.estimatedWorkDuration}</div>
+                            <div>${ec.l10n.format(workEffort.estimatedWorkDuration, "#,##0.###")}</div>
                         </#if>
                     </td>
                     <td style="padding:3pt;width:3in">
@@ -112,7 +112,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     ${raw(ec.resource.code128Svg(productInfo.productId, {height: '0.4in', moduleWidth: '0.25mm', fontSize: '7pt', humanReadable: true}))}
                                 </div></td>
                                 <td colspan="3" style="padding:${cellPadding}"><div style="text-align:left">${ec.resource.expand("ProductNameTemplate", "", productInfo)}</div></td>
-                                <td style="padding:${cellPadding}"><div style="text-align:right">${productInfo.quantity}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.format(productInfo.quantity, "#,##0.###")}</div></td>
                             </tr>
                         </#list>
                     </#list>
@@ -139,7 +139,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 ${raw(ec.resource.code128Svg(productInfo.productId, {height: '0.4in', moduleWidth: '0.25mm', fontSize: '7pt', humanReadable: true}))}
                             </div></td>
                             <td colspan="3" style="padding:${cellPadding}"><div style="text-align:left">${ec.resource.expand("ProductNameTemplate", "", productInfo)}</div></td>
-                            <td style="padding:${cellPadding}"><div style="text-align:right">${productInfo.quantity}</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.format(productInfo.quantity, "#,##0.###")}</div></td>
                         </tr>
                         <#if has(productInfo?.locationInfoList)><#list productInfo.locationInfoList as locationInfo>
                             <tr style="font-size:9pt">
@@ -151,7 +151,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <td style="padding:${cellPadding}"><div style="text-align:center">${(locationInfo.positionId ?? " ")}</div></td>
 
                                 <td style="padding:${cellPadding}"><div> </div></td>
-                                <td style="padding:${cellPadding}"><div style="text-align:right">${locationInfo.quantity}</div></td>
+                                <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.format(locationInfo.quantity, "#,##0.###")}</div></td>
                             </tr>
                         </#list></#if>
                     </#list>
