@@ -67,13 +67,13 @@ Validated rows are done later in a browser by the same method, with the print ou
 
 | Screen | Migrated | Validated |
 | --- | :-: | :-: |
-| `BasicHandheld/Warehouse` | [ ] | [ ] |
-| `BasicHandheld/Warehouse/Asset` | [ ] | [ ] |
-| `BasicHandheld/Warehouse/Asset/ReceiveAsset` | [ ] | [ ] |
-| `BasicHandheld/Warehouse/Asset/SelectAsset` | [ ] | [ ] |
-| `BasicHandheld/Warehouse/dashboard` | [ ] | [ ] |
-| `BasicHandheld/Warehouse/Shipping` | [ ] | [ ] |
-| `BasicHandheld/Warehouse/Shipping/PickLocationMoves` | [ ] | [ ] |
+| `BasicHandheld/Warehouse` | [x] | [ ] |
+| `BasicHandheld/Warehouse/Asset` | [x] | [ ] |
+| `BasicHandheld/Warehouse/Asset/ReceiveAsset` | [x] | [ ] |
+| `BasicHandheld/Warehouse/Asset/SelectAsset` | [x] | [ ] |
+| `BasicHandheld/Warehouse/dashboard` | [x] | [ ] |
+| `BasicHandheld/Warehouse/Shipping` | [x] | [ ] |
+| `BasicHandheld/Warehouse/Shipping/PickLocationMoves` | [x] | [ ] |
 | `email/InvoiceFinalized` | [ ] | [ ] |
 | `email/InvoicesPastDue` | [ ] | [ ] |
 | `email/OrderPlaced` | [ ] | [ ] |
