@@ -91,8 +91,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <default-parameters statusId="ReturnCreated,ReturnRequested,ReturnApproved,ReturnShipped,ReturnReceived" statusId_op="in"
                             entryDate_poffset="-3" entryDate_period="30d"/>
                 </search-form-inputs>
-                <econdition field-name="vendorRoleTypeId" value="OrgInternal" ignore="!returnType?.toLowerCase() === 'customer'"/>
-                <econdition field-name="customerRoleTypeId" value="OrgInternal" ignore="!returnType?.toLowerCase() === 'supplier'"/>
+                <econdition field-name="vendorRoleTypeId" value="OrgInternal" ignore="returnType?.toLowerCase() !== 'customer'"/>
+                <econdition field-name="customerRoleTypeId" value="OrgInternal" ignore="returnType?.toLowerCase() !== 'supplier'"/>
             </entity-find>
             <row-actions>
                 <entity-find entity-name="mantle.order.return.ReturnItem" list="returnOrderList" distinct="true">

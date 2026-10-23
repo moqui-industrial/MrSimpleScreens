@@ -99,7 +99,7 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="priceFormat"/>
         <actions>
             <if condition="productId"><then>
-                <if condition="!priceFormat"><set field="priceFormat" value="#,##0.000"/></if>
+                <if condition="!priceFormat"><set field="priceFormat" from="'#,##0.000'"/></if>
                 <service-call name="mantle.product.PriceServices.get#OrderProductPrice" in-map="context" out-map="priceOut"/>
                 <if condition="toDecimal(priceOut.price ?? 0).compare(0) &gt; 0"><then>
                     <script>ec.web.sendTextResponse(ec.l10n.format(priceOut.price, priceFormat))</script>

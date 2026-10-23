@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
         <parameter name="weightFormat"/>
         <actions>
             <if condition="shipmentId &amp;&amp; shipmentPackageSeqId"><then>
-                <if condition="!weightFormat"><set field="weightFormat" value="#,##0.0##"/></if>
+                <if condition="!weightFormat"><set field="weightFormat" from="'#,##0.0##'"/></if>
                 <service-call name="mantle.shipment.ShipmentServices.get#ShipmentPackageWeight" in-map="context" out-map="weightOut" ignore-error="true"/>
                 <if condition="weightOut?.weight"><then>
                     <script>ec.web.sendTextResponse(ec.l10n.format(weightOut.weight, weightFormat))</script>

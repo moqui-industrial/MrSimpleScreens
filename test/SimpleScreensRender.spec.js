@@ -184,3 +184,23 @@ feature("fiscal period drop-down options are plain maps, a term picks its period
         one.jsonObject[0].periodName.includes("FY2026m10")
     },
 })
+
+// A set value with ## and no ${} went through the l10n comment strip: the price format "#,##0.000" read "#,".
+feature("getProductPrice formats the price to three decimals by default", {
+    expect() {
+        const str = screens.render("Order/OrderItems/getProductPrice",
+                { productId: "DEMO_1_1", quantity: "1", pricePurposeEnumId: "PppPurchase", lastStandalone: "-2" }, null)
+        !str.errorMessages.length
+        /^\d[\d,]*\.\d{3}$/.test(String(str.output).trim())
+    },
+})
+
+// The return item list posts the hidden "" of a replacement product it does not change; an id field set to "" failed its foreign key.
+feature("a return item update with a blank replacement product clears it, not a foreign key error", {
+    expect() {
+        const out = ec.service.sync().name("mantle.order.ReturnServices.update#ReturnItem")
+                .parameters({ returnId: "55700", returnItemSeqId: "01", replacementProductId: "", description: "blank replacement" }).call()
+        !ec.message.hasError()
+        ec.entity.find("mantle.order.return.ReturnItem").condition("returnId", "55700").condition("returnItemSeqId", "01").one().replacementProductId == null
+    },
+})
