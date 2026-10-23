@@ -59,11 +59,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="entityName" value="moqui.basic.StatusItem"/>
                 </entity-find>
                 <entity-find list="statusItemList" entity-name="moqui.basic.StatusItem">
-                    <econdition field-name="statusId" operator="in" from="currentStatusList.pkValue"/>
+                    <econdition field-name="statusId" operator="in" from="currentStatusList.map(it => it.pkValue)"/>
                     <econdition field-name="statusTypeId" value="WorkEffort"/>
                 </entity-find>
                 <if condition="(statusItemList?.length > 0)">
-                    <set field="currentStatus" from="statusItemList.first"/></if>
+                    <set field="currentStatus" from="statusItemList[0]"/></if>
             </if>
             <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="svctdList" cache="true">
                 <econdition field-name="statusFlowId" from="statusFlowId"/>
@@ -102,7 +102,8 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response type="none"/>
     </transition>
 
-    <transition name="createTask"><service-call name="mantle.work.TaskServices.create#Task" in-map="context"/>
+    <transition name="createTask"><service-call name="mantle.work.TaskServices.create#Task"
+            in-map="Object.assign({}, context, {workEffortId:null})"/>
         <default-response url="."/></transition>
     <transition name="getProjectParties">
         <service-call name="mantle.work.ProjectServices.get#ProjectParties" web-send-json-response="resultList"/>
@@ -242,9 +243,9 @@ along with this software (see the LICENSE.md file). If not, see
                 </widgets></section>
 
                 <container><label text="Priority: " type="strong"/><label text="${task.priority || ''}"/></container>
-                <container><label text="Purpose: " type="strong"/><label text="${purposeEnum.description}"/></container>
+                <container><label text="Purpose: " type="strong"/><label text="${purposeEnum?.description ?? ''}"/></container>
                 <container><label text="Status: " type="strong"/>
-                    <editable id="TaskStatus" text="${currentStatus.description}" transition="updateTaskStatus"
+                    <editable id="TaskStatus" text="${currentStatus?.description ?? ''}" transition="updateTaskStatus"
                             parameter-name="statusId" widget-type="select">
                         <parameter name="workEffortId" from="task.workEffortId"/>
                         <editable-load transition="getTaskStatuses"/>
@@ -262,9 +263,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <container><label text="Actual Hours: " type="strong"/><label text="${ec.l10n.format(task.actualWorkTime, '0.00')}"/></container>
                 <container><label text="Remaining Hours: " type="strong"/><label text="${ec.l10n.format(task.remainingWorkTime, '0.00')}"/></container>
                 <container><label text="Act/Est: " type="strong"/>
-                    <label text="${ec.l10n.format((task.actualWorkTime / task.estimatedWorkTime) * 100, '0.00')}%" condition="task.estimatedWorkTime"/></container>
+                    <label text="${ec.l10n.format(toDecimal(task.actualWorkTime ?? 0).multiply(100).divide(task.estimatedWorkTime), '0.00')}%" condition="toNumber(task.estimatedWorkTime)"/></container>
                 <container><label text="Act+Rem/Est: " type="strong"/>
-                    <label text="${ec.l10n.format(((task.actualWorkTime + task.remainingWorkTime) / task.estimatedWorkTime) * 100, '0.00')}%" condition="task.estimatedWorkTime"/></container>
+                    <label text="${ec.l10n.format(toDecimal(task.actualWorkTime ?? 0).add(task.remainingWorkTime ?? 0).multiply(100).divide(task.estimatedWorkTime), '0.00')}%" condition="toNumber(task.estimatedWorkTime)"/></container>
                 <container><label text="Last Updated: " type="strong"/><label text="${ec.l10n.format(task.lastUpdatedStamp, null)}"/></container>
             </box-body></container-box>
 
@@ -410,7 +411,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <link text="${childTask.workEffortId} - ${childTask.workEffortName}" url="taskSummary" link-type="anchor">
                                 <parameter name="workEffortId" from="childTask.workEffortId"/>
                             </link>
-                            <label text="${childTask.statusDescription || ''} - ${childTask.priority ? 'P ' + childTask.priority + ' - ' : '' }${childResolution.description} - ${childPurpose.description}" type="div"/>
+                            <label text="${[childTask.statusDescription, childTask.priority ? 'P ' + childTask.priority : null, childResolution?.description, childPurpose?.description].filter(it => it).join(' - ')}" type="div"/>
                         </container>
                     </widgets>
                 </section-iterate>

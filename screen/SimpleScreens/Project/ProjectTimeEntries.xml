@@ -73,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="clientPartyId">
                 <default-field title="Client"><display-entity entity-name="mantle.party.PartyDetail" text="PartyNameTemplate"/></default-field></field>
             <field name="workEffortId"><header-field title="Task" show-order-by="true"/>
-                <default-field><label text="WorkEffortNameTemplate"/></default-field></field>
+                <default-field><label text="WorkEffortNameTemplate"/><hidden/></default-field></field>
 
             <field name="rateTypeEnumId">
                 <header-field title="Rate Type" show-order-by="true">

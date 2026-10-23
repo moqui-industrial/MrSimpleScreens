@@ -61,7 +61,7 @@ function screenCase(screenPath) {
     const short = commitId.substring(0, 10)
     return {
         "Project/EditRepositories": { params: { rootWorkEffortId: PROJECT }, texts: ["gits", "/git/gits.git"] },
-        "Project/ProjectSummary": { params: { workEffortId: PROJECT }, texts: ["gits"] },
+        "Project/ProjectSummary": { params: { workEffortId: PROJECT }, texts: ["gits", "Complete/Closed - 0", "Provider Cost"] },
         "Project/GitCommit": { params: { repositoryId: "gits", commitId }, texts: [`Show the commits of ${taskId}`, "README.md",
             "moqui-diff"] },
         "Task/EditSource": { params: { workEffortId: taskId }, texts: [short] },

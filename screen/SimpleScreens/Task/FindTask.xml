@@ -71,7 +71,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
             <order-by field-name="workEffortId"/>
         </entity-find>
-        <set field="myProjectIds" from="myProjectList.workEffortId"/>
+        <set field="myProjectIds" from="myProjectList.map(it => it.workEffortId)"/>
 
         <if condition="!queryString"><then>
             <!-- pure DB query -->
@@ -120,7 +120,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
                     in-map="Object.assign({}, context, {indexName:'mantle', documentType:'MantleTask'})"/>
 
-            <set field="workEffortIdList" from="documentList._id"/>
+            <set field="workEffortIdList" from="(documentList ?? []).map(it => it._id)"/>
             <entity-find entity-name="mantle.work.effort.PartyTaskSummary" list="taskList">
                 <search-form-inputs default-order-by="priority,workEffortId" input-fields-map="searchInputs"/>
                 <econdition field-name="workEffortId" operator="in" from="workEffortIdList"/>
@@ -193,7 +193,7 @@ along with this software (see the LICENSE.md file). If not, see
                             </entity-options>
                         </drop-down>
                     </default-field></field>
-                    <field name="statusId"><default-field title="Status">
+                    <field name="statusId" from="null"><default-field title="Status">
                         <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#statusDropDown">
                             <set field="statusTypeId" value="WorkEffort"/></widget-template-include>
                     </default-field></field>

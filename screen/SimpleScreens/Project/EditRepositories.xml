@@ -99,7 +99,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="repositoryId"/><parameter name="commitId" from="headCommitId"/>
                     <parameter name="rootWorkEffortId" from="workEffortId"/></link>
             </default-field></field>
-            <field name="lastUpdateDate"><default-field title="Last Change"><display format="yyyy-MM-dd HH:mm"/></default-field></field>
+            <field name="lastUpdateDate"><default-field title="Last Change"><display text="${lastUpdateDate ? ec.l10n.format(lastUpdateDate, 'yyyy-MM-dd HH:mm') : ''}"/></default-field></field>
             <field name="httpsUrl"><default-field title="Clone URLs"><display text="${httpsUrl ?? ''}"/>
                 <display text="${sshUrl ?? ''}"/></default-field></field>
             <field name="submitButton"><default-field title="Remove"><submit confirmation="Unlink this repository from the project?"/></default-field></field>

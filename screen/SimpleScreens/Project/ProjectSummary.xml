@@ -24,6 +24,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="projectSummary"><default-response url="../ProjectSummary"/></transition>
     <transition name="milestoneSummary"><default-response url="../MilestoneSummary"/></transition>
 
+    <transition name="findTask"><default-response url="//${taskRoot||appRoot}/Task/FindTask"/></transition>
     <transition name="taskSummary"><default-response url="//${taskRoot||appRoot}/Task/TaskSummary"/></transition>
     <transition name="gitCommit"><default-response url="../GitCommit"/></transition>
 
@@ -220,7 +221,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <row-col sm="5"><link text="In Progress - ${pstats.taskCountByStatusMap.WeInProgress||0}"
                                     style="text-success" url="findTask" link-type="anchor"
                                     parameter-map="{rootWorkEffortId:project.workEffortId, statusId:'WeInProgress'}"/></row-col>
-                            <row-col sm="7"><link text="Complete/Closed - ${((pstats.taskCountByStatusMap.WeComplete||0) == null ? null : toDecimal((pstats.taskCountByStatusMap.WeComplete||0))) + ((pstats.taskCountByStatusMap.WeClosed||0) == null ? null : toDecimal((pstats.taskCountByStatusMap.WeClosed||0)))}"
+                            <row-col sm="7"><link text="Complete/Closed - ${toDecimal(pstats.taskCountByStatusMap.WeComplete||0).add(pstats.taskCountByStatusMap.WeClosed||0)}"
                                     style="text-info" url="findTask" link-type="anchor"
                                     parameter-map="{rootWorkEffortId:project.workEffortId, statusId:'WeComplete,WeClosed', statusId_op:'in'}"/></row-col>
                         </container-row>

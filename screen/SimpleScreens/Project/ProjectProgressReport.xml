@@ -78,7 +78,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <label text="Milestones" type="h4"/>
         <form-list name="MilestoneStatsList" list="milestoneStatsList">
-            <field name="estimatedStartDate"><default-field><display/></default-field></field>
+            <field name="estimatedStartDate"><default-field><display text="${estimatedStartDate ? ec.l10n.format(estimatedStartDate, 'yyyy-MM-dd') : ''}"/></default-field></field>
             <field name="workEffortId"><default-field title="Milestone">
                 <link url="milestoneSummary" text="WorkEffortNameTemplate" link-type="anchor"/></default-field></field>
 
