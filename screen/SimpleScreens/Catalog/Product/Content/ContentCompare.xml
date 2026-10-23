@@ -28,6 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
         <script><![CDATA[
             versionText = null
             diffHtml = ''
+            diffUnified = ''
             if (versionNameLhs == versionNameRhs) {
                 versionText = resourceRef?.getText(versionNameLhs) || ''
             } else {
@@ -35,6 +36,7 @@ along with this software (see the LICENSE.md file). If not, see
                     const diff = resourceRef?.getVersionDiff(versionNameLhs, versionNameRhs)
                     if (diff) {
                         diffHtml = diff.html
+                        diffUnified = diff.unifiedDiff
                         diffStats = diff.stats.insertions + ' added, ' + diff.stats.deletions + ' removed'
                     }
                 } catch (err) {
@@ -52,7 +54,8 @@ along with this software (see the LICENSE.md file). If not, see
             <container-box><box-header title="Compare versions ${versionNameLhs.substring(0, 12)} and ${versionNameRhs.substring(0, 12)}"/><box-toolbar>
                 <label text="${diffStats || ''}" type="span"/>
             </box-toolbar><box-body>
-                <render-mode><text type="html,vuet,qvt"><![CDATA[<div class="scroll">${diffHtml}</div>]]></text></render-mode>
+                <render-mode><text type="html,vuet,qvt"><![CDATA[<div class="scroll">${diffHtml}</div>]]></text>
+                    <text type="tui"><![CDATA[{"t":"text","style":"pre","text":${JSON.stringify(diffUnified || '')}}]]></text></render-mode>
             </box-body></container-box>
         </fail-widgets></section>
     </widgets>

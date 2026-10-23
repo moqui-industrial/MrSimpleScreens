@@ -58,7 +58,7 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="activeOrgId" from="ec.user.context?.activeOrgId"/>
         <set field="filterOrgIds" from="ec.user.context?.filterOrgIds"/>
         <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.product.Product')"/>
-        <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
+        <if condition="findFilters?.length"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
         <!-- <log level="warn" message="Doing product search with activeOrgId ${activeOrgId} filterOrgIds ${filterOrgIds} entityFilterSetId ${entityFilterSetId}"/> -->
         <script><![CDATA[
             if ('MANTLE_USER_ORG' === entityFilterSetId) {
@@ -78,7 +78,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find entity-name="mantle.product.Product" list="amountUomList" distinct="true">
             <select-field field-name="amountUomId"/></entity-find>
-        <set field="amountUomIds" from="amountUomList.amountUomId"/>
+        <set field="amountUomIds" from="amountUomList.map(it => it.amountUomId)"/>
     </actions>
     <widgets>
         <container-dialog id="AddCategoryContainer" button-text="Add All to Category" condition="productIds?.length">

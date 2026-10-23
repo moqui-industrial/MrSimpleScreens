@@ -50,7 +50,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <form-single name="UpdateContentForm" transition="updateContent" map="productCategoryContent">
                     <field name="productCategoryId"><default-field><hidden/></default-field></field>
                     <field name="productCategoryContentId"><default-field title="ID"><display/></default-field></field>
-                    <field name="productCategoryContentTypeEnumId"><default-field title="Content Type">
+                    <field name="categoryContentTypeEnumId"><default-field title="Content Type">
                         <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#enumDropDown">
                             <set field="enumTypeId" value="ProductCategoryContentType"/></widget-template-include>
                     </default-field></field>

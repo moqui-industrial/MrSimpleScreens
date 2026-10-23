@@ -30,14 +30,12 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="createProductFeatureGroupAppl">
         <actions>
-            <if condition="Array.isArray(productFeatureId)"><then>
-                <iterate list="productFeatureId" entry="curId">
-                    <service-call name="create#mantle.product.feature.ProductFeatureGroupAppl"
-                            in-map="{productFeatureId:curId, productFeatureGroupId:productFeatureGroupId, fromDate:fromDate}"/>
-                </iterate>
-            </then><else>
-                <service-call name="create#mantle.product.feature.ProductFeatureGroupAppl" in-map="context"/>
-            </else></if>
+            <!-- the browser posts repeated values as an array, the TUI one comma-joined string, one choice a single value -->
+            <set field="featureIdList" from="Array.isArray(productFeatureId) ? productFeatureId : String(productFeatureId ?? '').split(',').filter(it => it)"/>
+            <iterate list="featureIdList" entry="curId">
+                <service-call name="create#mantle.product.feature.ProductFeatureGroupAppl"
+                        in-map="{productFeatureId:curId, productFeatureGroupId:productFeatureGroupId, fromDate:fromDate}"/>
+            </iterate>
         </actions>
         <default-response url="."/>
     </transition>

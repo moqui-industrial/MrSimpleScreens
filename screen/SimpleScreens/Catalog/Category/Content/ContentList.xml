@@ -84,7 +84,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </default-field></field>
                 <field name="detail"><default-field title=""><link url="../ContentDetail" text="Edit"/></default-field></field>
 
-                <field name="productContentId"><default-field title="ID"><display/></default-field></field>
+                <field name="productCategoryContentId"><default-field title="ID"><display/></default-field></field>
                 <field name="categoryContentTypeEnumId">
                     <header-field title="Type" show-order-by="true">
                         <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#enumDropDown">
