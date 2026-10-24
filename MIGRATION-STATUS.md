@@ -45,7 +45,7 @@ The browser smoke used a temporary SimpleScreens app mount and an explicit **tes
 
 Additional scoped Chromium checks exercised all four HTML calendars with successful REST requests, month/week/day navigation, event creation dialog opening, live QVT calendar rendering with three real tasks, Vue/Quasar nav mounting, sales-summary dialog opening/closing and project SVG output. Isolated calendar fixtures checked exclusive-end multi-day events, HTML-looking titles, unsafe link rejection and independent source failures.
 
-Browser smoke source is retained in `test/browser-smoke.mjs`. It reads `MRSS_BASE_URL`, `MRSS_USERNAME`, `MRSS_PASSWORD`, `MRSS_CHROMIUM` and `MRSS_OUTPUT_DIR`; defaults are for disposable local demo data only. See `test/README.md`.
+The browser smoke is now the client spec `test/client/BrowserSmoke.spec.js` (`moqui test-client SimpleScreens --serve`), whose server mounts the app in `test/MoquiConf.xml` and makes the test-only grant in `test/ClientAccess.spec.js`, both in test runs only. Defaults are for disposable local demo data only. See `test/README.md`.
 
 ## Screen checklist
 
@@ -53,7 +53,7 @@ One row per screen XML under `screen/` (371), sorted by path below `screen/`, ca
 
 **Migrated** means both: the source is converted (Groovy to JavaScript, Java classes and collections to the supported APIs, FreeMarker/XSL-FO to supported templates, jQuery/CDN libraries to native controls), and the screen has been exercised through the TUI. The TUI pass is the first-pass check because an agent can drive it from a terminal and iterate quickly. **Validated** is a later phase: the screen checked in a browser (rendering, dialogs, AJAX and transitions, print output, authorization as the mounting app configures it). Do not tick Validated during the TUI pass.
 
-Nothing is ticked yet. The earlier JS specs and Chromium smoke runs show some screens render, but they predate this definition and did not go through the TUI, so they do not count. `test/screen-report.py` writes a report of which screens those specs already reach; use it to choose where to start, not as a source of ticks.
+Nothing is ticked yet. The earlier JS specs and Chromium smoke runs show some screens render, but they predate this definition and did not go through the TUI, so they do not count. `test/ScreenReport.spec.js` writes a report of which screens those specs already reach (`./moq test SimpleScreens --spec ScreenReport -D mrss_screen_report=/tmp/mrss-report.md`); use it to choose where to start, not as a source of ticks.
 
 ### Process
 
