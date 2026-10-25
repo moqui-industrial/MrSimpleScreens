@@ -1,8 +1,8 @@
-# MrSimpleScreens migration status
+# mr-marble migration status
 
 Revalidated 2026-10-23 against the local MR-Moqui working tree after the screen migration batches. **772 features in 80 specs: all pass.** 366 of the 371 screen rows are ticked Migrated (exercised through the TUI); none is Validated. The original 2026-10-16/17 validation was 411 features in 45 specs; the growth is Mantle specs added since and three SimpleScreens specs (80 features: `SimpleScreensRender` 54, `MyAccountScreens` 18, `GitScreens` 8). This is a working migration, not a claim of complete browser/authorization/print-layout parity or a released artifact.
 
-Component name remains `SimpleScreens`; the repository/directory is `MrSimpleScreens` (`git@github.com:moqui/MrSimpleScreens.git`). The unchanged upstream baseline is `5aed7ffba7231babdccfb0bd46cb6db66195487c`. `MIGRATION-INVENTORY.md` is the frozen pre-port inventory (its line numbers and counts describe that upstream source, not the current files). Process: `plans/ScreenMigrationTutorial.md` in MR-Moqui.
+The component, repository and directory are `mr-marble` (`git@github.com:moqui/mr-marble.git`); until 2026-10-25 the repository was `MrSimpleScreens` with the component name `SimpleScreens`, and Marble ERP was merged in from `MrMarbleERP` then (the renames are in the MR-Moqui `docs/Moqui-Java-Migration.md`). The screen tree is still `screen/SimpleScreens/`. The unchanged upstream baseline is `5aed7ffba7231babdccfb0bd46cb6db66195487c`. `MIGRATION-INVENTORY.md` is the frozen pre-port inventory (its line numbers and counts describe that upstream source, not the current files). Process: `plans/ScreenMigrationTutorial.md` in MR-Moqui.
 
 ## Known failure
 
@@ -18,7 +18,7 @@ Open items found by the migration batches, for the review pass, are in `MIGRATIO
 - All 29 remaining original FreeMarker templates have supported replacements; originals remain as reference. Eighteen XSL-FO documents now have HTML-print replacements, with additional fragments for macros/recursive invoice rows. Email and sales-stat/chart templates are ported too. Legacy SimpleScreens default template locations map to replacements; arbitrary external custom FreeMarker layouts still require their own port.
 - Native browser controls replace jQuery/Bootstrap dependencies: order audit history uses escaped, keyboard-accessible details; report details use dialogs; project status charts use SVG. Nav components use supported request helpers.
 - Four calendars use `MrCalendar.js`, a native month/week/day calendar backed by the actual Mantle REST event/task endpoints. Existing create forms and detail links remain. It is a compact agenda/day-column view, not FullCalendar's hourly time-grid.
-- Added since the first validation: Git repositories of projects and the commits, branches and tags of tasks (`Project/EditRepositories`, `Project/GitCommit`, `Task/EditSource`, boxes on the project and task summaries, My Account's Git Access, a Content option backed by Git LFS), covered by `GitScreens`; the wiki and product/category content compare screens use the framework's server-side version diff (`ResourceReference.getVersionDiff`) instead of jsdiff from a CDN, with a wiki feature in `SimpleScreensRender`; print headers repeat on every page and the running footer with page number is reproduced; party drop-downs and person lookups leave out another user's personal contact (`Party.privateOwnerUserId`); record-update notification topics go to the automatic Updates inbox; ProjectSummary and the find screens no longer call host decimal `valueOf` or Groovy `take()`; `EditInvoice` payment dialogs hide on a zero unpaid total; `SimpleReport` `FieldList` arrays; `component.xml` dependencies renamed (`mr-mantle-usl`, no component prefixes).
+- Added since the first validation: Git repositories of projects and the commits, branches and tags of tasks (`Project/EditRepositories`, `Project/GitCommit`, `Task/EditSource`, boxes on the project and task summaries, My Account's Git Access, a Content option backed by Git LFS), covered by `GitScreens`; the wiki and product/category content compare screens use the framework's server-side version diff (`ResourceReference.getVersionDiff`) instead of jsdiff from a CDN, with a wiki feature in `SimpleScreensRender`; print headers repeat on every page and the running footer with page number is reproduced; party drop-downs and person lookups leave out another user's personal contact (`Party.privateOwnerUserId`); record-update notification topics go to the automatic Updates inbox; ProjectSummary and the find screens no longer call host decimal `valueOf` or Groovy `take()`; `EditInvoice` payment dialogs hide on a zero unpaid total; `SimpleReport` `FieldList` arrays; `component.xml` dependencies renamed (`mr-mantle`, no component prefixes).
 - Supporting host fixes/additions include print query-mode selection and standalone rendering, real Code 128 SVG, flattening, session/form/entity helpers and the APIs described in the tutorial. These host changes must ship with the component.
 
 ## Verified results (2026-10-23)
@@ -26,7 +26,7 @@ Open items found by the migration batches, for the review pass, are in `MIGRATIO
 | Check | Result |
 | --- | --- |
 | Current framework debug build (`cargo build -p moqui`) | Pass |
-| All Mantle + SimpleScreens specs (`moqui test mantle-usl SimpleScreens`) | **772 passed, 0 failed; 80 specs** |
+| All Mantle + mr-marble specs (`moqui test mr-mantle mr-marble`) | **772 passed, 0 failed; 80 specs** |
 | Component Groovy lint (`moqui lint --groovy`) | **0 parse failures**, 384 files / 9,929 expression sites; 64 flagged sites (14 `gstring-dollar-name`, 47 `static-class`, 3 `empty-collection-truthiness`) |
 | Runtime screen lint (`moqui lint --screens`) | **0 parse failures**, 919 files / 20,546 expression sites (whole runtime, base components included) |
 | Component XML syntax | 0 files that do not parse |
@@ -45,7 +45,7 @@ The browser smoke used a temporary SimpleScreens app mount and an explicit **tes
 
 Additional scoped Chromium checks exercised all four HTML calendars with successful REST requests, month/week/day navigation, event creation dialog opening, live QVT calendar rendering with three real tasks, Vue/Quasar nav mounting, sales-summary dialog opening/closing and project SVG output. Isolated calendar fixtures checked exclusive-end multi-day events, HTML-looking titles, unsafe link rejection and independent source failures.
 
-The browser smoke is now the client spec `test/client/BrowserSmoke.spec.js` (`moqui test-client SimpleScreens --serve`), whose server mounts the app in `test/MoquiConf.xml` and makes the test-only grant in `test/ClientAccess.spec.js`, both in test runs only. Defaults are for disposable local demo data only. See `test/README.md`.
+The browser smoke is now the client spec `test/client/BrowserSmoke.spec.js` (`moqui test-client mr-marble --serve`), whose server mounts the app in `test/MoquiConf.xml` and makes the test-only grant in `test/ClientAccess.spec.js`, both in test runs only. Defaults are for disposable local demo data only. See `test/README.md`.
 
 ## Screen checklist
 
@@ -53,13 +53,13 @@ One row per screen XML under `screen/` (371), sorted by path below `screen/`, ca
 
 **Migrated** means both: the source is converted (Groovy to JavaScript, Java classes and collections to the supported APIs, FreeMarker/XSL-FO to supported templates, jQuery/CDN libraries to native controls), and the screen has been exercised through the TUI. The TUI pass is the first-pass check because an agent can drive it from a terminal and iterate quickly. **Validated** is a later phase: the screen checked in a browser (rendering, dialogs, AJAX and transitions, print output, authorization as the mounting app configures it). Do not tick Validated during the TUI pass.
 
-Nothing is ticked yet. The earlier JS specs and Chromium smoke runs show some screens render, but they predate this definition and did not go through the TUI, so they do not count. `test/ScreenReport.spec.js` writes a report of which screens those specs already reach (`./moq test SimpleScreens --spec ScreenReport -D mrss_screen_report=/tmp/mrss-report.md`); use it to choose where to start, not as a source of ticks.
+Nothing is ticked yet. The earlier JS specs and Chromium smoke runs show some screens render, but they predate this definition and did not go through the TUI, so they do not count. `test/ScreenReport.spec.js` writes a report of which screens those specs already reach (`./moq test mr-marble --spec ScreenReport -D mrss_screen_report=/tmp/mrss-report.md`); use it to choose where to start, not as a source of ticks.
 
 ### Process
 
 A full automated test suite is not a goal of this migration. Agents do the testing themselves, as part of changing a screen, and the screen is only as migrated as that testing showed. For each screen:
 
-1. Find what is left to convert: `moqui lint --groovy runtime/component/MrSimpleScreens` and `moqui lint --screens`, the screen's `.ftl`/XSL-FO companions, and `plans/ScreenMigrationTutorial.md`. Keep XML layout and Mantle service contracts; convert in a mechanical pass first and review its diff, then fix by hand (decimals, empty-collection truthiness, dates, copied service parameters).
+1. Find what is left to convert: `moqui lint --groovy runtime/component/mr-marble` and `moqui lint --screens`, the screen's `.ftl`/XSL-FO companions, and `plans/ScreenMigrationTutorial.md`. Keep XML layout and Mantle service contracts; convert in a mechanical pass first and review its diff, then fix by hand (decimals, empty-collection truthiness, dates, copied service parameters).
 2. Drive it in the TUI on a runtime with the demo and flow data loaded, as a user with the access the screen needs: `moqui tui --user john.doe --path /apps/SimpleScreens/<path>` (a dev instance only), or `--snapshot <path>` for one rendering and `--agent` for scripted commands (`docs/TUI.md`, For agents). Mount SimpleScreens as an app in the runtime you test in (it normally relies on an application such as MarbleERP or PopCommerce; its own configuration mounts only My Account), and keep any test-only grant out of component data.
 3. Exercise what the screen does, not only that it renders: fill and submit its forms, run its transitions and dialogs, try the empty and error cases, and compare results with the data the services should have changed. Fix what is wrong and repeat until it behaves.
 4. Tick Migrated for the screen, and note in the commit what was run and anything left over. Add a JS spec feature only where a regression guard is cheap, such as a screen with real fixture data or a bug that was easy to reintroduce; do not add one per screen.
@@ -69,7 +69,7 @@ Practical notes from the TUI passes (BasicHandheld, MyAccount):
 
 - `plans/ScreenMigrationTutorial.md` does not exist; use the other `plans/` documents and the screens already ticked as examples.
 - Use a scratch runtime in a short path under `/tmp` (the embedded Postgres socket path must stay under 108 bytes): a copy of `conf/MoquiDevConf.xml` with `ssh_port` 0, symlinks to the repository's `base-component` and each component, and a test-only component for mounts, grants and fixtures. Run `MOQUI_RUNTIME=<scratch> target/debug/moqui tui --agent --user john.doe --size 130x32` with the commands piped on stdin; a run boots in about 5 s and the database persists between runs. Keep test mounts, grants and fixtures out of committed component data, and delete the scratch runtime and throwaway specs when done. A non-admin user (the `worker` of WorkPlanToCashBasicFlow) needs a scratch ALL_USERS grant on the screens to be used; john.doe's ADMIN skips an old-password check, so test those as a plain user.
-- Make fixtures with a throwaway spec in the test-only component and `moqui test <thatcomponent> --keep`, then run the TUI on the kept runtime it leaves in `/tmp/mt-*`. `--spec` follows `dependsOn` only inside one component, so a SimpleScreens spec that depends on Mantle specs cannot be selected alone (the README example fails); copy the spec into the test-only component without its `dependsOn` and name the Mantle flow specs in `--spec`, or run the whole suite. In a repository runtime `MrSimpleScreens` sorts before `mr-mantle-usl`, so load order matters for the same reason.
+- Make fixtures with a throwaway spec in the test-only component and `moqui test <thatcomponent> --keep`, then run the TUI on the kept runtime it leaves in `/tmp/mt-*`. `--spec` follows `dependsOn` only inside one component, so a mr-marble spec that depends on Mantle specs cannot be selected alone (the README example fails); copy the spec into the test-only component without its `dependsOn` and name the Mantle flow specs in `--spec`, or run the whole suite. In a repository runtime `mr-marble` sorts before `mr-mantle`, so load order matters for the same reason.
 - `moqui load location=<file.xml>` loads a seed file (an `ArtifactAuthz` grant, a `ScreenScheduled` row) into the scratch database between runs; the Tools data screen (`/apps/tools/Entity/DataEdit/EntityDataFind?selectedEntity=...`) checks what a screen wrote.
 - The JavaScript templates under `runtime/base-component/framework/template/screen` are embedded with `include_str!`: rebuild (`cargo build -p moqui`) after editing them, and update the goldens (`UPDATE_GOLDEN=1 cargo test -p moqui-core --lib golden`, `UPDATE_GOLDEN=1 cargo test -p moqui-host --test tui_screens`) when a render changes. Component XML is read at run time and needs no rebuild.
 - After a failed form submit the form is dirty and the next `go` shows a "leave with unsaved changes" confirm: `do Discard`, or start a new session. A dialog or row editor takes a command to settle: `set`/`do` by element number (`set #3 ...`, `elements` lists them) is the reliable way to fill a dialog whose fields have no titles.
@@ -461,21 +461,21 @@ Validated rows are done later in a browser by the same method, with the print ou
 
 ## Evidence
 
-The first validation's logs were under `/tmp/mrss-*` and are gone. The 2026-10-23 run: `target/debug/moqui test mantle-usl SimpleScreens` (log `/tmp/mrss-now.log`, not retained), `moqui lint --groovy runtime/component/MrSimpleScreens` and `moqui lint --screens`. Reproduction commands and dependency requirements are in `test/README.md`.
+The first validation's logs were under `/tmp/mrss-*` and are gone. The 2026-10-23 run: `target/debug/moqui test mr-mantle mr-marble` (log `/tmp/mrss-now.log`, not retained), `moqui lint --groovy runtime/component/mr-marble` and `moqui lint --screens`. Reproduction commands and dependency requirements are in `test/README.md`.
 
 # Marble ERP
 
-Merged from the MrMarbleERP repository, as it was there.
+Merged from the mr-marble repository, as it was there.
 
-## MrMarbleERP migration — 2026-10-17
+## mr-marble migration — 2026-10-17
 
-MR-Moqui port of `moqui/MarbleERP` at `dfbea90`. Repository: https://github.com/moqui/MrMarbleERP (master); upstream remains https://github.com/moqui/MarbleERP. The component name stays **MarbleERP**, preserving component locations, authorization artifacts and `/apps/marble` mounting. `/qapps/marble` also works.
+MR-Moqui port of `moqui/MarbleERP` at `dfbea90`. Repository: https://github.com/moqui/mr-marble (master); upstream remains https://github.com/moqui/MarbleERP. The component name stayed **MarbleERP** until the 2026-10-25 merge into mr-marble, preserving component locations, authorization artifacts and `/apps/marble` mounting. `/qapps/marble` also works.
 
 ### Work performed
 
 1. Cloned upstream unchanged and pushed that history first. `MIGRATION-INVENTORY.md` freezes the original component lint: 3 XML files, 47 expression sites, 30 parse failures, 28 flagged sites. Whole-runtime screen lint initially had 29 parse failures. `linkCondition` data attributes are not covered by that lint, so they were inspected and tested separately.
-2. Used a disposable runtime under `/tmp` with base-component, mr-mantle-udm, mr-mantle-usl, MrSimpleScreens and this component. Built the current framework with `cargo build -p moqui`.
-3. The pristine load stopped at the Java-only `moqui-fop` dependency. Removing that dependency was necessary before the pre-conversion load could pass. Print content now comes from MrSimpleScreens' HTML-print replacements and MR-Moqui's Chromium PDF path, not FOP.
+2. Used a disposable runtime under `/tmp` with base-component, mr-mantle, mr-marble and this component. Built the current framework with `cargo build -p moqui`.
+3. The pristine load stopped at the Java-only `moqui-fop` dependency. Removing that dependency was necessary before the pre-conversion load could pass. Print content now comes from mr-marble's HTML-print replacements and MR-Moqui's Chromium PDF path, not FOP.
 4. Mechanical conversion rewrote 26 parameter maps and one data-link Elvis expression in two files. Parse failures fell from 30 to 3. Converter output is committed separately from the hand port.
 5. Hand ported `orgPartyRoles*.partyId` to `map`, the inline FreeMarker organization chooser to the fancy dialect, and the two stored party-link role conditions to JavaScript `some`. Replaced the chooser's jQuery/Bootstrap dropdown/tooltip with native `details` and DOM relocation. Organization names are HTML-escaped and IDs URL-encoded.
 6. Added `test/MarbleScreens.spec.js` and the dependency-free Chromium smoke `test/browser-smoke.mjs`.
@@ -496,7 +496,7 @@ Evidence from this run (local, not portable fixtures): `/tmp/mrmarble-final-test
 
 ### Required framework support
 
-Use the current MR-Moqui source and the ported MrSimpleScreens, not an older release binary or upstream SimpleScreens. This was validated with mantle-usl `14d327b`, mantle-udm `50be8e3`, and the in-progress MrSimpleScreens migration based on `2c1ba93` (its migration and supporting framework edits were already present locally).
+Use the current MR-Moqui source and the ported mr-marble, not an older release binary or upstream SimpleScreens. This was validated with mr-mantle `14d327b`, mr-mantle `50be8e3`, and the in-progress mr-marble migration based on `2c1ba93` (its migration and supporting framework edits were already present locally).
 
 Chromium found a framework gap that socketless/main-thread tests did not: an OrderDetail shipment include under the full Marble app shell exceeded a nested engine's 256 KiB script budget. Merely increasing the outer script budget did not fix it. Request workers now reserve an 8 MiB native stack, with a shared 4 MiB script budget that nested request engines may use from the remaining allowance. Non-request/service worker budgets are unchanged; minimum remaining stack and script-depth guards remain. A unit regression verifies that request script recursion fails with a script error rather than overflowing the worker. The full suite and authenticated browser smoke were rerun after this fix. See `plans/MarbleERPMigration.md` in MR-Moqui.
 

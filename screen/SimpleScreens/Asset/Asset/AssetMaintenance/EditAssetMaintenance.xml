@@ -93,8 +93,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
             </form-single>
         </row-col><row-col lg="6">
-            <section-include name="StatusChangeSection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
-            <section-include name="StatusHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusChangeSection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
 
             <container-box><box-header title="Attachments"/><box-toolbar>
                 <container-dialog id="NewContentDialog" button-text="Add Attachment">

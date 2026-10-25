@@ -19,11 +19,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <subscreens default-item="FindMessage">
         <subscreens-item name="FindMessage" menu-include="false"
-                         location="component://SimpleScreens/screen/MyAccount/User/Messages/FindMessage.xml"/>
+                         location="component://mr-marble/screen/MyAccount/User/Messages/FindMessage.xml"/>
         <subscreens-item name="EditMessage" menu-title="Message" menu-index="1"
-                         location="component://SimpleScreens/screen/MyAccount/User/Messages/EditMessage.xml"/>
+                         location="component://mr-marble/screen/MyAccount/User/Messages/EditMessage.xml"/>
         <subscreens-item name="MessageThread" menu-title="Thread" menu-index="2"
-                         location="component://SimpleScreens/screen/MyAccount/User/Messages/MessageThread.xml"/>
+                         location="component://mr-marble/screen/MyAccount/User/Messages/MessageThread.xml"/>
     </subscreens>
 
     <widgets>

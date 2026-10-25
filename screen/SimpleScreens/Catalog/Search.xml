@@ -20,8 +20,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="findProduct"><default-response url="."/></transition>
     <transition name="editProduct"><default-response url="../Product/EditProduct"/></transition>
 
-    <transition-include name="getFeatureList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getCategoryList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getFeatureList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getCategoryList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <transition name="addProductCategory"><service-call name="mantle.product.ProductServices.add#ProductsToCategory"/>
         <default-response url="."/></transition>

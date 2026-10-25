@@ -1,14 +1,14 @@
-# SimpleScreens migration tests
+# mr-marble migration tests
 
-Run from the MR-Moqui repository root with a current build and a runtime containing the Mantle forks and this component. The component name is still `SimpleScreens`.
+Run from the MR-Moqui repository root with a current build and a runtime containing the Mantle forks and this component. The component name is `mr-marble` (Simple Screens and Marble ERP).
 
 ```sh
 cargo build -p moqui
 # Full Mantle + SimpleScreens suite; default database mode is a fresh disposable fixture.
-target/debug/moqui test mantle-usl SimpleScreens --keep --junit /tmp/mrss-junit
+target/debug/moqui test mr-mantle mr-marble --keep --junit /tmp/mrss-junit
 
 # Two screen specs plus their eight prerequisite Mantle flow specs:
-target/debug/moqui test mantle-usl SimpleScreens \
+target/debug/moqui test mr-mantle mr-marble \
   --spec MyAccountScreens,SimpleScreensRender --keep --junit /tmp/mrss-screen-junit
 ```
 
@@ -43,13 +43,13 @@ One discovery feature visits many screens; feature count is not unique-screen co
 `test/client/suite.js` declares, runs the specs against it and stops it:
 
 ```sh
-moqui test-client SimpleScreens --serve
-moqui test-client SimpleScreens --serve --spec FindScreens --param screen=Survey/FindSurvey
-moqui test-client SimpleScreens --serve --spec FindScreens --param screen=Order/FindOrder --headed
-./moq test-client SimpleScreens --serve                 # the same through moq, building first
+moqui test-client mr-marble --serve
+moqui test-client mr-marble --serve --spec FindScreens --param screen=Survey/FindSurvey
+moqui test-client mr-marble --serve --spec FindScreens --param screen=Order/FindOrder --headed
+./moq test-client mr-marble --serve                 # the same through moq, building first
 ```
 
-The server is a child `moqui test mantle-usl SimpleScreens --spec SimpleScreensRender,ClientAccess --db snapshot
+The server is a child `moqui test mr-mantle mr-marble --spec SimpleScreensRender,ClientAccess --db snapshot
 --serve` on a scratch runtime: SimpleScreensRender's eight Mantle flows supply the orders, invoices and payments, and
 `ClientAccess.spec.js` makes the **test-only** grant that lets john.doe's ADMIN group use the app (SimpleScreens
 normally relies on the application that mounts it; ADMIN alone gets 403). `test/MoquiConf.xml` mounts the app at
@@ -57,7 +57,7 @@ normally relies on the application that mounts it; ADMIN alone gets 403). `test/
 component's `MoquiConf.xml`, so no real database or server gets them. The server's output goes to `server-<n>.log` in
 the output directory.
 
-Against a server of your own with disposable flow data, the mount and the grant (`moqui test SimpleScreens --spec
+Against a server of your own with disposable flow data, the mount and the grant (`moqui test mr-marble --spec
 ClientAccess --db existing` on **that** server's database only), pass `--server http://127.0.0.1:18081` instead of
 `--serve`. `--param user=` and `--param password=` (or `MOQUI_TEST_USER`, `MOQUI_TEST_PASSWORD`) override the demo
 credentials. Do not reuse demo credentials or the test grant for production.
@@ -94,11 +94,11 @@ the two OrgInternal `econdition ignore` expressions from `FindOrder.xml` and eva
 `orderType` values, against Java's case-insensitive sales/purchase behavior, including Any/empty values:
 
 ```sh
-./moq test SimpleScreens --spec OrderRoleFilters
+./moq test mr-marble --spec OrderRoleFilters
 ```
 
 ```sh
-target/debug/moqui lint --groovy runtime/component/MrSimpleScreens
+target/debug/moqui lint --groovy runtime/component/mr-marble
 target/debug/moqui lint --screens /tmp/mrss-screen-lint.txt
 cargo test -p moqui-core --lib
 cargo test -p moqui-lib barcode
@@ -111,7 +111,7 @@ Host result: **939 passed, 0 failed, 1 ignored**; includes 18 print tests and ne
 ## Screen report
 
 ```sh
-./moq test SimpleScreens --spec ScreenReport -D mrss_screen_report=/tmp/mrss-report.md
+./moq test mr-marble --spec ScreenReport -D mrss_screen_report=/tmp/mrss-report.md
 ```
 
 `ScreenReport.spec.js` (was `screen-report.py`) lists every screen with whether the discovery render (the
@@ -121,7 +121,7 @@ work; the Migrated/Validated checklist in `../MIGRATION-STATUS.md` is ticked by 
 
 ## Marble ERP tests
 
-Use MR-Moqui, mr-mantle-udm, mr-mantle-usl and the migrated MrSimpleScreens. Names in `component.xml`, not checkout directory names, select components for `moqui test`.
+Use MR-Moqui, mr-mantle and the migrated mr-marble. Names in `component.xml`, not checkout directory names, select components for `moqui test`.
 
 From the MR-Moqui root:
 
@@ -131,7 +131,7 @@ R=$(mktemp -d /tmp/mrmarble-XXXXXX)
 mkdir -p "$R/component"
 cp -r runtime/conf "$R/conf"
 ln -s "$PWD/runtime/base-component" "$R/base-component"
-for c in mantle-udm mantle-usl MrSimpleScreens MrMarbleERP; do
+for c in mr-mantle mr-marble; do
     ln -s "$PWD/runtime/component/$c" "$R/component/$c"
 done
 
@@ -139,21 +139,21 @@ done
 MOQUI_RUNTIME="$R" target/debug/moqui load types=all
 
 # Tests create their own fresh disposable database, not the load database above.
-MOQUI_RUNTIME="$R" target/debug/moqui test mantle-usl SimpleScreens MarbleERP \
+MOQUI_RUNTIME="$R" target/debug/moqui test mr-mantle mr-marble \
     --keep --junit /tmp/mrmarble-junit
 
 # Faster: Marble and its eight prerequisite Mantle flow specs:
-MOQUI_RUNTIME="$R" target/debug/moqui test mantle-usl MarbleERP \
+MOQUI_RUNTIME="$R" target/debug/moqui test mr-mantle mr-marble \
     --spec MarbleScreens --keep --junit /tmp/mrmarble-screen-junit
 
-MOQUI_RUNTIME="$R" target/debug/moqui lint --groovy runtime/component/MrMarbleERP
+MOQUI_RUNTIME="$R" target/debug/moqui lint --groovy runtime/component/mr-marble
 MOQUI_RUNTIME="$R" target/debug/moqui lint --screens /tmp/mrmarble-screen-lint.txt
-python3 -I scripts/screen-port-scan.py runtime/component/MrMarbleERP/screen
-find runtime/component/MrMarbleERP -name '*.xml' -print0 | xargs -0 xmllint --noout
+python3 -I scripts/screen-port-scan.py runtime/component/mr-marble/screen
+find runtime/component/mr-marble -name '*.xml' -print0 | xargs -0 xmllint --noout
 cargo test -p moqui-core --lib
 ```
 
-Both `mantle-usl` and `MarbleERP` must be selected for cross-component test dependencies. The fixture flows create orders 55400/55401, invoice/payment 55400 and other data asserted by the screens. Tests restore the user's original active-organization preference. Discovery excludes wiki-specific pages and SalesSummary, which has its own populated date-bounded check.
+Both `mr-mantle` and `mr-marble` must be selected for cross-component test dependencies. The fixture flows create orders 55400/55401, invoice/payment 55400 and other data asserted by the screens. Tests restore the user's original active-organization preference. Discovery excludes wiki-specific pages and SalesSummary, which has its own populated date-bounded check.
 
 ### Authenticated browser smoke
 
@@ -167,7 +167,7 @@ MOQUI_RUNTIME=/tmp/mt-... target/debug/moqui --port 18082 --https-port off \
 # Once the server reports it is listening (Node 22+ and Chromium):
 MRMARBLE_BASE_URL=http://127.0.0.1:18082 \
 MRMARBLE_CHROMIUM=/usr/bin/chromium MRMARBLE_OUTPUT_DIR=/tmp \
-    node runtime/component/MrMarbleERP/test/browser-smoke.mjs
+    node runtime/component/mr-marble/test/browser-smoke.mjs
 pdftotext /tmp/mrmarble-order.pdf -
 ```
 

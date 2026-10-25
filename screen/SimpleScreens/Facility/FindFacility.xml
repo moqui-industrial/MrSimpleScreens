@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="createFacility"><service-call name="create#mantle.facility.Facility"/>
         <default-response url="../EditFacility"/></transition>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <actions>
         <entity-find entity-name="mantle.facility.Facility" list="facilityList">

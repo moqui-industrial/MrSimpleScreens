@@ -66,17 +66,17 @@ along with this software (see the LICENSE.md file). If not, see
         <div class="check-page" style="position:relative;width:8.5in;height:11in;break-after:page;font-family:Helvetica,sans-serif;font-size:${fontSize}">
                 <#-- Top Area -->
                 <div style="position:absolute;top:0;left:0;width:8.5in;height:${topHeight}in">
-                    <#if checkPosition == "top">${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
+                    <#if checkPosition == "top">${raw(ec.resource.template("component://mr-marble/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://mr-marble/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
                 </div>
 
                 <#-- Middle Area -->
                 <div style="position:absolute;top:${topHeight}in;left:0;width:8.5in;height:${middleHeight}in;overflow:hidden;<#if stubLines>border:thin solid black</#if>">
-                    <#if checkPosition == "middle">${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
+                    <#if checkPosition == "middle">${raw(ec.resource.template("component://mr-marble/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://mr-marble/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
                 </div>
 
                 <#-- Bottom Area -->
                 <div style="position:absolute;top:${Number(topHeight)+Number(middleHeight)}in;left:0;width:8.5in;height:${bottomHeight}in;overflow:hidden">
-                    <#if checkPosition == "bottom">${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://SimpleScreens/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
+                    <#if checkPosition == "bottom">${raw(ec.resource.template("component://mr-marble/template/account/PaymentCheck-checkBody.html.fancy", {paymentInfo: paymentInfo}))}<#else>${raw(ec.resource.template("component://mr-marble/template/account/PaymentCheck-stubBody.html.fancy", {paymentInfo: paymentInfo}))}</#if>
                 </div>
             </div>
         </#list>

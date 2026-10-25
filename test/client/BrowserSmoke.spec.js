@@ -3,7 +3,7 @@
 // problems (uncaught exceptions, console errors, failed responses, render errors) fail each row. The PDF and a
 // screenshot of PrintOrder go to the output directory; reading the PDF's text (pdftotext) was a manual step and is
 // not ported.
-// Run: moqui test-client SimpleScreens --serve --spec BrowserSmoke
+// Run: moqui test-client mr-marble --serve --spec BrowserSmoke
 const user = params.user ?? "john.doe"
 const password = params.password ?? "moqui"
 

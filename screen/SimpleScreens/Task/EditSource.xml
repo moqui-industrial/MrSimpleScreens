@@ -12,7 +12,7 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<!-- The commits, branches and tags of a task: linked by hand here, or by the conventions of mantle-usl's
+<!-- The commits, branches and tags of a task: linked by hand here, or by the conventions of mr-mantle's
     Work.gitecas.xml (a task ID in a commit message, a Task trailer, a branch or tag named for the task) in the
     repositories of the task's project. New screen, no SimpleScreens original. -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -35,7 +35,7 @@ along with this software (see the LICENSE.md file). If not, see
 <#assign dateTimeFormat = (dateTimeFormat ?? "yyyy-MM-dd HH:mm")>
 
 
-${raw(ec.resource.template("component://SimpleScreens/template/shipment/ShipmentLoadPick-shipmentLoadPickPageSequence.html.fancy", {}))}
+${raw(ec.resource.template("component://mr-marble/template/shipment/ShipmentLoadPick-shipmentLoadPickPageSequence.html.fancy", {}))}
 
 
 

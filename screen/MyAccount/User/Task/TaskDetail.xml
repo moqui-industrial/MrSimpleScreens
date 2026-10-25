@@ -31,7 +31,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createNote"><service-call name="create#mantle.work.effort.WorkEffortNote"/><default-response url="."/></transition>
     <transition name="updateNote"><service-call name="update#mantle.work.effort.WorkEffortNote"/><default-response url="."/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
     <transition name="addAssignment"><service-call name="create#mantle.work.effort.WorkEffortParty"/><default-response url="."/></transition>
     <transition name="updateAssignment"><service-call name="update#mantle.work.effort.WorkEffortParty"/><default-response url="."/></transition>
     <!-- <transition name="editParty"><default-response url="."/></transition> -->
@@ -95,9 +95,9 @@ along with this software (see the LICENSE.md file). If not, see
                 </form-single>
             </box-body></container-box>
         </row-col><row-col lg="6">
-            <section-include name="StatusChangeAndHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
-            <section-include name="NotesSection" location="component://SimpleScreens/screen/MyAccount/User/Calendar/EventDetail.xml"/>
-            <section-include name="PartiesSection" location="component://SimpleScreens/screen/MyAccount/User/Calendar/EventDetail.xml"/>
+            <section-include name="StatusChangeAndHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
+            <section-include name="NotesSection" location="component://mr-marble/screen/MyAccount/User/Calendar/EventDetail.xml"/>
+            <section-include name="PartiesSection" location="component://mr-marble/screen/MyAccount/User/Calendar/EventDetail.xml"/>
         </row-col></container-row>
     </widgets>
 </screen>

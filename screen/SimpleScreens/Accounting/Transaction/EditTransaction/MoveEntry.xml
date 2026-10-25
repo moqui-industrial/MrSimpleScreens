@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="moveTransEntry"><service-call name="mantle.ledger.LedgerServices.move#AcctgTransEntry"/>
         <default-response url=".."/></transition>
-    <transition-include name="getGlAccountListPaginated" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
+    <transition-include name="getGlAccountListPaginated" location="component://mr-marble/template/account/AccountTransitions.xml"/>
 
     <actions>
         <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans" value-field="acctgTrans"/>

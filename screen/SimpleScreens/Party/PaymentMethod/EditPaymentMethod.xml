@@ -30,8 +30,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="removePaymentMethod"><service-call name="mantle.account.PaymentMethodServices.delete#PaymentMethod"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getGlAccountListPaginated" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
-    <transition-include name="getGeoCountryStates" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getGlAccountListPaginated" location="component://mr-marble/template/account/AccountTransitions.xml"/>
+    <transition-include name="getGeoCountryStates" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="createContent"><service-call name="mantle.account.PaymentMethodServices.create#PaymentMethodContent"/>
         <default-response url="."/></transition>
@@ -71,7 +71,7 @@ along with this software (see the LICENSE.md file). If not, see
                 parameter-map="{partyId:partyId, paymentMethodId:paymentMethodId}"/>
 
         <form-single name="PaymentMethodInfoForm" transition="storePaymentMethodInfo" map="methodInfoFlat"
-                extends="component://SimpleScreens/template/party/PartyForms.xml#PaymentMethodInfo"/>
+                extends="component://mr-marble/template/party/PartyForms.xml#PaymentMethodInfo"/>
 
         <section name="ContentSection"><actions>
             <entity-find entity-name="mantle.account.method.PaymentMethodContent" list="contentList">

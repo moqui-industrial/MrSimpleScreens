@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="reserveAssetForOrderItem"><service-call name="mantle.product.AssetServices.reserve#AssetForOrderItem"/>
         <default-response url=".."/></transition>
-    <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getAssetList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <actions>
         <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem"/>

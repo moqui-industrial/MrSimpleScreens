@@ -7,7 +7,7 @@
     <screen-facade>
         <screen location="component://webroot/screen/webroot/apps.xml">
             <subscreens-item name="SimpleScreens" menu-title="Simple Screens" menu-index="95"
-                    location="component://SimpleScreens/screen/SimpleScreens.xml"/>
+                    location="component://mr-marble/screen/SimpleScreens.xml"/>
         </screen>
     </screen-facade>
 </moqui-conf>

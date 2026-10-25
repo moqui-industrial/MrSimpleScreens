@@ -46,13 +46,13 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="addItemToPackage"><service-call name="mantle.shipment.ShipmentServices.add#ItemToPackage"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getAssetList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <subscreens>
-        <subscreens-item name="ReceiveItem" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentDetail/ReceiveItem.xml"/>
-        <subscreens-item name="UpdateItemAsset" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentDetail/UpdateItemAsset.xml"/>
-        <subscreens-item name="ItemReserve" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentDetail/ItemReserve.xml"/>
+        <subscreens-item name="ReceiveItem" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentDetail/ReceiveItem.xml"/>
+        <subscreens-item name="UpdateItemAsset" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentDetail/UpdateItemAsset.xml"/>
+        <subscreens-item name="ItemReserve" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentDetail/ItemReserve.xml"/>
     </subscreens>
     <actions>
         <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>

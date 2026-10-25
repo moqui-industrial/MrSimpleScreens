@@ -29,7 +29,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/>
     </transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <widgets>
         <container-dialog id="AddUserDialog" button-text="Add Party">

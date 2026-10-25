@@ -53,19 +53,19 @@ along with this software (see the LICENSE.md file). If not, see
             <label text=" for Asset, Facility, Invoice, Order, Return, Party, Badge, Payment, Product, Shipment, Work Effort (Project, Task, Picklist, Production Run), GL Transaction"/>
         </container>
 
-        <form-single name="SearchOptions" transition="." extends="component://SimpleScreens/screen/SimpleScreens/Search.xml#SearchOptions"/>
+        <form-single name="SearchOptions" transition="." extends="component://mr-marble/screen/SimpleScreens/Search.xml#SearchOptions"/>
 
-        <section-include name="AssetSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="FacilitySection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="InvoiceSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="OrderSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="ReturnSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="PartySection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="PaymentSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="ProductSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="ShipmentSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="WorkEffortSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
-        <section-include name="AcctgTransSection" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="AssetSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="FacilitySection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="InvoiceSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="OrderSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="ReturnSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="PartySection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="PaymentSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="ProductSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="ShipmentSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="WorkEffortSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
+        <section-include name="AcctgTransSection" location="component://mr-marble/screen/SimpleScreens/QuickLookup.xml"/>
 
         <!-- show messages, mainly for 'Invalid search...' message -->
         <section-iterate name="messageInfos" list="ec.message.messageInfos" entry="messageInfo"><widgets>
@@ -73,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
         </widgets></section-iterate>
 
         <container-box><box-header title="Search Results"/><box-body-nopad>
-            <form-list name="SearchResults" list="documentList" extends="component://SimpleScreens/screen/SimpleScreens/Search.xml#SearchResults"/>
+            <form-list name="SearchResults" list="documentList" extends="component://mr-marble/screen/SimpleScreens/Search.xml#SearchResults"/>
             <label text="Full search string: ${queryString||''}" type="p"/>
             <link url="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax"
                     url-type="plain" link-type="anchor" target-window="_blank" text="Search String Reference"/>

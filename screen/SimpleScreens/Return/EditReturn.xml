@@ -156,7 +156,7 @@ along with this software (see the LICENSE.md file). If not, see
                     confirmation="Approve this return?"/>
             <link url="cancelReturn" condition="['ReturnCreated', 'ReturnRequested', 'ReturnApproved'].includes(returnHeader.statusId)" text="Cancel"
                     confirmation="Are you sure you want to cancel this return?"/>
-            <section-include name="StatusHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
         </row-col></container-row>
     </widgets>
 </screen>

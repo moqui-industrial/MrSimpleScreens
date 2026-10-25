@@ -84,7 +84,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
             </form-single>
         </container><container style="col-lg-6">
-            <section-include name="StatusChangeAndHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusChangeAndHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
 
             <section name="CommunicationEventPurposeSection"><actions>
                 <entity-find entity-name="mantle.party.communication.CommunicationEventPurpose" list="purposeList">

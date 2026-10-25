@@ -25,7 +25,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="deleteStoreCategory"><service-call name="delete#mantle.product.store.ProductStoreCategory"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getCategoryList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getCategoryList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <widgets>
         <container-dialog id="NewStoreCategoryDialog" button-text="Add Store Category">

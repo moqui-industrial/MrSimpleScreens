@@ -26,7 +26,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="removeCategory"><service-call name="delete#moqui.resource.wiki.WikiBlogCategory"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getSpacePages" location="component://SimpleScreens/screen/SimpleScreens/Wiki/wiki.xml"/>
+    <transition-include name="getSpacePages" location="component://mr-marble/screen/SimpleScreens/Wiki/wiki.xml"/>
     <transition name="downloadSmallImage" read-only="true">
         <actions>
             <entity-find-one entity-name="moqui.resource.wiki.WikiBlog" value-field="wikiBlog"/>

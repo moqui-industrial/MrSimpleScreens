@@ -16,7 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Suppliers" default-menu-index="11" menu-image="/ssstatic/images/Supplier.png">
 
     <subscreens default-item="FindSupplier">
-        <subscreens-item name="FinancialInfo" location="component://SimpleScreens/screen/SimpleScreens/Party/FinancialInfo.xml" menu-index="11"/>
+        <subscreens-item name="FinancialInfo" location="component://mr-marble/screen/SimpleScreens/Party/FinancialInfo.xml" menu-index="11"/>
     </subscreens>
 
     <pre-actions><set field="roleTypeId" value="Supplier"/></pre-actions>

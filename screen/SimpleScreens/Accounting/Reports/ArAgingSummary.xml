@@ -18,7 +18,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="findInvoice"><default-response url="../../Invoice/FindInvoice"/></transition>
     <transition name="findPayment"><default-response url="../../Payment/FindPayment"/></transition>
     <transition name="editParty"><default-response url="//${appRoot}/Party/EditParty"/></transition>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <actions>
         <set field="pageNoLimit" value="true"/>

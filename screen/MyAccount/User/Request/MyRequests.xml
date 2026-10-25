@@ -67,7 +67,7 @@ along with this software (see the LICENSE.md file). If not, see
         </container-dialog>
 
         <form-list name="ListRequests" list="requestList" skip-form="true" header-dialog="true"
-                extends="component://SimpleScreens/screen/SimpleScreens/Request/FindRequest.xml#ListRequests">
+                extends="component://mr-marble/screen/SimpleScreens/Request/FindRequest.xml#ListRequests">
             <entity-find entity-name="mantle.request.RequestAndParty" list="requestList" distinct="true">
                 <search-form-inputs default-order-by="priority,requestDate" skip-fields="partyId">
                     <default-parameters statusId="ReqDraft,ReqSubmitted,ReqReviewed,ReqInProgress" statusId_op="in"/></search-form-inputs>

@@ -17,7 +17,7 @@
 // the panels show), and the four charts of SalesSummaryCharts.html.fancy as the client's `chart` component (a table of the
 // datasets with a bar for the first series). Each returns an array of nodes for `JSON.stringify` in a `tui` text.
 //
-//     const salesTui = ec.resource.script('component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryTui.js')
+//     const salesTui = ec.resource.script('component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesSummaryTui.js')
 //     salesSummaryTui = salesTui.statsNodes(); salesSummaryChartsTui = salesTui.chartNodes()
 
 const dec = (value) => toDecimal(value ?? 0)

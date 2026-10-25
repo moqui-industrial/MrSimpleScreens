@@ -2,7 +2,7 @@
 // search, taken from the screen file and evaluated in the real engine (ec.resource.condition, as the entity-find's
 // econdition ignore is) for each orderType. Java's !'sales'.equalsIgnoreCase(orderType) ignores the vendor constraint
 // except for sales orders; !'purchase'.equalsIgnoreCase(orderType) does the converse, including for Any and empty.
-// Run: ./moq test SimpleScreens --spec OrderRoleFilters
+// Run: ./moq test mr-marble --spec OrderRoleFilters
 const ORDER_TYPES = [undefined, null, "", "Any", "Sales", "SALES", "sales", "Purchase", "PURCHASE", "purchase"]
 const FILTERS = [["vendorRoleTypeId", "sales"], ["customerRoleTypeId", "purchase"]]
 
@@ -10,7 +10,7 @@ let xml
 
 spec({
     setupSpec() {
-        xml = String(ec.resource.getLocationText("component://SimpleScreens/screen/SimpleScreens/Order/FindOrder.xml") || "")
+        xml = String(ec.resource.getLocationText("component://mr-marble/screen/SimpleScreens/Order/FindOrder.xml") || "")
     },
 })
 

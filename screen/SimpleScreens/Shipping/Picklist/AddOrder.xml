@@ -29,9 +29,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="addOrderPartToLoad"><service-call name="mantle.work.ShipmentWorkServices.add#OrderPartToShipmentLoad"/>
         <default-response url="../PicklistDetail"/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getFacilityList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getFacilityList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
 
     <actions>
         <set field="excludeOnPicklist" from="excludeOnPicklist || 'true'"/>
@@ -56,7 +56,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <form-list name="AddOrderList" list="orderList" transition="addOrderPartToLoad" multi="true"
                 header-dialog="true" select-columns="true" saved-finds="true">
-            <!-- NOTE: see similar entity-find in ShipmentWorkServices.create#ShipmentLoadsForOrders in mantle-usl -->
+            <!-- NOTE: see similar entity-find in ShipmentWorkServices.create#ShipmentLoadsForOrders in mr-mantle -->
             <entity-find entity-name="mantle.order.OrderPartFindView" list="orderList" use-clone="true">
                 <search-form-inputs default-order-by="shipmentMethodSequenceNum,placedDate,orderId,orderPartSeqId"
                         skip-fields="vendorRoleTypeId,customerRoleTypeId,customerClassificationId,itemTypeEnumId,orderType,partStatusId,facilityId,workEffortId"/>

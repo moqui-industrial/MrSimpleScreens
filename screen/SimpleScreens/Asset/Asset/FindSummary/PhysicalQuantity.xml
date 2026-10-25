@@ -26,8 +26,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="recordQuantity"><service-call name="mantle.product.AssetServices.record#PhysicalInventoryQuantity"/>
         <default-response type="screen-last"/></transition>
 
-    <transition-include name="getAssetPoolList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <!-- <transition-include name="getLotList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/> -->
+    <transition-include name="getAssetPoolList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <!-- <transition-include name="getLotList" location="component://mr-marble/template/product/ProductTransitions.xml"/> -->
 
     <actions>
         <entity-find-one entity-name="mantle.facility.Facility" value-field="facility"/>

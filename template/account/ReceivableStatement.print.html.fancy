@@ -193,7 +193,7 @@ along with this software (see the LICENSE.md file). If not, see
 
 <#-- The XSL-FO region-after: a margin box of the statement's page, so it prints at the foot of every page. The pages
      number through every statement in the render. -->
-<#assign footerContact = ec.resource.template("component://SimpleScreens/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>
+<#assign footerContact = ec.resource.template("component://mr-marble/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>
 <style>@page mrss-ReceivableStatement { @bottom-center { content: ${cssString((footerContact ? footerContact + "\n" : "") + "Statement -- " + ec.l10n.format(asOfTimestamp, dateFormat) + " -- Page ")} counter(page) " of " counter(pages);
     white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>

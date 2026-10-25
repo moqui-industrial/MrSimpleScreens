@@ -36,9 +36,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createContact"><service-call name="mantle.sales.AccountServices.create#Contact"/>
         <default-response url="../EditParty"/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getGeoCountryStates" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getPartyClassificationList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getGeoCountryStates" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getPartyClassificationList" location="component://mr-marble/template/party/PartyTransitions.xml"/>
 
     <actions>
         <service-call name="mantle.party.PartyServices.search#Party" in-map="context" out-map="context"/>

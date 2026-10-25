@@ -92,7 +92,7 @@ along with this software (see the LICENSE.md file). If not, see
         </container-dialog>
 
         <render-mode>
-            <text type="tui" location="component://SimpleScreens/screen/MyAccount/User/Calendar/MyCalendar.tui.json" template="false"/>
+            <text type="tui" location="component://mr-marble/screen/MyAccount/User/Calendar/MyCalendar.tui.json" template="false"/>
             <text type="html,vuet,qvt"><![CDATA[
                 <mr-calendar lang="${ec.user.locale.toString().replace('_', '-')}"
                     data-events-url="/rest/s1/mantle/workEfforts/calendar/events" data-tasks-url="/rest/s1/mantle/workEfforts/calendar/tasks"

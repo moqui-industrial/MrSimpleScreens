@@ -29,10 +29,10 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="deleteInvoiceItem"><service-call name="mantle.account.InvoiceServices.delete#InvoiceItem"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getGlAccountListPaginated" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
-    <transition-include name="getItemTypeGlAccount" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getAssetList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getGlAccountListPaginated" location="component://mr-marble/template/account/AccountTransitions.xml"/>
+    <transition-include name="getItemTypeGlAccount" location="component://mr-marble/template/account/AccountTransitions.xml"/>
 
     <actions>
         <service-call name="mantle.account.InvoiceServices.get#InvoiceBasicInfo" out-map="context"

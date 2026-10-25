@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="adjustFinancialAccount"><service-call name="mantle.account.FinancialAccountServices.adjust#FinancialAccount"/>
         <default-response url="."/></transition>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <pre-actions>
         <if condition="!finAccountId &amp;&amp; finAccountTransId">

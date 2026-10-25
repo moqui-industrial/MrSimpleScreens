@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="storeContactInfo"><service-call name="mantle.party.ContactServices.store#PartyContactInfo"/>
         <default-response url="."/></transition>
-    <transition-include name="getGeoCountryStates" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getGeoCountryStates" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="addPartyRole"><service-call name="create#mantle.party.PartyRole"/>
         <default-response url="."/></transition>
@@ -106,11 +106,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <label text="Where payments are sent (Accounts Receivable)" type="p"/>
                 <container-dialog id="PaymentInfoEdit" button-text="Edit Payment Info" width="800">
                     <form-single name="PaymentInfo" transition="storeContactInfo" map="paymentInfoFlat"
-                            extends="component://SimpleScreens/template/party/PartyForms.xml#ContactInfo"/>
+                            extends="component://mr-marble/template/party/PartyForms.xml#ContactInfo"/>
                 </container-dialog>
                 <section name="PaymentContactInfo">
                     <actions><set field="contactInfo" from="paymentContactInfo"/></actions>
-                    <widgets><render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode></widgets>
+                    <widgets><render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode></widgets>
                 </section>
 
                 <form-single name="SetVendorRepForm" transition="setVendorRep">
@@ -129,11 +129,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <label text="Where invoices are sent (Accounts Payable)" type="p"/>
                 <container-dialog id="BillingInfoEdit" button-text="Edit Billing Info" width="800">
                     <form-single name="BillingInfo" transition="storeContactInfo" map="billingInfoFlat"
-                            extends="component://SimpleScreens/template/party/PartyForms.xml#ContactInfo"/>
+                            extends="component://mr-marble/template/party/PartyForms.xml#ContactInfo"/>
                 </container-dialog>
                 <section name="BillingContactInfo">
                     <actions><set field="contactInfo" from="billingContactInfo"/></actions>
-                    <widgets><render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode></widgets>
+                    <widgets><render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode></widgets>
                 </section>
             </panel-left>
             <panel-center>

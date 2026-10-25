@@ -113,7 +113,7 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="mantle.work.ProjectServices.get#ProjectMilestones" web-send-json-response="resultList"/>
         <default-response type="none"/>
     </transition>
-    <transition-include name="getTaskList" location="component://SimpleScreens/template/work/WorkTransitions.xml"/>
+    <transition-include name="getTaskList" location="component://mr-marble/template/work/WorkTransitions.xml"/>
 
     <transition name="clockInTimeEntry"><service-call name="mantle.work.TimeServices.create#TimeEntryClockIn"/>
         <default-response url="."/></transition>
@@ -351,7 +351,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <section name="ChildNestedComments">
                             <condition><expression>childCeList</expression></condition>
                             <actions><set field="currentCe" from="commEventDetail"/></actions>
-                            <widgets><include-screen location="component://SimpleScreens/screen/SimpleScreens/Task/TaskSummary/TaskCommentNested.xml"/></widgets>
+                            <widgets><include-screen location="component://mr-marble/screen/SimpleScreens/Task/TaskSummary/TaskCommentNested.xml"/></widgets>
                         </section>
                     </container>
                 </widgets></section-iterate>
@@ -393,7 +393,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <widgets>
                         <container-dialog id="NewChildTaskContainer" button-text="New Child Task">
                             <form-single name="NewChildTaskForm" transition="createTask"
-                                    extends="component://SimpleScreens/screen/SimpleScreens/Task/FindTask.xml#NewTaskForm">
+                                    extends="component://mr-marble/screen/SimpleScreens/Task/FindTask.xml#NewTaskForm">
                             </form-single>
                         </container-dialog>
                     </widgets>

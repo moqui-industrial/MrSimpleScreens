@@ -1,7 +1,7 @@
 // Port of screen-report.py: a Markdown report of every screen XML under screen/ and the testing that reaches it, for
 // the agent or reviewer choosing work. MIGRATION-STATUS.md keeps only the Migrated/Validated checklist, which a person
 // or agent ticks by hand. Ignored unless the property mrss_screen_report names the file to write:
-//     ./moq test SimpleScreens --spec ScreenReport -D mrss_screen_report=/tmp/mrss-report.md
+//     ./moq test mr-marble --spec ScreenReport -D mrss_screen_report=/tmp/mrss-report.md
 //
 // Columns: Discovery (one of the no-required-parameter paths SimpleScreensRender renders; "excluded" for a screen it
 // skips), Targeted (the path appears in the server specs; a text match, so it can over-credit a screen named inside a
@@ -11,7 +11,7 @@
 const OUT = System.getProperty("mrss_screen_report")
 // as SimpleScreensRender skips them
 const SKIP = ["wiki", "ViewWikiPage", "EditWikiPage", "WikiCommentNested", "WikiCommentReply", "SalesSummary"]
-const COMPONENT = "component://SimpleScreens"
+const COMPONENT = "component://mr-marble"
 
 // Every file under location, as paths relative to the component ("screen/SimpleScreens/Order/FindOrder.xml").
 const listFiles = (location, prefix, out) => {
@@ -31,7 +31,7 @@ spec({
     setupSpec() {
         if (!OUT) return
         login("john.doe")
-        screens = ec.screen.makeTest().rootScreen("component://SimpleScreens/screen/SimpleScreens.xml")
+        screens = ec.screen.makeTest().rootScreen("component://mr-marble/screen/SimpleScreens.xml")
     },
 })
 
@@ -61,7 +61,7 @@ feature("the screen report is written", {
         const count = (test) => rows.filter(test).length
         const summary = `${rows.length} screens; discovery ${count((r) => r[1] === "yes")}, targeted ${count((r) => r[2])}, ` +
             `either ${count((r) => r[1] === "yes" || r[2])}, smoke ${count((r) => r[3])}.`
-        const lines = ["# MrSimpleScreens screen report", "", summary, "",
+        const lines = ["# mr-marble screen report", "", summary, "",
             "| Screen | Discovery | Targeted | Smoke | Companion files |", "| --- | :-: | :-: | :-: | --- |",
             ...rows.map(([path, found, targeted, smoked, companions]) => `| \`${path}\` | ${found} | ${targeted} | ${smoked} | ${companions} |`)]
         const location = /^[a-z][a-z0-9+.-]*:/i.test(OUT) ? OUT : `file:${OUT}`
@@ -72,6 +72,6 @@ feature("the screen report is written", {
     then({ rows, discovery, written }) {
         discovery.size > 0
         rows.length > 0
-        written.startsWith("# MrSimpleScreens screen report")
+        written.startsWith("# mr-marble screen report")
     },
 })

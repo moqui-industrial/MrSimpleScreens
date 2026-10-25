@@ -27,7 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="updateAssetAssign"><service-call name="update#mantle.work.effort.WorkEffortAssetAssign"/><default-response url="."/></transition>
     <!-- <transition name="equipmentDetail"><default-response url="."/></transition> -->
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
     <transition name="addAssignment"><service-call name="create#mantle.work.effort.WorkEffortParty"/><default-response url="."/></transition>
     <transition name="updateAssignment"><service-call name="update#mantle.work.effort.WorkEffortParty"/><default-response url="."/></transition>
     <!-- <transition name="editParty"><default-response url="."/></transition> -->
@@ -84,7 +84,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </form-single>
             </box-body></container-box>
         </row-col><row-col lg="6">
-            <section-include name="StatusChangeAndHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusChangeAndHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
 
             <section name="NotesSection">
                 <actions>

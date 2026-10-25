@@ -129,14 +129,14 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="printShipmentLabels"><service-call name="mantle.shipment.ShipmentServices.print#ShipmentLabels"/>
         <default-response url="."/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getContainerList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getAssetList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getContainerList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
 
-    <transition-include name="getPackageWeight" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
-    <transition-include name="getShippingOptions" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
-    <transition-include name="getShipmentLabel" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
+    <transition-include name="getPackageWeight" location="component://mr-marble/template/shipment/ShipmentTransitions.xml"/>
+    <transition-include name="getShippingOptions" location="component://mr-marble/template/shipment/ShipmentTransitions.xml"/>
+    <transition-include name="getShipmentLabel" location="component://mr-marble/template/shipment/ShipmentTransitions.xml"/>
 
     <transition name="EmailMessage" read-only="true"><parameter name="emailMessageId"/><actions>
         <entity-find-one entity-name="moqui.basic.email.EmailMessage" value-field="emailMessage"/>
@@ -163,7 +163,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
 
     <subscreens>
-        <subscreens-item name="UpdateContactInfo" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty/UpdateContactInfo.xml"/>
+        <subscreens-item name="UpdateContactInfo" location="component://mr-marble/screen/SimpleScreens/Party/EditParty/UpdateContactInfo.xml"/>
     </subscreens>
     <actions>
         <set field="defaultItemLimit" from="ec.user.getPreference('shipment.detail.item.limit') || '10'"/>
@@ -301,14 +301,14 @@ along with this software (see the LICENSE.md file). If not, see
                 </fail-widgets></section>
             </widgets></section>
 
-            <section-include name="PackShipmentSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
-            <section-include name="ShipShipmentSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
-            <section-include name="DeliverShipmentSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
+            <section-include name="PackShipmentSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
+            <section-include name="ShipShipmentSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
+            <section-include name="DeliverShipmentSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
 
-            <section-include name="RequestLabelsSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
+            <section-include name="RequestLabelsSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
             <link url="trackShipmentLabels" text="Track Labels" condition="shippingGatewayConfigId &amp;&amp; hasAnyLabels"/>
-            <section-include name="PrintLabelsSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
-            <section-include name="QzPrintLabelsSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
+            <section-include name="PrintLabelsSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
+            <section-include name="QzPrintLabelsSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
 
             <section name="ShipPackedSection" condition="shipment.statusId == 'ShipPacked'"><widgets>
                 <section name="ShipPackedInSection" condition="isIncoming"><widgets>
@@ -409,7 +409,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <container type="dl" style="dl-horizontal">
                     <label text="Destination Address" type="dt"/>
                     <container type="dd">
-                        <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                        <render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode>
                         <dynamic-dialog id="UpdatePostalInfo" button-text="Update Address" transition="UpdateContactInfo" width="800"
                                 condition="allowUpdate || shipment.statusId == 'ShipPacked'"
                                 parameter-map="{partyId:toPartyId, postalContactMechId:contactInfo.postalContactMechId,
@@ -442,7 +442,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <container type="dl" style="dl-horizontal">
                     <label text="Origin Address" type="dt"/>
                     <container type="dd">
-                        <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                        <render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode>
                         <dynamic-dialog id="UpdatePostalInfoOrigin" button-text="Update Address" transition="UpdateContactInfo" width="800" condition="allowUpdate"
                                 parameter-map="{partyId:fromPartyId, postalContactMechId:contactInfo.postalContactMechId,
                                             postalContactMechPurposeId:contactInfo.postalContactMechPurposeId, shipmentId:shipmentId}"/>
@@ -630,7 +630,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <section name="ShippedShippingInfo" condition="curDestPaInfo"><actions><set field="contactInfo" from="curDestPaInfo"/></actions><widgets>
                             <label text="Destination" type="dt"/>
                             <container type="dd">
-                                <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                                <render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode>
                                 <container><label text="Trust: ${contactInfo.postalTrustLevelEnum?.description ?: 'New'}" type="strong"/></container>
                                 <label text="${contactInfo.postalContactMech.validateMessage?:''}" type="div"/>
                             </container>
@@ -715,7 +715,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </form-single>
             </widgets></section>
 
-            <section-include name="StatusHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
 
             <section name="CustomerNotesSection" condition="isOutgoing"><actions>
                 <entity-find entity-name="mantle.party.PartyNote" list="customerNoteList">
@@ -957,7 +957,7 @@ along with this software (see the LICENSE.md file). If not, see
                     condition="shipmentItemDetailList.length &gt; parseInt(pageSize, 10)"/>
             <link url="../ShipmentItems" text="See All ${shipmentItemDetailList.length} Items" btn-type="success"
                     condition="shipmentItemDetailList.length &gt; parseInt(pageSize, 10)"/>
-            <section-include name="ShipmentItemsSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
+            <section-include name="ShipmentItemsSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
         </box-body></container-box>
 
         <!-- Packages -->
@@ -971,7 +971,7 @@ along with this software (see the LICENSE.md file). If not, see
                         condition="shipmentPackageList.length &gt; parseInt(pageSize, 10)"/>
                 <link url="../ShipmentPackages" text="See All ${shipmentPackageList.length} Packages" btn-type="success"
                         condition="shipmentPackageList.length &gt; parseInt(pageSize, 10)"/>
-                <section-include name="PackageListSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
+                <section-include name="PackageListSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentPackages.xml"/>
             </box-body></container-box>
         </widgets></section>
     </widgets>

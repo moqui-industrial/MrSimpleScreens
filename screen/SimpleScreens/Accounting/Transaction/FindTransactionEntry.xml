@@ -25,9 +25,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="editProduct"><default-response url="//${appRoot}/Catalog/Product/EditProduct"/></transition>
     <transition name="editParty"><default-response url="//${appRoot}/Party/EditParty"/></transition>
 
-    <transition-include name="getGlAccountListPaginated" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getGlAccountListPaginated" location="component://mr-marble/template/account/AccountTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <transition-include name="emailScreenAsync" location="component://webroot/template/screen/BasicTransitions.xml"/>
 

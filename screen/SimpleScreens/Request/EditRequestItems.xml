@@ -26,8 +26,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createPurchaseOrder"><service-call name="mantle.order.OrderServices.create#PurchaseRequestOrder" in-map="context"/>
         <default-response url="."/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <actions>
         <entity-find entity-name="mantle.request.RequestItemOrder" list="requestItemOrderList" distinct="true">

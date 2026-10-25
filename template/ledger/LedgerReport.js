@@ -16,7 +16,7 @@
 // LedgerTable.html.fancy. The FreeMarker originals walked the class tree with recursive macros and added decimals with
 // operators; the fancy dialect has neither, so the table is data made here:
 //
-//     const ledger = ec.resource.script('component://SimpleScreens/template/ledger/LedgerReport.js')
+//     const ledger = ec.resource.script('component://mr-marble/template/ledger/LedgerReport.js')
 //     ledgerTable = ledger.table(ec.l10n.localize("Balance Sheet"), headers, rows)
 //
 // A row is {label, indent (em, or null), strong, rowClass, rowStyle, cells}; a cell is {text, href, pad, cls, italic}.

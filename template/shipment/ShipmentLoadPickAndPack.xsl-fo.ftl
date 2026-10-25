@@ -14,8 +14,8 @@ along with this software (see the LICENSE.md file). If not, see
 
 <#-- See the mantle.shipment.ShipmentServices.get#ShipmentPickPackInfo service for data preparation -->
 
-<#import "component://SimpleScreens/template/shipment/ShipmentLoadPick.xsl-fo.ftl" as loadPick>
-<#import "component://SimpleScreens/template/shipment/ShipmentPack.xsl-fo.ftl" as shipmentPack>
+<#import "component://mr-marble/template/shipment/ShipmentLoadPick.xsl-fo.ftl" as loadPick>
+<#import "component://mr-marble/template/shipment/ShipmentPack.xsl-fo.ftl" as shipmentPack>
 
 <#assign cellPadding = "1pt">
 <#assign dateFormat = dateFormat!"dd MMM yyyy">

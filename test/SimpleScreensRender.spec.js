@@ -11,7 +11,7 @@ spec({
     tempSequences: { start: 63100, banks: { "mantle.order.OrderHeader": 10, "mantle.work.effort.WorkEffort": 10 } },
     setupSpec() {
         login("john.doe")
-        screens = ec.screen.makeTest().rootScreen("component://SimpleScreens/screen/SimpleScreens.xml")
+        screens = ec.screen.makeTest().rootScreen("component://mr-marble/screen/SimpleScreens.xml")
     },
     cleanupSpec() {
         log.info(`Rendered ${screens.renderCount} screens (${screens.errorCount} errors) in ${(Date.now() - screens.startTime) / 1000}s, output ${Math.round(screens.renderTotalChars / 1000)}k chars`)

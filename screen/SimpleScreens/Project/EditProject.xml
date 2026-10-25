@@ -30,7 +30,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="editProject"><default-response url="."/></transition>
 
     <transition name="findTask"><default-response url="//${appRoot}/Task/FindTask"/></transition>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <pre-actions>
         <if condition="rootWorkEffortId"><set field="workEffortId" from="rootWorkEffortId"/></if>
@@ -55,7 +55,7 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="vendorWep" from="vendorWepList?.[0]"/>
     </actions>
     <widgets>
-        <section-include name="ActiveProjectSection" location="component://SimpleScreens/screen/SimpleScreens/Project/ProjectSummary.xml"/>
+        <section-include name="ActiveProjectSection" location="component://mr-marble/screen/SimpleScreens/Project/ProjectSummary.xml"/>
 
         <container-dialog id="CloneProjectDialog" button-text="Clone Project">
             <form-single name="CloneProject" transition="cloneProject">

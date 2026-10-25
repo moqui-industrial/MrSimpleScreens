@@ -22,8 +22,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="selectAsset"><default-response url="//${appRoot}/Asset/Asset/SelectAsset"/></transition>
     <transition name="editProduct"><default-response url="//${appRoot}/Catalog/Product/EditProduct"/></transition>
 
-    <transition-include name="getFacilityList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getFacilityList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <widgets>
         <form-list name="PickMoveList" list="pickMoveList" skip-form="true" header-dialog="true" select-columns="true" saved-finds="true"

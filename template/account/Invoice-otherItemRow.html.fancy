@@ -28,6 +28,6 @@
         <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency(toDecimal(invoiceItem.quantity ?? 1).multiply(invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>
     </tr>
     <#if has(childItemList)><#list childItemList as childItem>
-        ${raw(ec.resource.template("component://SimpleScreens/template/account/Invoice-otherItemRow.html.fancy", {invoiceItem: childItem, invoiceItemList: invoiceItemList, itemIndex: negOne}))}
+        ${raw(ec.resource.template("component://mr-marble/template/account/Invoice-otherItemRow.html.fancy", {invoiceItem: childItem, invoiceItemList: invoiceItemList, itemIndex: negOne}))}
     </#list></#if>
 

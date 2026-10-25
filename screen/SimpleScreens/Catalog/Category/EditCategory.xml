@@ -43,7 +43,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="deleteProductCategoryRollup"><service-call name="delete#mantle.product.category.ProductCategoryRollup"
             in-map="Object.assign({}, context, {productCategoryId:childProductCategoryId})"/><default-response url="."/></transition>
 
-    <transition-include name="getCategoryList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getCategoryList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <actions>
         <entity-find-one entity-name="mantle.product.category.ProductCategory" value-field="category" cache="false"/>

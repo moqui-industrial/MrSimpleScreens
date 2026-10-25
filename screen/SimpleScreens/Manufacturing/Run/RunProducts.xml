@@ -29,10 +29,10 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="receiveAsset"><service-call name="mantle.product.AssetServices.receive#Asset"/><default-response url="."/></transition>
 
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getProductAmount" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getAssetAvailableToPromiseTotal" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getProductAmount" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getAssetList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getAssetAvailableToPromiseTotal" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <actions>
         <service-call name="mantle.work.ManufacturingServices.get#ProductionRunDisplayInfo" in-map="context" out-map="context"/>
@@ -57,7 +57,7 @@ along with this software (see the LICENSE.md file). If not, see
             </container-dialog>
             <container-dialog id="ReceiveAssetDialog" button-text="Produce Asset">
                 <form-single name="ReceiveAssetForm" transition="receiveAsset"
-                        extends="component://SimpleScreens/screen/SimpleScreens/Manufacturing/Run/RunProduced.xml#ReceiveAssetForm">
+                        extends="component://mr-marble/screen/SimpleScreens/Manufacturing/Run/RunProduced.xml#ReceiveAssetForm">
                 </form-single>
             </container-dialog>
         </box-toolbar><box-body-nopad>
@@ -113,7 +113,7 @@ along with this software (see the LICENSE.md file). If not, see
             </container-dialog>
             <container-dialog id="IssueAssetDialog" button-text="Consume Asset">
                 <form-single name="IssueAssetForm" transition="issueAssetToWorkEffort"
-                        extends="component://SimpleScreens/screen/SimpleScreens/Manufacturing/Run/RunProducts/ConsumeAsset.xml#ConsumeAssetForm">
+                        extends="component://mr-marble/screen/SimpleScreens/Manufacturing/Run/RunProducts/ConsumeAsset.xml#ConsumeAssetForm">
                 </form-single>
             </container-dialog>
         </box-toolbar><box-body>

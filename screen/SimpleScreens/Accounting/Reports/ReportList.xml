@@ -23,9 +23,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="viewPostedAmountSummary"><default-response url="../PostedAmountSummary"/></transition>
     <transition name="viewPostedBalanceSummary"><default-response url="../PostedBalanceSummary"/></transition>
 
-    <transition-include name="getTimePeriodList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
-    <transition-include name="getGlAccountListPaginated" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getTimePeriodList" location="component://mr-marble/template/party/PartyTransitions.xml"/>
+    <transition-include name="getGlAccountListPaginated" location="component://mr-marble/template/account/AccountTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="receivableStatement">
         <default-response url="${ec.web.getWebappRootUrl(false, null)}/fop/apps/${appRoot}/Accounting/Invoice/ReceivableStatement" url-type="plain">
@@ -184,7 +184,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <container-dialog id="PostedAmountSummaryDialog" button-text="Posted Amount Summary">
                         <form-single name="PostedAmountSummaryForm" transition="viewPostedAmountSummary">
                             <field name="organizationPartyId"><default-field title="Organization">
-                                <widget-template-include location="component://SimpleScreens/template/party/PartyWidgetTemplates.xml#partyDropDownByRole">
+                                <widget-template-include location="component://mr-marble/template/party/PartyWidgetTemplates.xml#partyDropDownByRole">
                                     <set field="roleTypeId" value="OrgInternal"/></widget-template-include>
                             </default-field></field>
                             <field name="dateRange"><default-field><date-period allow-empty="false"/></default-field></field>
@@ -230,22 +230,22 @@ along with this software (see the LICENSE.md file). If not, see
             </box-body></container-box>
         </row-col></container-row>
 
-        <section-include name="SelectOrganization" location="component://SimpleScreens/template/account/LedgerCharts.xml"/>
+        <section-include name="SelectOrganization" location="component://mr-marble/template/account/LedgerCharts.xml"/>
 
         <container-row><row-col md="6">
-            <section-include name="OperatingRevenueExpenseChart" location="component://SimpleScreens/template/account/LedgerCharts.xml"/>
+            <section-include name="OperatingRevenueExpenseChart" location="component://mr-marble/template/account/LedgerCharts.xml"/>
         </row-col><row-col md="6">
-            <section-include name="CurrentAssetLiabilityChart" location="component://SimpleScreens/template/account/LedgerCharts.xml"/>
+            <section-include name="CurrentAssetLiabilityChart" location="component://mr-marble/template/account/LedgerCharts.xml"/>
         </row-col></container-row>
 
         <container-row><row-col md="6">
-            <section-include name="NetIncomeChart" location="component://SimpleScreens/template/account/LedgerCharts.xml"/>
+            <section-include name="NetIncomeChart" location="component://mr-marble/template/account/LedgerCharts.xml"/>
         </row-col><row-col md="6">
-            <section-include name="BalanceSheetChart" location="component://SimpleScreens/template/account/LedgerCharts.xml"/>
+            <section-include name="BalanceSheetChart" location="component://mr-marble/template/account/LedgerCharts.xml"/>
         </row-col></container-row>
 
         <container-row><row-col md="6">
-            <section-include name="NetIncomeYoyChart" location="component://SimpleScreens/template/account/LedgerCharts.xml"/>
+            <section-include name="NetIncomeYoyChart" location="component://mr-marble/template/account/LedgerCharts.xml"/>
         </row-col><row-col md="6">
         </row-col></container-row>
     </widgets>

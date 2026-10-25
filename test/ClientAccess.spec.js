@@ -1,9 +1,9 @@
-// Test-only access for the client specs (test/client, moqui test-client SimpleScreens): the demo user john.doe's
+// Test-only access for the client specs (test/client, moqui test-client mr-marble): the demo user john.doe's
 // ADMIN group may use the SimpleScreens app that test/MoquiConf.xml mounts at /apps/SimpleScreens. Its ADMIN
 // membership does not reach those screens: SimpleScreens normally relies on the application that mounts it for the
-// grant (PopcAdmin's), and its own artifact groups have none. moqui test-client SimpleScreens --serve runs this spec on
+// grant (PopcAdmin's), and its own artifact groups have none. moqui test-client mr-marble --serve runs this spec on
 // its server's scratch database (test/client/suite.js); for another server with disposable data run it there:
-//     moqui test SimpleScreens --spec ClientAccess --db existing
+//     moqui test mr-marble --spec ClientAccess --db existing
 // The rows are made only when they are missing. They are not data in data/, so no load of a real database reaches them.
 
 const one = (entity, fields) => {
@@ -25,7 +25,7 @@ spec({
             ensure("moqui.security.ArtifactGroup", { artifactGroupId: "MRSS_TEST_APP" },
                 { description: "SimpleScreens app at /apps/SimpleScreens (client tests only)" })
             ensure("moqui.security.ArtifactGroupMember",
-                { artifactGroupId: "MRSS_TEST_APP", artifactName: "component://SimpleScreens/screen/SimpleScreens.xml",
+                { artifactGroupId: "MRSS_TEST_APP", artifactName: "component://mr-marble/screen/SimpleScreens.xml",
                     artifactTypeEnumId: "AT_XML_SCREEN" },
                 { nameIsPattern: "N", inheritAuthz: "Y" })
             ensure("moqui.security.ArtifactAuthz", { artifactAuthzId: "MRSS_TEST_APP_ADMIN" },
@@ -42,7 +42,7 @@ feature("ADMIN, the group of john.doe, may use the SimpleScreens app", {
         try {
             return {
                 member: one("moqui.security.ArtifactGroupMember", { artifactGroupId: "MRSS_TEST_APP",
-                    artifactName: "component://SimpleScreens/screen/SimpleScreens.xml", artifactTypeEnumId: "AT_XML_SCREEN" }),
+                    artifactName: "component://mr-marble/screen/SimpleScreens.xml", artifactTypeEnumId: "AT_XML_SCREEN" }),
                 authz: one("moqui.security.ArtifactAuthz", { artifactAuthzId: "MRSS_TEST_APP_ADMIN" }),
                 admin: ec.entity.find("moqui.security.UserGroupMember").condition("userId", "EX_JOHN_DOE")
                     .condition("userGroupId", "ADMIN").count(),

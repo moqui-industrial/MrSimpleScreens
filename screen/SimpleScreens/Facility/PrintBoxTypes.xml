@@ -19,7 +19,7 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find entity-name="mantle.shipment.ShipmentBoxTypeDetail" list="boxTypeList"><order-by field-name="pseudoId"/></entity-find>
     </actions>
     <widgets>
-        <render-mode><text type="html-print" location="component://SimpleScreens/template/shipment/ShipmentBoxTypes.print.html.fancy"
+        <render-mode><text type="html-print" location="component://mr-marble/template/shipment/ShipmentBoxTypes.print.html.fancy"
                 template="true" encode="false" no-boundary-comment="true"/></render-mode>
     </widgets>
 </screen>

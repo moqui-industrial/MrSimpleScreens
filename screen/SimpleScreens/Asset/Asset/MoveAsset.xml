@@ -23,10 +23,10 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="editFacility"><default-response url="//${appRoot}/Facility/EditFacility"/></transition>
     <transition name="editContainer"><default-response url="//${appRoot}/Asset/Container/EditContainer"/></transition>
 
-    <transition-include name="getFacilityList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
-    <transition-include name="getLocationList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
-    <transition-include name="getContainerList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
-    <transition-include name="getAssetPoolList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="getFacilityList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="getLocationList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="getContainerList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="getAssetPoolList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <actions>
         <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset"/>

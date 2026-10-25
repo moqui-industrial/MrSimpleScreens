@@ -18,7 +18,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createBlog"><service-call name="org.moqui.impl.WikiServices.create#WikiBlog"/>
         <default-response url="../EditWikiBlog"/></transition>
 
-    <transition-include name="getSpacePages" location="component://SimpleScreens/screen/SimpleScreens/Wiki/wiki.xml"/>
+    <transition-include name="getSpacePages" location="component://mr-marble/screen/SimpleScreens/Wiki/wiki.xml"/>
 
     <widgets>
         <container-dialog id="AddBlogPageDialog" button-text="Add Blog Post from Page">

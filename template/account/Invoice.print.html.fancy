@@ -169,7 +169,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </tr></thead>
                     <tbody>
                         <#list topItemList as invoiceItem>
-                            <#if !(has(invoiceItem?.parentItemSeqId))>${raw(ec.resource.template("component://SimpleScreens/template/account/Invoice-productItemRow.html.fancy", {invoiceItem: invoiceItem, invoiceItemList: invoiceItemList, itemIndex: invoiceItem_index+1}))}</#if>
+                            <#if !(has(invoiceItem?.parentItemSeqId))>${raw(ec.resource.template("component://mr-marble/template/account/Invoice-productItemRow.html.fancy", {invoiceItem: invoiceItem, invoiceItemList: invoiceItemList, itemIndex: invoiceItem_index+1}))}</#if>
                         </#list>
                         <tr style="font-size:9pt;border-top:solid black">
                             <td style="padding:${cellPadding}"><div> </div></td>
@@ -195,7 +195,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </tr></thead>
                     <tbody>
                     <#list topItemList as invoiceItem>
-                        <#if !(has(invoiceItem?.parentItemSeqId))>${raw(ec.resource.template("component://SimpleScreens/template/account/Invoice-otherItemRow.html.fancy", {invoiceItem: invoiceItem, invoiceItemList: invoiceItemList, itemIndex: invoiceItem_index+1}))}</#if>
+                        <#if !(has(invoiceItem?.parentItemSeqId))>${raw(ec.resource.template("component://mr-marble/template/account/Invoice-otherItemRow.html.fancy", {invoiceItem: invoiceItem, invoiceItemList: invoiceItemList, itemIndex: invoiceItem_index+1}))}</#if>
                     </#list>
                         <tr style="font-size:9pt;border-top:solid black">
                             <td style="padding:${cellPadding}"><div> </div></td>
@@ -326,7 +326,7 @@ along with this software (see the LICENSE.md file). If not, see
         </div></td></tr></tbody></table>
     
 <#-- The XSL-FO region-after: a margin box of this document's page, so it prints at the foot of every page -->
-<#assign footerContact = ec.resource.template("component://SimpleScreens/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>
+<#assign footerContact = ec.resource.template("component://mr-marble/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>
 <style>@page mrss-Invoice { @bottom-center { content: ${cssString((footerContact ? footerContact + "\n" : "") + (fromParty?.organizationName ?? "") + (fromParty?.firstName ?? "") + " " + (fromParty?.lastName ?? "") + " Invoice #" + invoiceId + " -- " + ec.l10n.format(invoice.invoiceDate, dateFormat) + " -- Page ")} counter(page);
     white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>

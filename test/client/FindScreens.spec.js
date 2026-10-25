@@ -6,7 +6,7 @@
 // so this is a layout and framework smoke, not a check of rows. Page problems (uncaught exceptions, console errors,
 // responses of 400 and up, render errors, error notifications) fail each row. A screenshot of each goes to the output
 // directory, and a failure leaves its own.
-// Run: moqui test-client SimpleScreens --serve --spec FindScreens [--param screen=Order/FindOrder]
+// Run: moqui test-client mr-marble --serve --spec FindScreens [--param screen=Order/FindOrder]
 const user = params.user ?? "john.doe"
 const password = params.password ?? "moqui"
 const RENDER_ERRORS = /Error rendering|Exception in render|Internal Server Error|Maximum call stack|ReferenceError|TypeError/

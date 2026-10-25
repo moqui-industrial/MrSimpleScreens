@@ -9,7 +9,7 @@ spec({
     stepwise: true,
     setupSpec() {
         login("john.doe")
-        screens = ec.screen.makeTest().rootScreen("component://SimpleScreens/screen/SimpleScreens.xml")
+        screens = ec.screen.makeTest().rootScreen("component://mr-marble/screen/SimpleScreens.xml")
         my = screenTest("apps/my")
         tools = screenTest("apps/system")
     },

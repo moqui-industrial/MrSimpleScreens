@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createBudgetItem"><service-call name="create#mantle.other.budget.BudgetItem"/><default-response url="."/></transition>
     <transition name="updateBudgetItem"><service-call name="update#mantle.other.budget.BudgetItem"/><default-response url="."/></transition>
     <transition name="deleteBudgetItem"><service-call name="delete#mantle.other.budget.BudgetItem"/><default-response url="."/></transition>
-    <transition-include name="getGlAccountListPaginated" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
+    <transition-include name="getGlAccountListPaginated" location="component://mr-marble/template/account/AccountTransitions.xml"/>
 
     <actions>
         <entity-find-one entity-name="mantle.other.budget.Budget" value-field="budget"/>

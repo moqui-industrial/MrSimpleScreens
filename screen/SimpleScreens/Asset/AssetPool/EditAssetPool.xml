@@ -36,7 +36,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="deleteAssetPoolStore"><service-call name="delete#mantle.product.asset.AssetPoolStore"/>
         <default-response url="."/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <actions>
         <entity-find-one entity-name="mantle.product.asset.AssetPool" value-field="assetPool"/>

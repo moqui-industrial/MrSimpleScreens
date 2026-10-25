@@ -20,13 +20,13 @@ along with this software (see the LICENSE.md file). If not, see
 
         <if condition="sri.getRenderMode() == 'html'">
             <set field="preHeaderContent" from="ec.l10n.localize('Your items are on their way!')"/>
-            <set field="bodyContentLocation" value="component://SimpleScreens/screen/email/ShipmentShippedBody.html.ftl"/>
+            <set field="bodyContentLocation" value="component://mr-marble/screen/email/ShipmentShippedBody.html.ftl"/>
         </if>
     </actions>
     <widgets>
         <render-mode>
-            <text type="html" location="component://SimpleScreens/screen/email/EmailLayout.html.fancy"/>
-            <text type="text" location="component://SimpleScreens/screen/email/ShipmentShipped.text.fancy"/>
+            <text type="html" location="component://mr-marble/screen/email/EmailLayout.html.fancy"/>
+            <text type="text" location="component://mr-marble/screen/email/ShipmentShipped.text.fancy"/>
         </render-mode>
     </widgets>
 </screen>

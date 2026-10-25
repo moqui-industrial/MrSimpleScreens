@@ -42,7 +42,7 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="mantle.work.ProjectServices.get#ProjectTasks" web-send-json-response="resultList"/>
         <default-response type="none"/>
     </transition> -->
-    <transition-include name="getTaskList" location="component://SimpleScreens/template/work/WorkTransitions.xml"/>
+    <transition-include name="getTaskList" location="component://mr-marble/template/work/WorkTransitions.xml"/>
 
     <transition name="getProjectParties">
         <service-call name="mantle.work.ProjectServices.get#ProjectParties" web-send-json-response="resultList"/>
@@ -53,7 +53,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response type="none"/>
     </transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="TaskList.csv">
         <default-response url="."><parameter name="renderMode" value="csv"/>

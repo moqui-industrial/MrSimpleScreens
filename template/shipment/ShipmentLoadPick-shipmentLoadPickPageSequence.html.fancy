@@ -55,10 +55,10 @@
             </table>
 
             <#if has(reservedLocationInfoList)>
-                ${raw(ec.resource.template("component://SimpleScreens/template/shipment/ShipmentLoadPick-locationInfoTable.html.fancy", {locationInfoList: reservedLocationInfoList, titleString: "By Loc - Res"}))}
+                ${raw(ec.resource.template("component://mr-marble/template/shipment/ShipmentLoadPick-locationInfoTable.html.fancy", {locationInfoList: reservedLocationInfoList, titleString: "By Loc - Res"}))}
             </#if>
             <#if has(otherLocationInfoList)>
-                ${raw(ec.resource.template("component://SimpleScreens/template/shipment/ShipmentLoadPick-locationInfoTable.html.fancy", {locationInfoList: otherLocationInfoList, titleString: "By Loc - Alt"}))}
+                ${raw(ec.resource.template("component://mr-marble/template/shipment/ShipmentLoadPick-locationInfoTable.html.fancy", {locationInfoList: otherLocationInfoList, titleString: "By Loc - Alt"}))}
             </#if>
             <#if has(productInfoList)>
                 <table style="width:7.5in;border-bottom:solid black;margin-top:10pt">

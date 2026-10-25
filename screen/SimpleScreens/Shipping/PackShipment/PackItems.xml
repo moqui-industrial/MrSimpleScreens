@@ -40,9 +40,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="addItemToPackage"><service-call name="mantle.shipment.ShipmentServices.add#ItemToPackage"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getPackageWeight" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
-    <transition-include name="getShipmentLabel" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
+    <transition-include name="getAssetList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getPackageWeight" location="component://mr-marble/template/shipment/ShipmentTransitions.xml"/>
+    <transition-include name="getShipmentLabel" location="component://mr-marble/template/shipment/ShipmentTransitions.xml"/>
 
     <actions>
         <service-call name="mantle.shipment.ShipmentInfoServices.get#ShipmentDisplayInfo" in-map="{shipmentId:shipmentId}" out-map="context"/>
@@ -148,7 +148,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </form-single>
                     </container-dialog>
 
-                    <section-include name="PackComponentsSection" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
+                    <section-include name="PackComponentsSection" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
                 </widgets></section>
             </box-toolbar><box-body>
                 <label condition="isOutgoing || isTransfer" type="p" style="text-strong"
@@ -235,7 +235,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </field>
                     </form-list>
 
-                    <section-include name="PaReservedComponentPack" location="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
+                    <section-include name="PaReservedComponentPack" location="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentItems.xml"/>
 
                     <form-list name="ItemAssetIssuanceList" list="assetIssuanceList" skip-form="true">
                         <row-actions>

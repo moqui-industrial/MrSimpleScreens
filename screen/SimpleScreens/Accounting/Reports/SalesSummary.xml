@@ -15,8 +15,8 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Sales Summary" default-menu-include="false">
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getProductList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getProductList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
 
     <actions>
         <set field="interval" from="interval || 'w'"/>
@@ -104,7 +104,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <script>
             if (sri.getRenderMode() == 'tui') {
-                const salesTui = ec.resource.script('component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryTui.js')
+                const salesTui = ec.resource.script('component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesSummaryTui.js')
                 salesSummaryTui = salesTui.statsNodes()
                 salesSummaryChartsTui = salesTui.chartNodes()
             }
@@ -198,10 +198,10 @@ along with this software (see the LICENSE.md file). If not, see
             <label text="Products: ${selectedProductList.map(it => ec.resource.expand('ProductNameTemplate', '', it)).join(', ')}" condition="(selectedProductList?.length > 0)" type="h5"/>
         </container>
 
-        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats.html.fancy"/>
+        <render-mode><text type="html,vuet,qvt" location="component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesSummaryStats.html.fancy"/>
             <text type="tui" template="true"><![CDATA[${JSON.stringify(salesSummaryTui)}]]></text></render-mode>
 
-        <render-mode><text type="html,vuet,qvt" location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummaryCharts.html.fancy"/>
+        <render-mode><text type="html,vuet,qvt" location="component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesSummaryCharts.html.fancy"/>
             <text type="tui" template="true"><![CDATA[${JSON.stringify(salesSummaryChartsTui)}]]></text></render-mode>
 
         <container-box><box-header title="Top Products Ordered (${{d:'Day', w:'Week', M:'Month', q:'Quarter', y:'Year'}[interval||'w']} from ${ec.l10n.format(topProductStart, 'dd MMM yyyy')} to ${ec.l10n.format((topProductEnd ? topProductEnd - 1 : null), 'dd MMM yyyy')})"/><box-body-nopad>

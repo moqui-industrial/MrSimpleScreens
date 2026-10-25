@@ -8,7 +8,7 @@ spec({
     setupSpec() {
         login("john.doe")
         oldOrg = ec.user.getPreference('ACTIVE_ORGANIZATION')
-        screens = ec.screen.makeTest().rootScreen("component://MarbleERP/screen/marble.xml")
+        screens = ec.screen.makeTest().rootScreen("component://mr-marble/screen/marble.xml")
     },
     setup() { ec.artifactExecution.disableAuthz() },
     cleanup() { ec.artifactExecution.enableAuthz() },

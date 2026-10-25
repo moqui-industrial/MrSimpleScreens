@@ -15,13 +15,13 @@ along with this software (see the LICENSE.md file). If not, see
 <entity-facade-xml type="seed-initial">
     <!-- NOTE: subscreen configuration is now in the MoquiConf.xml file instead of DB records
     <moqui.screen.SubscreensItem screenLocation="component://webroot/screen/webroot/apps.xml" subscreenName="my" menuTitle="My Account"
-            menuIndex="90" menuInclude="Y" subscreenLocation="component://SimpleScreens/screen/MyAccount.xml"/>
+            menuIndex="90" menuInclude="Y" subscreenLocation="component://mr-marble/screen/MyAccount.xml"/>
     <moqui.screen.SubscreensItem screenLocation="component://webroot/screen/webroot.xml" subscreenName="ssstatic"
-            menuInclude="N" subscreenLocation="component://SimpleScreens/screen/ssstatic.xml"/>
+            menuInclude="N" subscreenLocation="component://mr-marble/screen/ssstatic.xml"/>
     -->
     <!-- Not needed generally, but here commented for convenience:
     <moqui.screen.SubscreensItem screenLocation="component://webroot/screen/webroot/apps.xml"
-            subscreenName="SimpleScreens" subscreenLocation="component://SimpleScreens/screen/SimpleScreens.xml"
+            subscreenName="SimpleScreens" subscreenLocation="component://mr-marble/screen/SimpleScreens.xml"
             menuTitle="Simple Screens" menuIndex="99" menuInclude="N"/>
     -->
 
@@ -30,7 +30,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- Artifact group and authz for My Account App -->
     <artifactGroups artifactGroupId="MY_ACCOUNT" description="My Account App (via root screen)">
-        <artifacts artifactName="component://SimpleScreens/screen/MyAccount.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://mr-marble/screen/MyAccount.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
         <authz artifactAuthzId="MY_ACCOUNT_1" userGroupId="MY_ACCOUNT_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
         <authz artifactAuthzId="MY_ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
@@ -96,40 +96,40 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ('locale' defaults to all if not specified, 'docTitle' defaults to filename from location) -->
 
     <!-- Accounting - GL -->
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/GlAccount/FindGlAccount.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/account/GL Account Class Reference.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/GlAccount/GlAccountTree.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/account/GL Account Class Reference.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/GlAccount/EditGlAccount.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/account/GL Account Class Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Accounting/GlAccount/FindGlAccount.xml"
+            docIndex="100" docLocation="component://mr-marble/document/account/GL Account Class Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Accounting/GlAccount/GlAccountTree.xml"
+            docIndex="100" docLocation="component://mr-marble/document/account/GL Account Class Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Accounting/GlAccount/EditGlAccount.xml"
+            docIndex="100" docLocation="component://mr-marble/document/account/GL Account Class Reference.md"/>
 
     <!-- Accounting - Invoice -->
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Invoice/FindInvoice.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/account/Invoice Status Reference.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Invoice/EditInvoice.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/account/Invoice Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Accounting/Invoice/FindInvoice.xml"
+            docIndex="100" docLocation="component://mr-marble/document/account/Invoice Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Accounting/Invoice/EditInvoice.xml"
+            docIndex="100" docLocation="component://mr-marble/document/account/Invoice Status Reference.md"/>
 
     <!-- Accounting - Payment -->
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Payment/FindPayment.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/account/Payment Status Reference.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Payment/EditPayment.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/account/Payment Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Accounting/Payment/FindPayment.xml"
+            docIndex="100" docLocation="component://mr-marble/document/account/Payment Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Accounting/Payment/EditPayment.xml"
+            docIndex="100" docLocation="component://mr-marble/document/account/Payment Status Reference.md"/>
 
     <!-- Order -->
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Order/FindOrder.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/order/Order Roles and Parts.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Order/FindOrder.xml"
-            docIndex="110" docLocation="component://SimpleScreens/document/order/Order Status Reference.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Order/OrderDetail.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/order/Order Roles and Parts.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Order/OrderDetail.xml"
-            docIndex="110" docLocation="component://SimpleScreens/document/order/Order Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Order/FindOrder.xml"
+            docIndex="100" docLocation="component://mr-marble/document/order/Order Roles and Parts.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Order/FindOrder.xml"
+            docIndex="110" docLocation="component://mr-marble/document/order/Order Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Order/OrderDetail.xml"
+            docIndex="100" docLocation="component://mr-marble/document/order/Order Roles and Parts.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Order/OrderDetail.xml"
+            docIndex="110" docLocation="component://mr-marble/document/order/Order Status Reference.md"/>
 
     <!-- Shipment -->
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Shipment/FindShipment.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/shipment/Shipment Status Reference.md"/>
-    <moqui.screen.ScreenDocument screenLocation="component://SimpleScreens/screen/SimpleScreens/Shipment/ShipmentDetail.xml"
-            docIndex="100" docLocation="component://SimpleScreens/document/shipment/Shipment Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Shipment/FindShipment.xml"
+            docIndex="100" docLocation="component://mr-marble/document/shipment/Shipment Status Reference.md"/>
+    <moqui.screen.ScreenDocument screenLocation="component://mr-marble/screen/SimpleScreens/Shipment/ShipmentDetail.xml"
+            docIndex="100" docLocation="component://mr-marble/document/shipment/Shipment Status Reference.md"/>
 
     <!-- ==================================================== -->
     <!-- ========== Pre-configured form-list finds ========== -->
@@ -137,7 +137,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- Accounting/Invoice/FindInvoice -->
     <moqui.screen.form.FormConfig formConfigId="AI_FI_AR_CUST_STMT"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Invoice/FindInvoice.xml.form_list$InvoiceList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Invoice/FindInvoice.xml.form_list$InvoiceList">
         <fields positionSequence="0" positionIndex="0" fieldName="toPartyId"/>
         <fields positionSequence="0" positionIndex="1" fieldName="invoiceId"/>
         <fields positionSequence="0" positionIndex="2" fieldName="referenceNumber"/>
@@ -148,14 +148,14 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.screen.form.FormConfig>
     <moqui.screen.form.FormListFind formListFindId="AI_FI_AR_CUST_STMT" formConfigId="AI_FI_AR_CUST_STMT"
             description="AR Customer Statement" orderByField="+invoiceDate"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Invoice/FindInvoice.xml.form_list$InvoiceList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Invoice/FindInvoice.xml.form_list$InvoiceList">
         <fields fieldName="statusId" fieldOperator="in" fieldValue="InvoiceInProcess,InvoiceFinalized,InvoiceSent,InvoiceAcked"/>
         <userGroups userGroupId="ALL_USERS"/>
     </moqui.screen.form.FormListFind>
 
     <!-- Accounting/Reports/SalesAnalysis -->
     <moqui.screen.form.FormConfig formConfigId="AC_REP_SAL_AN_BY_PRD"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesAnalysis.xml.form_list$SalesAnalysis">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesAnalysis.xml.form_list$SalesAnalysis">
         <fields positionSequence="0" positionIndex="0" fieldName="pseudoId"/>
         <fields positionSequence="0" positionIndex="1" fieldName="productName"/>
         <fields positionSequence="0" positionIndex="3" fieldName="minUnitAmount"/>
@@ -169,7 +169,7 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.screen.form.FormConfig>
     <moqui.screen.form.FormListFind formListFindId="AC_REP_SAL_AN_BY_PRD" formConfigId="AC_REP_SAL_AN_BY_PRD"
             description="By Product Last Month" orderByField="pseudoId"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesAnalysis.xml.form_list$SalesAnalysis">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesAnalysis.xml.form_list$SalesAnalysis">
         <fields fieldName="pageNoLimit" fieldOperator="equals" fieldValue="true"/>
         <fields fieldName="issuedDate" fieldPeriod="month" fieldPerOffset="-1"/>
         <userGroups userGroupId="ALL_USERS"/>
@@ -177,7 +177,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- Accounting/Reports/InvoiceAgingDetail -->
     <moqui.screen.form.FormConfig formConfigId="AC_REP_INVAGD_RECSUM"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields positionSequence="0" positionIndex="0" fieldName="toPseudoId"/>
         <fields positionSequence="0" positionIndex="1" fieldName="toName"/>
         <!-- <fields positionSequence="0" positionIndex="2" fieldName="statusId"/> -->
@@ -192,7 +192,7 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.screen.form.FormConfig>
     <moqui.screen.form.FormListFind formListFindId="AC_REP_INVAGD_RECSUM" formConfigId="AC_REP_INVAGD_RECSUM"
             description="Receivable Summary" orderByField="toName,invoiceId"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields fieldName="pageNoLimit" fieldOperator="equals" fieldValue="true"/>
         <fields fieldName="dateField" fieldOperator="equals" fieldValue="dueDate"/>
         <fields fieldName="invoiceType" fieldOperator="equals" fieldValue="Receivable"/>
@@ -200,7 +200,7 @@ along with this software (see the LICENSE.md file). If not, see
         <userGroups userGroupId="ALL_USERS"/>
     </moqui.screen.form.FormListFind>
     <moqui.screen.form.FormConfig formConfigId="AC_REP_INVAGD_RECDET"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields positionSequence="0" positionIndex="0" fieldName="toPseudoId"/>
         <fields positionSequence="0" positionIndex="1" fieldName="toName"/>
         <fields positionSequence="0" positionIndex="2" fieldName="invoiceDate"/>
@@ -215,7 +215,7 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.screen.form.FormConfig>
     <moqui.screen.form.FormListFind formListFindId="AC_REP_INVAGD_RECDET" formConfigId="AC_REP_INVAGD_RECDET"
             description="Receivable Detail" orderByField="toName,invoiceId"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields fieldName="pageNoLimit" fieldOperator="equals" fieldValue="true"/>
         <fields fieldName="dateField" fieldOperator="equals" fieldValue="dueDate"/>
         <fields fieldName="invoiceType" fieldOperator="equals" fieldValue="Receivable"/>
@@ -223,7 +223,7 @@ along with this software (see the LICENSE.md file). If not, see
         <userGroups userGroupId="ALL_USERS"/>
     </moqui.screen.form.FormListFind>
     <moqui.screen.form.FormConfig formConfigId="AC_REP_INVAGD_PAYSUM"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields positionSequence="0" positionIndex="0" fieldName="fromPseudoId"/>
         <fields positionSequence="0" positionIndex="1" fieldName="fromName"/>
         <!-- <fields positionSequence="0" positionIndex="2" fieldName="statusId"/> -->
@@ -238,7 +238,7 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.screen.form.FormConfig>
     <moqui.screen.form.FormListFind formListFindId="AC_REP_INVAGD_PAYSUM" formConfigId="AC_REP_INVAGD_PAYSUM"
             description="Payable Summary" orderByField="fromName,invoiceId"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields fieldName="pageNoLimit" fieldOperator="equals" fieldValue="true"/>
         <fields fieldName="dateField" fieldOperator="equals" fieldValue="dueDate"/>
         <fields fieldName="invoiceType" fieldOperator="equals" fieldValue="Payable"/>
@@ -246,7 +246,7 @@ along with this software (see the LICENSE.md file). If not, see
         <userGroups userGroupId="ALL_USERS"/>
     </moqui.screen.form.FormListFind>
     <moqui.screen.form.FormConfig formConfigId="AC_REP_INVAGD_PAYDET"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields positionSequence="0" positionIndex="0" fieldName="fromPseudoId"/>
         <fields positionSequence="0" positionIndex="1" fieldName="fromName"/>
         <fields positionSequence="0" positionIndex="2" fieldName="invoiceDate"/>
@@ -261,7 +261,7 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.screen.form.FormConfig>
     <moqui.screen.form.FormListFind formListFindId="AC_REP_INVAGD_PAYDET" formConfigId="AC_REP_INVAGD_PAYDET"
             description="Payable Detail" orderByField="fromName,invoiceId"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Reports/InvoiceAgingDetail.xml.form_list$InvoiceAgingList">
         <fields fieldName="pageNoLimit" fieldOperator="equals" fieldValue="true"/>
         <fields fieldName="dateField" fieldOperator="equals" fieldValue="dueDate"/>
         <fields fieldName="invoiceType" fieldOperator="equals" fieldValue="Payable"/>
@@ -271,7 +271,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- Accounting/Transaction/FindTransactionEntry -->
     <moqui.screen.form.FormConfig formConfigId="AT_FTE_AR_CUST_LEDG"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Transaction/FindTransactionEntry.xml.form_list$TransactionEntryList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Transaction/FindTransactionEntry.xml.form_list$TransactionEntryList">
         <fields positionSequence="0" positionIndex="0" fieldName="otherPartyId"/>
         <fields positionSequence="0" positionIndex="1" fieldName="acctgTransId"/>
         <fields positionSequence="0" positionIndex="2" fieldName="transactionDate"/>
@@ -285,7 +285,7 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.screen.form.FormConfig>
     <moqui.screen.form.FormListFind formListFindId="AT_FTE_AR_CUST_LEDG" formConfigId="AT_FTE_AR_CUST_LEDG"
             description="AR Customer Ledger" orderByField="-transactionDate,-acctgTransId,acctgTransEntrySeqId"
-            formLocation="component://SimpleScreens/screen/SimpleScreens/Accounting/Transaction/FindTransactionEntry.xml.form_list$TransactionEntryList">
+            formLocation="component://mr-marble/screen/SimpleScreens/Accounting/Transaction/FindTransactionEntry.xml.form_list$TransactionEntryList">
         <fields fieldName="transactionDate" fieldPeriod="year" fieldPerOffset="0"/>
         <userGroups userGroupId="ALL_USERS"/>
     </moqui.screen.form.FormListFind>
@@ -294,62 +294,62 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- HH Warehouse App -->
     <artifactGroups artifactGroupId="SimpleHhWh" description="HH Warehouse App (via root screen)">
-        <artifacts artifactName="component://SimpleScreens/screen/BasicHandheld/Warehouse.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://mr-marble/screen/BasicHandheld/Warehouse.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
         <authz artifactAuthzId="SimpleHhWh_ADMIN" userGroupId="ADMIN"  authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL">
             <filters entityFilterSetId="MANTLE_ACTIVE_ORG"/></authz>
     </artifactGroups>
 
     <!-- Artifact Groups for Parts of SimpleScreens -->
     <artifactGroups artifactGroupId="SimpleScreensAccounting" description="SS Accounting">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Accounting.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Accounting.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensAsset" description="SS Asset">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Asset.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Asset.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensCatalog" description="SS Catalog">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Catalog.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Catalog.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
 
     <artifactGroups artifactGroupId="SimpleScreensCustomer" description="SS Customer">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Customer.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Customer.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensFacility" description="SS Facility">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Facility.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Facility.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensGateway" description="SS Gateway">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Gateway.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Gateway.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensHumanRes" description="SS HumanRes">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/HumanRes.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/HumanRes.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
 
     <artifactGroups artifactGroupId="SimpleScreensManufacturing" description="SS Manufacturing">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Manufacturing.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Manufacturing.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensOrder" description="SS Order">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Order.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Order.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensParty" description="SS Party">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Party.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Party.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
 
     <artifactGroups artifactGroupId="SimpleScreensProductStore" description="SS Product Store">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/ProductStore.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/ProductStore.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensProject" description="SS Project">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Project.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Project.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensRequest" description="SS Request">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Request.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Request.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
 
     <artifactGroups artifactGroupId="SimpleScreensReturn" description="SS Return">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Return.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Return.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensShipment" description="SS Shipment">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Shipment.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Shipment.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensShipping" description="SS Shipping">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Shipping.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Shipping.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
 
     <artifactGroups artifactGroupId="SimpleScreensSupplier" description="SS Supplier">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Supplier.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Supplier.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensSurvey" description="SS Survey">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Survey.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Survey.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensTask" description="SS Task">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Task.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Task.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
     <artifactGroups artifactGroupId="SimpleScreensWiki" description="SS Wiki/Content">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Wiki.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Wiki.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/></artifactGroups>
 
     <artifactGroups artifactGroupId="SimpleScreensAssetPhysInv" description="SS Asset Physical Inventory">
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Asset/Asset/FindSummary/PhysicalQuantity.xml" artifactTypeEnumId="AT_XML_SCREEN"/>
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Asset/Asset/FindSummary/PhysicalChange.xml" artifactTypeEnumId="AT_XML_SCREEN"/>
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Asset/Asset/FindSummary.xml/recordChange" artifactTypeEnumId="AT_XML_SCREEN_TRANS"/>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Asset/Asset/FindSummary/PhysicalQuantity.xml" artifactTypeEnumId="AT_XML_SCREEN"/>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Asset/Asset/FindSummary/PhysicalChange.xml" artifactTypeEnumId="AT_XML_SCREEN"/>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Asset/Asset/FindSummary.xml/recordChange" artifactTypeEnumId="AT_XML_SCREEN_TRANS"/>
     </artifactGroups>
 
 </entity-facade-xml>

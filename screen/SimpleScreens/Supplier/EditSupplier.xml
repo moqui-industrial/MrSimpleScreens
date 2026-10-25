@@ -52,23 +52,23 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="updatePartyContactOther"><service-call name="mantle.party.ContactServices.update#PartyContactOther"/>
         <default-response url="."/></transition>
-    <transition-include name="getContactMechPurposesByType" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getContactMechPurposesByType" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="createPartyNote"><service-call name="create#mantle.party.PartyNote"/>
         <default-response url="."/></transition>
     <transition name="updatePartyNote"><service-call name="update#mantle.party.PartyNote"/>
         <default-response url="."/></transition>
 
-    <transition-include name="createContent" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-    <transition-include name="updateContent" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-    <transition-include name="downloadContent" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
+    <transition-include name="createContent" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+    <transition-include name="updateContent" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+    <transition-include name="downloadContent" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
 
     <subscreens>
-        <subscreens-item name="UpdateContactInfo" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty/UpdateContactInfo.xml"/>
-        <subscreens-item name="ExpiredContactOther" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty/ExpiredContactOther.xml"/>
-        <subscreens-item name="ExpiredPostal" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty/ExpiredPostal.xml"/>
-        <subscreens-item name="UpdatePaymentMethodInfo" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty/UpdatePaymentMethodInfo.xml"/>
-        <subscreens-item name="FindDuplicates" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty/FindDuplicates.xml"/>
+        <subscreens-item name="UpdateContactInfo" location="component://mr-marble/screen/SimpleScreens/Party/EditParty/UpdateContactInfo.xml"/>
+        <subscreens-item name="ExpiredContactOther" location="component://mr-marble/screen/SimpleScreens/Party/EditParty/ExpiredContactOther.xml"/>
+        <subscreens-item name="ExpiredPostal" location="component://mr-marble/screen/SimpleScreens/Party/EditParty/ExpiredPostal.xml"/>
+        <subscreens-item name="UpdatePaymentMethodInfo" location="component://mr-marble/screen/SimpleScreens/Party/EditParty/UpdatePaymentMethodInfo.xml"/>
+        <subscreens-item name="FindDuplicates" location="component://mr-marble/screen/SimpleScreens/Party/EditParty/FindDuplicates.xml"/>
     </subscreens>
 
     <actions>
@@ -83,17 +83,17 @@ along with this software (see the LICENSE.md file). If not, see
         <container-row><row-col lg="6">
             <link url="findOrder" text="Orders" parameter-map="{vendorPartyId:partyId}"/>
             <dynamic-dialog id="FindDuplicatesDialog" button-text="Find Duplicates" transition="FindDuplicates" width="960"/>
-            <section-include name="HasDuplicatesSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="HasDuplicatesSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
 
-            <section-include name="EditPartySection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-            <section-include name="RolesSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-            <section-include name="PartyIdentificationSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="EditPartySection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="RolesSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="PartyIdentificationSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
         </row-col><row-col lg="6">
-            <section-include name="NotesSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-            <section-include name="ContactInfoSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-            <section-include name="PaymentMethodSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-            <section-include name="FinancialAccountSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
-            <section-include name="ContentSection" location="component://SimpleScreens/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="NotesSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="ContactInfoSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="PaymentMethodSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="FinancialAccountSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
+            <section-include name="ContentSection" location="component://mr-marble/screen/SimpleScreens/Party/EditParty.xml"/>
         </row-col></container-row>
     </widgets>
 </screen>

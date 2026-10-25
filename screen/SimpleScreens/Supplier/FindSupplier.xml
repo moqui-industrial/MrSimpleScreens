@@ -23,8 +23,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createOrganization"><service-call name="mantle.party.PartyServices.create#Organization"/>
         <default-response url="../EditSupplier"/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
-    <transition-include name="getPartyClassificationList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
+    <transition-include name="getPartyClassificationList" location="component://mr-marble/template/party/PartyTransitions.xml"/>
 
     <pre-actions><set field="roleTypeId" value="Supplier"/></pre-actions>
     <actions>
@@ -33,19 +33,19 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <container-dialog id="CreatePersonDialog" button-text="New Person Supplier">
             <form-single name="CreatePersonForm" transition="createPerson"
-                    extends="component://SimpleScreens/screen/SimpleScreens/Party/FindParty.xml#CreatePersonForm"/>
+                    extends="component://mr-marble/screen/SimpleScreens/Party/FindParty.xml#CreatePersonForm"/>
         </container-dialog>
         <container-dialog id="CreateOrganizationDialog" button-text="New Organization Supplier">
             <form-single name="CreateOrganizationForm" transition="createOrganization"
-                    extends="component://SimpleScreens/screen/SimpleScreens/Party/FindParty.xml#CreateOrganizationForm"/>
+                    extends="component://mr-marble/screen/SimpleScreens/Party/FindParty.xml#CreateOrganizationForm"/>
         </container-dialog>
 
         <link url="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax"
                 url-type="plain" link-type="anchor" target-window="_blank" text="Search String Reference"/>
-        <form-single name="OuterSearchForm" extends="component://SimpleScreens/screen/SimpleScreens/Party/FindParty.xml#OuterSearchForm"/>
+        <form-single name="OuterSearchForm" extends="component://mr-marble/screen/SimpleScreens/Party/FindParty.xml#OuterSearchForm"/>
 
         <form-list name="SupplierListForm" list="documentList" skip-form="true" header-dialog="true"
-                extends="component://SimpleScreens/screen/SimpleScreens/Party/FindParty.xml#PartyListForm">
+                extends="component://mr-marble/screen/SimpleScreens/Party/FindParty.xml#PartyListForm">
             <field name="pseudoId"><default-field><link url="editSupplier" text="${pseudoId}" link-type="anchor"/></default-field></field>
             <field name="combinedName"><default-field><link url="editSupplier" text="PartyNameOnlyTemplate" text-map="party" link-type="anchor"/></default-field></field>
             <field name="submitButton">

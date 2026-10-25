@@ -162,7 +162,7 @@
 
 <#-- The XSL-FO region-after: a margin box of the insert's page, so it prints at the foot of every page; the same for
      every package. XSL-FO had no page number here ("any point in page #?"). -->
-<#assign footerContact = ec.resource.template("component://SimpleScreens/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>
+<#assign footerContact = ec.resource.template("component://mr-marble/template/party/ContactInfoLine.fancy", {contactInfo: fromContactInfo}).trim()>
 <style>@page mrss-ShipmentInsert { @bottom-center { content: ${cssString((footerContact ? footerContact + "\n" : "") + "Shipment #" + shipmentId + " -- " + (shipment.estimatedShipDate != null ? ec.l10n.format(shipment.estimatedShipDate, dateFormat) + " -- " : "") + "Printed " + ec.l10n.format(ec.user.nowTimestamp, dateTimeFormat))};
     white-space: pre-wrap; font: 8pt Helvetica, Arial, sans-serif; text-align: center; vertical-align: top; border-top: thin solid black; width: 100%; } }</style>
 </section>

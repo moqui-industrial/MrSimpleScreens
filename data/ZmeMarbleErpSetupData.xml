@@ -24,7 +24,7 @@ along with this software (see the LICENSE.md file). If not, see
         <authz artifactAuthzId="MarbleAdminMyAccount" artifactGroupId="MY_ACCOUNT" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </userGroups>
     <artifactGroups artifactGroupId="MarbleErpAll" description="Marble ERP (via root screen)">
-        <artifacts artifactName="component://MarbleERP/screen/marble.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://mr-marble/screen/marble.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
         <authz artifactAuthzId="MARBLE_ERP_ADMIN" userGroupId="ADMIN"  authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL">
             <filters entityFilterSetId="MANTLE_ACTIVE_ORG"/></authz>
         <authz artifactAuthzId="MARBLE_ERP_MERP_ADMIN" userGroupId="MarbleErpAdmin" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL">
@@ -33,11 +33,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- Root screen (no inherit) and general screens group, for all non-admin user groups -->
     <artifactGroups artifactGroupId="MarbleErpApp" description="Marble ERP App Access">
-        <artifacts artifactName="component://MarbleERP/screen/marble.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="N"/>
-        <artifacts artifactName="component://MarbleERP/screen/marble/dashboard.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Search.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/SimpleReport/QuickViewReport.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://mr-marble/screen/marble.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="N"/>
+        <artifacts artifactName="component://mr-marble/screen/marble/dashboard.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/QuickLookup.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/Search.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://mr-marble/screen/SimpleScreens/SimpleReport/QuickViewReport.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
     </artifactGroups>
 
     <!-- ========== User Groups ========== -->

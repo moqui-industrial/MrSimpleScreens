@@ -17,11 +17,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <subscreens default-item="FindOrder">
         <subscreens-item name="OrderIssuedInvoiced" menu-include="false"
-                location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/OrderIssuedInvoiced.xml"/>
+                location="component://mr-marble/screen/SimpleScreens/Accounting/Reports/OrderIssuedInvoiced.xml"/>
         <subscreens-item name="SalesAnalysis" menu-include="false"
-                location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesAnalysis.xml"/>
+                location="component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesAnalysis.xml"/>
         <subscreens-item name="SalesSummary" menu-include="false"
-                location="component://SimpleScreens/screen/SimpleScreens/Accounting/Reports/SalesSummary.xml"/>
+                location="component://mr-marble/screen/SimpleScreens/Accounting/Reports/SalesSummary.xml"/>
     </subscreens>
     <widgets>
         <label text="Order ${orderId}" type="strong" condition="orderId"/>

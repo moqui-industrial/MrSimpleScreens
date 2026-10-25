@@ -26,7 +26,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="updateRequest"><service-call name="mantle.request.RequestServices.update#Request"/><default-response url="."/></transition>
     <transition name="updateStatus"><service-call name="mantle.request.RequestServices.update#Request"/><default-response url="."/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="addComment"><service-call name="mantle.request.RequestServices.add#RequestComment"/>
         <default-response url="."/></transition>
@@ -45,9 +45,9 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
 
     <subscreens>
-        <subscreens-item name="RequestCommentNested" location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest/RequestCommentNested.xml"/>
-        <subscreens-item name="RequestCommentReply" location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest/RequestCommentReply.xml"/>
-        <subscreens-item name="RequestCommentUpdate" location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest/RequestCommentUpdate.xml"/>
+        <subscreens-item name="RequestCommentNested" location="component://mr-marble/screen/SimpleScreens/Request/EditRequest/RequestCommentNested.xml"/>
+        <subscreens-item name="RequestCommentReply" location="component://mr-marble/screen/SimpleScreens/Request/EditRequest/RequestCommentReply.xml"/>
+        <subscreens-item name="RequestCommentUpdate" location="component://mr-marble/screen/SimpleScreens/Request/EditRequest/RequestCommentUpdate.xml"/>
     </subscreens>
 
     <actions>
@@ -71,7 +71,7 @@ along with this software (see the LICENSE.md file). If not, see
             <label text="Request #${requestId}" type="h4"/>
 
             <form-single name="EditRequest" transition="updateRequest" map="request"
-                    extends="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest.xml#EditRequest">
+                    extends="component://mr-marble/screen/SimpleScreens/Request/EditRequest.xml#EditRequest">
                 <field name="facilityId"><default-field><ignored/></default-field></field>
                 <field name="assignToPartyId"><default-field><ignored/></default-field></field>
 
@@ -86,10 +86,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </field-layout>
             </form-single>
 
-            <section-include name="CommentsSection" location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest.xml"/>
+            <section-include name="CommentsSection" location="component://mr-marble/screen/SimpleScreens/Request/EditRequest.xml"/>
         </row-col><row-col md="5">
-            <section-include name="StatusChangeSection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
-            <section-include name="StatusHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusChangeSection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
 
             <container-box><box-header title="Parties"/><box-body-nopad>
                 <form-list name="UpdatePartyForm" list="rpapList" skip-form="true">
@@ -119,7 +119,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </box-body></container-box>
             </widgets></section>
 
-            <section-include name="ContentSection" location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest.xml"/>
+            <section-include name="ContentSection" location="component://mr-marble/screen/SimpleScreens/Request/EditRequest.xml"/>
         </row-col></container-row>
     </widgets>
 </screen>

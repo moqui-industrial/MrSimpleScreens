@@ -49,8 +49,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="printShipmentLabels"><service-call name="mantle.shipment.ShipmentServices.print#ShipmentLabels"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getPackageWeight" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
-    <transition-include name="getShipmentLabel" location="component://SimpleScreens/template/shipment/ShipmentTransitions.xml"/>
+    <transition-include name="getPackageWeight" location="component://mr-marble/template/shipment/ShipmentTransitions.xml"/>
+    <transition-include name="getShipmentLabel" location="component://mr-marble/template/shipment/ShipmentTransitions.xml"/>
 
     <actions>
         <set field="pageSize" from="pageSize || '10'"/>

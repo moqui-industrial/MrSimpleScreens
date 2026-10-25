@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createGlAccount"><service-call name="mantle.ledger.LedgerServices.create#GlAccount"/>
         <default-response url="../EditGlAccount"/></transition>
 
-    <transition-include name="getGlAccountListPaginated" location="component://SimpleScreens/template/account/AccountTransitions.xml"/>
+    <transition-include name="getGlAccountListPaginated" location="component://mr-marble/template/account/AccountTransitions.xml"/>
 
     <actions>
         <entity-find entity-name="mantle.ledger.account.GlAccount" list="glAccountList">

@@ -17,7 +17,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="findInvoice"><default-response url="../FindInvoice"/></transition>
     <transition name="editParty"><default-response url="//${appRoot}/Party/EditParty"/></transition>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <actions>
         <set field="invoiceType" from="invoiceType || 'Receivable'"/>

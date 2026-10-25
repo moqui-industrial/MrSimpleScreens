@@ -28,9 +28,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="deleteInvoiceItemDetail"><service-call name="delete#mantle.account.invoice.InvoiceItemDetail"/>
         <default-response url="."/></transition>
 
-    <transition-include name="getAssetList" location="component://SimpleScreens/template/product/ProductTransitions.xml"/>
-    <transition-include name="getFacilityList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getAssetList" location="component://mr-marble/template/product/ProductTransitions.xml"/>
+    <transition-include name="getFacilityList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <actions>
         <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="invoice"/>

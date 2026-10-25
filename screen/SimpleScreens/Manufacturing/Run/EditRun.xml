@@ -43,8 +43,8 @@ along with this software (see the LICENSE.md file). If not, see
         </default-response>
     </transition>
 
-    <transition-include name="getFacilityList" location="component://SimpleScreens/template/facility/FacilityTransitions.xml"/>
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getFacilityList" location="component://mr-marble/template/facility/FacilityTransitions.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <actions>
         <service-call name="mantle.work.ManufacturingServices.get#ProductionRunDisplayInfo" in-map="context" out-map="context"/>
@@ -70,7 +70,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
             </form-single>
         </row-col><row-col lg="7">
-            <section-include name="StatusChangeAndHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusChangeAndHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
 
             <section name="NotesSection"><actions>
                 <entity-find entity-name="mantle.work.effort.WorkEffortNote" list="noteList">

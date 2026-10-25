@@ -25,7 +25,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="systemUserAccount"><default-response url="//system/Security/UserAccount/UserAccountDetail"/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="updateParty"><service-call name="mantle.party.PartyServices.update#PartyDetail"/>
         <default-response url="."/></transition>
@@ -41,13 +41,13 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="removePartyClassification"><service-call name="mantle.party.PartyServices.remove#PartyClassification"/>
         <default-response url="."/></transition>
-    <transition-include name="getPartyClassificationList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
+    <transition-include name="getPartyClassificationList" location="component://mr-marble/template/party/PartyTransitions.xml"/>
 
     <transition name="storePartySetting"><service-call name="mantle.party.PartyServices.store#PartySetting"/>
         <default-response url="."/></transition>
     <transition name="deletePartySetting"><service-call name="delete#mantle.party.PartySetting"/>
         <default-response url="."/></transition>
-    <transition-include name="getPartySettingList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
+    <transition-include name="getPartySettingList" location="component://mr-marble/template/party/PartyTransitions.xml"/>
 
     <transition name="createPartyIdentification"><service-call name="create#mantle.party.PartyIdentification"/>
         <default-response url="."/></transition>
@@ -101,7 +101,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="updatePartyContactOther"><service-call name="mantle.party.ContactServices.update#PartyContactOther"/>
         <default-response url="."/></transition>
-    <transition-include name="getContactMechPurposesByType" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getContactMechPurposesByType" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="createPartyNote"><service-call name="create#mantle.party.PartyNote"/>
         <default-response url="."/></transition>
@@ -944,7 +944,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         contactMechPurposeId:contactInfo.telecomContactMechPurposeId}"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.telecomContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                            <render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                     <section-iterate name="EmailInfoSection" list="contactOut.emailAddressList" entry="contactInfo"><widgets>
@@ -978,7 +978,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         contactMechPurposeId:contactInfo.emailContactMechPurposeId}"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.emailContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                            <render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                     <section-iterate name="WebInfoSection" list="contactOut.webAddressList" entry="contactInfo"><widgets>
@@ -1012,7 +1012,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         contactMechPurposeId:contactInfo.webContactMechPurposeId}"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.webContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                            <render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                     <section-iterate name="OtherInfoSection" list="otherPcmiList" entry="otherPcmi"><actions>
@@ -1119,7 +1119,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <label text="${contactInfo.postalContactMech.validateMessage||''}" type="div"/>
                         </row-col><row-col lg="6">
                             <label text="${contactInfo.postalContactMechPurpose.description}" type="strong"/>
-                            <render-mode><text type="tui" location="component://SimpleScreens/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/ContactInfo.html.fancy"/></render-mode>
+                            <render-mode><text type="tui" location="component://mr-marble/template/party/ContactInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/ContactInfo.html.fancy"/></render-mode>
                         </row-col></container-row>
                     </widgets></section-iterate>
                 </box-body></container-box>
@@ -1141,7 +1141,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <container style="float-box" type="ul">
                         <section-iterate name="BillingInfoSection" list="ppmiOut.methodInfoList" entry="methodInfo"><widgets>
                             <container type="li">
-                                <render-mode><text type="tui" location="component://SimpleScreens/template/party/PaymentMethodInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://SimpleScreens/template/party/PaymentMethodInfo.html.fancy"/></render-mode>
+                                <render-mode><text type="tui" location="component://mr-marble/template/party/PaymentMethodInfo.tui.fancy"/><text type="html,vuet,qvt" location="component://mr-marble/template/party/PaymentMethodInfo.html.fancy"/></render-mode>
                                 <label text="CIM ID: ${methodInfo.paymentMethod.gatewayCimId}" type="div" condition="methodInfo.paymentMethod.gatewayCimId"/>
                                 <label text="Gateway: ${methodInfo.paymentMethod.gatewayConfig?.description}" type="div" condition="methodInfo.paymentMethod?.paymentGatewayConfigId"/>
                                 <dynamic-dialog id="UpdatePaymentMethodDialog" button-text="Update"

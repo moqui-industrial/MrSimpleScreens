@@ -26,7 +26,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="addParty"><service-call name="create#mantle.request.RequestParty"/><default-response url="."/></transition>
     <transition name="updateParty"><service-call name="update#mantle.request.RequestParty"/><default-response url="."/></transition>
 
-    <transition-include name="searchPartyList" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="searchPartyList" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <transition name="createNote"><service-call name="create#mantle.request.RequestNote"/><default-response url="."/></transition>
     <transition name="updateNote"><service-call name="update#mantle.request.RequestNote"/><default-response url="."/></transition>
@@ -182,15 +182,15 @@ along with this software (see the LICENSE.md file). If not, see
                             <section name="ChildNestedComments">
                                 <condition><expression>childCeList?.length</expression></condition>
                                 <actions><set field="currentCe" from="commEventDetail"/></actions>
-                                <widgets><include-screen location="component://SimpleScreens/screen/SimpleScreens/Request/EditRequest/RequestCommentNested.xml"/></widgets>
+                                <widgets><include-screen location="component://mr-marble/screen/SimpleScreens/Request/EditRequest/RequestCommentNested.xml"/></widgets>
                             </section>
                         </container>
                     </widgets></section-iterate>
                 </box-body></container-box>
             </widgets></section>
         </row-col><row-col md="5">
-            <section-include name="StatusChangeSection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
-            <section-include name="StatusHistorySection" location="component://SimpleScreens/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusChangeSection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
+            <section-include name="StatusHistorySection" location="component://mr-marble/template/basic/StatusWidgets.xml"/>
 
             <container-box><box-header title="Parties"/><box-toolbar>
                 <container-dialog id="AddPartyDialog" button-text="Add Party">

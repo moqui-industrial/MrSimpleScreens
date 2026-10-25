@@ -36,7 +36,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="storeContactInfo"><service-call name="mantle.party.ContactServices.store#PartyContactInfo"/>
         <default-response url=".."/></transition>
-    <transition-include name="getGeoCountryStates" location="component://SimpleScreens/template/party/PartyForms.xml"/>
+    <transition-include name="getGeoCountryStates" location="component://mr-marble/template/party/PartyForms.xml"/>
 
     <actions>
         <if condition="postalContactMechId || telecomContactMechId || emailContactMechId || webContactMechId"><then>
@@ -60,7 +60,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <form-single name="UpdateContactInfo" transition="storeContactInfo" map="contactInfoFlat"
-                extends="component://SimpleScreens/template/party/PartyForms.xml#ContactInfo">
+                extends="component://mr-marble/template/party/PartyForms.xml#ContactInfo">
             <!-- these are needed for ID pass through in order, shipment screens -->
             <field name="facilityId"><default-field><hidden/></default-field></field>
             <field name="orderId"><default-field><hidden/></default-field></field>
