@@ -62,9 +62,10 @@ ClientAccess --db existing` on **that** server's database only), pass `--server 
 `--serve`. `--param user=` and `--param password=` (or `MOQUI_TEST_USER`, `MOQUI_TEST_PASSWORD`) override the demo
 credentials. Do not reuse demo credentials or the test grant for production.
 
-- `BrowserSmoke.spec.js` (was `browser-smoke.mjs`): customer, order, invoice, payment and My Account pages each show
-  their text; PrintOrder 55400 shows its total and real SVG barcode bars, and prints a PDF (`PrintOrder-55400.pdf`,
-  with a full-page `PrintOrder-55400.png`). Reading the PDF's text (`pdftotext`) was a manual step and is not ported.
+- `BrowserSmoke.spec.js`: customer, order, invoice, payment and My Account pages each show their text; the organization
+  menu selects Ziziwork Retail and then clears it; PrintOrder 55400 shows its total and real SVG barcode bars, and
+  prints a PDF (`PrintOrder-55400.pdf`, with full-page `PrintOrder-55400.png` and `marble-dashboard.png`). Reading the
+  PDF's text (`pdftotext`) was a manual step and is not ported.
 - `FindScreens.spec.js` (was the Playwright `random-screen.spec.mjs`): every `Find*.xml` with a list and its Find
   Options dialog (`form-list header-dialog="true"`) and no required parameter is a row (32 today), or only the one
   `--param screen=` names. Each row checks the status, the URL, the list table with a visible header, the Find Options
@@ -157,20 +158,12 @@ Both `mr-mantle` and `mr-marble` must be selected for cross-component test depen
 
 ### Authenticated browser smoke
 
-Use **disposable** data; this smoke changes and clears the demo user's active organization. Start a server against the retained `/tmp/mt-...` runtime printed at the beginning of the test run, with a free HTTP and cluster port. Marble's normal component config provides the app mount and its setup data provides administrator authorization; no extra authz grant is needed.
+Use **disposable** data; this smoke changes and clears the demo user's active organization. `--serve` starts that database itself (mr-mantle and mr-marble, with the flow data and the test-only grant). Marble's component config provides the app mount.
 
 ```sh
-# In a separate terminal, after the test process finishes:
-MOQUI_RUNTIME=/tmp/mt-... target/debug/moqui --port 18082 --https-port off \
-    --no-run-es -D cluster_https_port=18446
-
-# Once the server reports it is listening (Node 22+ and Chromium):
-MRMARBLE_BASE_URL=http://127.0.0.1:18082 \
-MRMARBLE_CHROMIUM=/usr/bin/chromium MRMARBLE_OUTPUT_DIR=/tmp \
-    node runtime/component/mr-marble/test/browser-smoke.mjs
-pdftotext /tmp/mrmarble-order.pdf -
+moqui test-client mr-marble --serve --spec BrowserSmoke
 ```
 
-The default credentials are the **local demo** `john.doe` / `moqui`; override `MRMARBLE_USERNAME` and `MRMARBLE_PASSWORD` if using a different disposable fixture. Never enable demo credentials in production. Stop the server when done.
+The default credentials are the **local demo** `john.doe` / `moqui`; override them with `--param user=` and `--param password=`. Never enable demo credentials in production.
 
-The smoke waits for browser load events and QVT DOM mutations, not sleeps. It checks the real mounted HTML and QVT pages, the native organization menu, select/clear preference transitions, barcode SVG and PDF generation, uncaught exceptions and HTTP failures. Outputs: `mrmarble-browser-results.json`, `mrmarble-dashboard.png`, `mrmarble-order.pdf`. See `../MIGRATION-STATUS.md` for results and precise acceptance limits.
+The spec checks the mounted HTML pages, the native organization menu (select Ziziwork Retail, then clear it), barcode SVG and PDF generation. Page problems (uncaught exceptions, console errors, HTTP failures, render errors) fail the rows. Screenshots and the PDF are in the output directory printed at the end. Reading the PDF's text is not part of the spec. See `../MIGRATION-STATUS.md` for acceptance limits.

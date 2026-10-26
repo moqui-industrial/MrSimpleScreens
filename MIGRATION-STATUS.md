@@ -478,7 +478,7 @@ MR-Moqui port of `moqui/MarbleERP` at `dfbea90`. Repository: https://github.com/
 3. The pristine load stopped at the Java-only `moqui-fop` dependency. Removing that dependency was necessary before the pre-conversion load could pass. Print content now comes from mr-marble's HTML-print replacements and MR-Moqui's Chromium PDF path, not FOP.
 4. Mechanical conversion rewrote 26 parameter maps and one data-link Elvis expression in two files. Parse failures fell from 30 to 3. Converter output is committed separately from the hand port.
 5. Hand ported `orgPartyRoles*.partyId` to `map`, the inline FreeMarker organization chooser to the fancy dialect, and the two stored party-link role conditions to JavaScript `some`. Replaced the chooser's jQuery/Bootstrap dropdown/tooltip with native `details` and DOM relocation. Organization names are HTML-escaped and IDs URL-encoded.
-6. Added `test/MarbleScreens.spec.js` and the dependency-free Chromium smoke `test/browser-smoke.mjs`.
+6. Added `test/MarbleScreens.spec.js` and the Chromium smoke, now `test/client/BrowserSmoke.spec.js`.
 
 Marble owns only its shell and dashboard; most ERP screens are mounted from SimpleScreens. No Mantle business services were copied into this component. Authorization data and the `MANTLE_ACTIVE_ORG` filters are retained unchanged; no global bypass or new user grant was added.
 
