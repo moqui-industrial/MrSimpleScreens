@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="mantle.order.OrderInfoServices.get#OrderDisplayInfo" in-map="{orderId:orderId}" out-map="context"/>
 
         <if condition="!templateLocation">
-            <set field="templateLocation" value="component://mr-marble/template/order/Order.xsl-fo.ftl"/></if>
+            <set field="templateLocation" value="component://mr-marble/template/order/Order.print.html.fancy"/></if>
     </actions>
     <widgets>
         <render-mode>

@@ -137,7 +137,7 @@
                     After you enter your content, highlight the text you want to style and select the options you set in the style editor in the "<em>styles</em>" drop down box. Want to <a href="http://www.mailchimp.com/kb/article/im-using-the-style-designer-and-i-cant-get-my-formatting-to-change" target="_blank">get rid of styling on a bit of text</a>, but having trouble doing it? Just use the "<em>remove formatting</em>" button to strip the text of any formatting and reset your style.
                     -->
                     <#if has(bodyContent)>${raw(bodyContent)}</#if>
-                    <#if has(bodyContentLocation)>${raw(sri.renderText((bodyContentLocation.startsWith("component://mr-marble/") ? bodyContentLocation.replace(/\.ftl$/, ".fancy") : bodyContentLocation), "true"))}</#if>
+                    <#if has(bodyContentLocation)>${raw(sri.renderText(bodyContentLocation, "true"))}</#if>
                 </td></tr></table>
             </td></tr>
             <#-- FOOTER -->
@@ -145,7 +145,7 @@
                 <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateFooter">
                     <tr width="100%"><td valign="top" class="footerContent" style="padding-top:20px;" width="100%">
                         <#if has(footerContent)>${raw(footerContent)}</#if>
-                        <#if has(footerContentLocation)>${raw(sri.renderText((footerContentLocation.startsWith("component://mr-marble/") ? footerContentLocation.replace(/\.ftl$/, ".fancy") : footerContentLocation), "true"))}</#if>
+                        <#if has(footerContentLocation)>${raw(sri.renderText(footerContentLocation, "true"))}</#if>
                     </td></tr>
                     <#--
                     <tr><td valign="top" class="footerContent">

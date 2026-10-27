@@ -5,7 +5,7 @@
 //
 // Columns: Discovery (one of the no-required-parameter paths SimpleScreensRender renders; "excluded" for a screen it
 // skips), Targeted (the path appears in the server specs; a text match, so it can over-credit a screen named inside a
-// longer path), Smoke (in test/client/BrowserSmoke.spec.js), Companion files (the .fancy replacements and original .ftl
+// longer path), Smoke (in test/client/BrowserSmoke.spec.js), Companion files (the .fancy templates
 // beside the screen). The discovery list comes from screens.getNoRequiredParameterPaths, as SimpleScreensRender gets it;
 // the screen files are a listing of the component's screen directory (it was git ls-files).
 const OUT = System.getProperty("mrss_screen_report")

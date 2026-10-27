@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="{shipmentId:shipmentId, templateSettingSuffix:'TemplateShipmentInsert'}" out-map="context"/>
 
         <if condition="!templateLocation">
-            <set field="templateLocation" value="component://mr-marble/template/shipment/ShipmentInsert.xsl-fo.ftl"/></if>
+            <set field="templateLocation" value="component://mr-marble/template/shipment/ShipmentInsert.print.html.fancy"/></if>
     </actions>
     <widgets>
         <render-mode>

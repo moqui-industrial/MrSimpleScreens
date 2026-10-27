@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <if condition="sri.getRenderMode() == 'html'">
             <set field="preHeaderContent" from="ec.l10n.localize('Thank you for your purchase.')"/>
-            <set field="bodyContentLocation" value="component://mr-marble/screen/email/InvoiceFinalizedBody.html.ftl"/>
+            <set field="bodyContentLocation" value="component://mr-marble/screen/email/InvoiceFinalizedBody.html.fancy"/>
         </if>
     </actions>
     <widgets>

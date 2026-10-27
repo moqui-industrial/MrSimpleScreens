@@ -2,7 +2,7 @@
 
 Generated 2026-10-16 from the unchanged upstream source. No conversion has been applied.
 
-**Historical document.** Everything below describes the upstream source at `5aed7ffb` before the port: line numbers, lint counts (2,215 parse failures, 2,366 flagged sites) and baseline results are not the current state. The conversion has since been done; the current state, results and remaining limits are in `MIGRATION-STATUS.md`. At 2026-10-23 the component's Groovy lint has 0 parse failures over 384 files and 9,903 expression sites, the original FreeMarker/XSL-FO templates (29 `.ftl` files) are kept only as reference beside their HTML-print (`*.print.html.fancy`) replacements, and the component has three JS specs (`MyAccountScreens`, `SimpleScreensRender`, `GitScreens`) in place of the original Groovy test.
+**Historical document.** Everything below describes the upstream source at `5aed7ffb` before the port: line numbers, lint counts (2,215 parse failures, 2,366 flagged sites) and baseline results are not the current state. The conversion has since been done and the 29 `.ftl` files have been removed; the current state, results and remaining limits are in `MIGRATION-STATUS.md`. At 2026-10-23 the component's Groovy lint has 0 parse failures over 384 files and 9,903 expression sites, the HTML-print (`*.print.html.fancy`) replacements are what the screens render, and the component has three JS specs (`MyAccountScreens`, `SimpleScreensRender`, `GitScreens`) in place of the original Groovy test.
 
 ## Revision and repository state
 

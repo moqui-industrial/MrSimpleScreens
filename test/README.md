@@ -105,7 +105,7 @@ cargo test -p moqui-core --lib
 cargo test -p moqui-lib barcode
 ```
 
-Current component/runtime screen lint has zero parse failures. Component lint retains 17 known false positives: literal `$` form-location strings and Boolean `hasNoItems` checks. Legacy `.ftl` location detections are compatibility adapters; originals remain as oracles. Dynamic/custom template locations need runtime tests.
+Current component/runtime screen lint has zero parse failures. Component lint retains 17 known false positives: literal `$` form-location strings and Boolean `hasNoItems` checks. Eight print screens still name `.xsl-fo.ftl` inside the rewrite from a stored setting to `.print.html.fancy`. A custom template location outside this component needs a runtime test.
 
 Host result: **939 passed, 0 failed, 1 ignored**; includes 18 print tests and nested-map/entity flattening regression. Barcode library: three passed. Required host changes are currently uncommitted, as is the component migration; this is not released-framework or clean-checkout certification.
 
