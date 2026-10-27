@@ -35,21 +35,21 @@ along with this software (see the LICENSE.md file). If not, see
 <#elseif (shipment.estimatedShipDate != null)>
   <#assign actualShipDate = ec.l10n.format(shipment.estimatedShipDate, "dd MMM yyyy")>
 <#else>
-  <#assign actualShipDate = "Not yet shipped">
+  <#assign actualShipDate = ec.l10n.localize('Not yet shipped')>
 </#if>
 <#-- The XSL-FO region-before: a table head, which Chromium repeats at the top of every page the body runs onto. -->
 <table class="print-running"><thead><tr><td><div class="page-header">
-            <div style="font-size:14pt;text-align:center;margin-bottom:0.1in">Bill of Lading #${shipmentId}</div>
+            <div style="font-size:14pt;text-align:center;margin-bottom:0.1in">${ec.l10n.localize('Bill of Lading')} #${shipmentId}</div>
             <table style="margin-bottom:0.1in;width:7.5in">
                 <tbody><tr>
                     <td style="padding:3pt;width:3.75in">
-                        <div style="font-weight:bold">Shipper</div>
+                        <div style="font-weight:bold">${ec.l10n.localize('Shipper')}</div>
                         <div>${(fromPartyDetail.organizationName ?? "")}${(fromPartyDetail?.firstName ?? "")} ${(fromPartyDetail?.lastName ?? "")}</div>
-                        <div style="font-weight:bold">Consignee</div>
+                        <div style="font-weight:bold">${ec.l10n.localize('Consignee')}</div>
                         <div>${(toPartyDetail.organizationName ?? "")}${(toPartyDetail?.firstName ?? "")} ${(toPartyDetail?.lastName ?? "")}</div>
                     </td>
                     <td style="padding:3pt;width:2in">
-                        <div style="font-weight:bold">Date</div>
+                        <div style="font-weight:bold">${ec.l10n.localize('Date')}</div>
                         <div>${actualShipDate}</div>
                     </td>
                     <td style="padding:3pt;width:1.75in">
@@ -66,7 +66,7 @@ along with this software (see the LICENSE.md file). If not, see
         <div class="page-body">
             <div style="border-top:thin solid black">
                 <#-- TODO: show vendor's contact info (customer service or billing address, phone, email)? -->
-                <div style="text-align:center">Bill of Lading #${shipmentId} -- ${actualShipDate}</div>
+                <div style="text-align:center">${ec.l10n.localize('Bill of Lading')} #${shipmentId} -- ${actualShipDate}</div>
             </div>
         <#--
             <#list orderPartInfoList as orderPartInfo>

@@ -15,7 +15,7 @@
         <td style="padding:${cellPadding}"><div>${(lot?.lotNumber ?? asset?.lotId ?? "")}</div></td>
         <td style="padding:${cellPadding}">
             <div>${(invoiceItem?.description ?? itemTypeEnum?.description ?? "")}</div>
-            <#if has(invoiceItem?.otherPartyProductId)><div>Your Product: ${invoiceItem.otherPartyProductId}</div></#if>
+            <#if has(invoiceItem?.otherPartyProductId)><div>${ec.l10n.localize('Your Product')}: ${invoiceItem.otherPartyProductId}</div></#if>
         </td>
         <td style="padding:${cellPadding}"><div style="text-align:center">${(invoiceItem.quantity ?? "1")}</div></td>
         <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency((invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>

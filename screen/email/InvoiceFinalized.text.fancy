@@ -3,36 +3,36 @@
 <#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
 <#assign dateFormat = (dateFormat ?? "dd MMM yyyy")>
 
-Invoice ${invoiceId}
+${ec.l10n.localize('Invoice')} ${invoiceId}
 <#if (finalizedStatusHistoryList.length> 1)>
-AMENDED ${ec.l10n.format(finalizedStatusHistoryList[0].changedDate, dateFormat)} (previous ${ec.l10n.format(finalizedStatusHistoryList[1].changedDate, dateFormat)})
+${ec.l10n.localize('AMENDED')} ${ec.l10n.format(finalizedStatusHistoryList[0].changedDate, dateFormat)} (${ec.l10n.localize('previous')} ${ec.l10n.format(finalizedStatusHistoryList[1].changedDate, dateFormat)})
 </#if>
 <#list orderIdSet as orderId>
-For Order ${orderId}
+${ec.l10n.localize('For Order')} ${orderId}
 </#list>
-Invoice Date ${ec.l10n.format(invoice.invoiceDate, dateFormat)}
-Customer # ${toParty.pseudoId}
-<#if has(invoice?.referenceNumber)>Ref # ${invoice.referenceNumber}</#if>
-<#if has(invoice?.otherPartyOrderId)>Your Order ${invoice.otherPartyOrderId}</#if>
+${ec.l10n.localize('Invoice Date')} ${ec.l10n.format(invoice.invoiceDate, dateFormat)}
+${ec.l10n.localize('Customer #')} ${toParty.pseudoId}
+<#if has(invoice?.referenceNumber)>${ec.l10n.localize('Ref #')} ${invoice.referenceNumber}</#if>
+<#if has(invoice?.otherPartyOrderId)>${ec.l10n.localize('Your Order')} ${invoice.otherPartyOrderId}</#if>
 
 <#if toDecimal(unpaidTotal ?? 0).compare(0) == 0>
-PAID IN FULL
+${ec.l10n.localize('PAID IN FULL')}
 <#else>
-Balance Due ${ec.l10n.formatCurrency(unpaidTotal, invoice.currencyUomId)}
+${ec.l10n.localize('Balance Due')} ${ec.l10n.formatCurrency(unpaidTotal, invoice.currencyUomId)}
 </#if>
 <#if toDecimal(unpaidTotal ?? 0).compare(0) != 0>
     <#if (invoice.dueDate != null)>
-Due Date ${ec.l10n.format(invoice.dueDate, dateFormat)}
+${ec.l10n.localize('Due Date')} ${ec.l10n.format(invoice.dueDate, dateFormat)}
     </#if>
     <#if has(settlementTerm)>
-Term: ${settlementTerm.description}
+${ec.l10n.localize('Term')}: ${settlementTerm.description}
     </#if>
 </#if>
 
 <#if has(fromContactInfo?.postalAddress)>
     <#if has(fromContactInfo?.postalAddress?.toName) || has(fromContactInfo?.postalAddress?.attnName)>
-<#if has(fromContactInfo?.postalAddress?.toName)>To: ${fromContactInfo.postalAddress.toName}</#if><#if has(fromContactInfo?.postalAddress?.attnName)>
-Attn: ${fromContactInfo.postalAddress.attnName}</#if>
+<#if has(fromContactInfo?.postalAddress?.toName)>${ec.l10n.localize('To')}: ${fromContactInfo.postalAddress.toName}</#if><#if has(fromContactInfo?.postalAddress?.attnName)>
+${ec.l10n.localize('Attn')}: ${fromContactInfo.postalAddress.attnName}</#if>
     <#else>
 ${(fromParty?.organizationName ?? "")} ${(fromParty?.firstName ?? "")} ${(fromParty?.middleName ?? "")} ${(fromParty?.lastName ?? "")}
     </#if>
@@ -41,10 +41,10 @@ ${fromContactInfo.postalAddress.address2}</#if>
 ${(fromContactInfo.postalAddress.city ?? "")}, ${(fromContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 ?? "")} ${(fromContactInfo.postalAddress.postalCode ?? "")}<#if has(fromContactInfo?.postalAddress?.postalCodeExt)>-${fromContactInfo.postalAddress.postalCodeExt}</#if><#if has(fromContactInfo?.postalAddress?.countryGeoId)> ${fromContactInfo.postalAddress.countryGeoId}</#if>
 </#if>
 <#if has(fromContactInfo?.telecomNumber)>
-<#if has(fromContactInfo?.telecomNumber?.countryCode)>Tel: ${fromContactInfo.telecomNumber.countryCode}-</#if><#if has(fromContactInfo?.telecomNumber?.areaCode)>${fromContactInfo.telecomNumber.areaCode}-</#if>${(fromContactInfo.telecomNumber.contactNumber ?? "")}
+<#if has(fromContactInfo?.telecomNumber?.countryCode)>${ec.l10n.localize('Tel')}: ${fromContactInfo.telecomNumber.countryCode}-</#if><#if has(fromContactInfo?.telecomNumber?.areaCode)>${fromContactInfo.telecomNumber.areaCode}-</#if>${(fromContactInfo.telecomNumber.contactNumber ?? "")}
 </#if>
 <#if has(fromContactInfo?.faxTelecomNumber)>
-<#if has(fromContactInfo?.faxTelecomNumber?.countryCode)>Fax: ${fromContactInfo.faxTelecomNumber.countryCode}-</#if><#if has(fromContactInfo?.faxTelecomNumber?.areaCode)>${fromContactInfo.faxTelecomNumber.areaCode}-</#if>${(fromContactInfo.faxTelecomNumber.contactNumber ?? "")}
+<#if has(fromContactInfo?.faxTelecomNumber?.countryCode)>${ec.l10n.localize('Fax')}: ${fromContactInfo.faxTelecomNumber.countryCode}-</#if><#if has(fromContactInfo?.faxTelecomNumber?.areaCode)>${fromContactInfo.faxTelecomNumber.areaCode}-</#if>${(fromContactInfo.faxTelecomNumber.contactNumber ?? "")}
 </#if>
 <#if has(fromContactInfo?.emailAddress)>
 ${fromContactInfo.emailAddress}

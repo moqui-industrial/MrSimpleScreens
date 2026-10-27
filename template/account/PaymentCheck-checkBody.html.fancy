@@ -54,7 +54,7 @@
         <#assign contactInfo = paymentInfo.toBillingContactInfo>
         <#if has(contactInfo?.postalAddress?.toName) || has(contactInfo?.postalAddress?.attnName)>
             <#if has(contactInfo?.postalAddress?.toName)><div style="text-align:left">${contactInfo.postalAddress.toName}</div></#if>
-            <#if has(contactInfo?.postalAddress?.attnName)><div style="text-align:left">Attn: ${contactInfo.postalAddress.attnName}</div></#if>
+            <#if has(contactInfo?.postalAddress?.attnName)><div style="text-align:left">${ec.l10n.localize('Attn')}: ${contactInfo.postalAddress.attnName}</div></#if>
         <#else>
             <div style="text-align:left">${(paymentInfo?.toPartyDetail?.organizationName ?? "")}${(paymentInfo?.toPartyDetail?.firstName ?? "")} ${(paymentInfo?.toPartyDetail?.lastName ?? "")}</div>
         </#if>

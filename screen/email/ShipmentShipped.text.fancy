@@ -2,20 +2,20 @@
      has(x): FreeMarker's ?has_content, an empty text, list or map is false -->
 <#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
 
-Shipment ${shipmentId}
+${ec.l10n.localize('Shipment')} ${shipmentId}
 <#list orderIdSet as orderId>
-Order ${orderId}
+${ec.l10n.localize('Order')} ${orderId}
 </#list>
 <#if has(invoiceList)>
-Invoice <#list invoiceList as invoice>${invoice.invoiceId}<#if has(invoice?.otherPartyOrderId) || has(invoice?.referenceNumber)> - PO ${(invoice.otherPartyOrderId ?? invoice.referenceNumber)}</#if><#if invoice_has_next>, </#if></#list>
+${ec.l10n.localize('Invoice')} <#list invoiceList as invoice>${invoice.invoiceId}<#if has(invoice?.otherPartyOrderId) || has(invoice?.referenceNumber)> - PO ${(invoice.otherPartyOrderId ?? invoice.referenceNumber)}</#if><#if invoice_has_next>, </#if></#list>
 </#if>
-<#if has(originFacility)>Shipping from ${originFacility.facilityName}</#if>
+<#if has(originFacility)>${ec.l10n.localize('Shipping from')} ${originFacility.facilityName}</#if>
 
-<#if has(firstShipmentMethodEnum)>Ship By ${firstShipmentMethodEnum.description}</#if>
+<#if has(firstShipmentMethodEnum)>${ec.l10n.localize('Ship By')} ${firstShipmentMethodEnum.description}</#if>
 <#if has(toContactInfo?.postalAddress)>
     <#if has(toContactInfo?.postalAddress?.toName) || has(toContactInfo?.postalAddress?.attnName)>
-<#if has(toContactInfo?.postalAddress?.toName)>To: ${toContactInfo.postalAddress.toName}</#if><#if has(toContactInfo?.postalAddress?.attnName)>
-Attn: ${toContactInfo.postalAddress.attnName}</#if>
+<#if has(toContactInfo?.postalAddress?.toName)>${ec.l10n.localize('To')}: ${toContactInfo.postalAddress.toName}</#if><#if has(toContactInfo?.postalAddress?.attnName)>
+${ec.l10n.localize('Attn')}: ${toContactInfo.postalAddress.attnName}</#if>
     <#else>
 ${(toPartyDetail?.organizationName ?? "")} ${(toPartyDetail?.firstName ?? "")} ${(toPartyDetail?.middleName ?? "")} ${(toPartyDetail?.lastName ?? "")}
     </#if>
@@ -35,18 +35,18 @@ ${toContactInfo.emailAddress}
     <#assign weightUom = (shipmentPackage.weightUom ?? '')>
     <#assign shipmentPackageContentList = shipmentPackage.contents>
     <#assign packageRouteSeg = ec.entity.find("mantle.shipment.ShipmentPackageRouteSeg").condition("shipmentId", shipmentId).condition("shipmentPackageSeqId", shipmentPackage.shipmentPackageSeqId).condition("shipmentRouteSegmentSeqId", firstRouteSegment.shipmentRouteSegmentSeqId).one()>
-Package ${shipmentPackage.shipmentPackageSeqId}<#if has(shipmentPackage?.weight)>
-Weight ${ec.l10n.format(shipmentPackage.weight, "")} ${(weightUom?.description ?? "")}</#if>
-Tracking ${(firstCarrierDetail?.organizationName ?? "")} ${(packageRouteSeg?.trackingCode ?? "N/A")}
+${ec.l10n.localize('Package')} ${shipmentPackage.shipmentPackageSeqId}<#if has(shipmentPackage?.weight)>
+${ec.l10n.localize('Weight')} ${ec.l10n.format(shipmentPackage.weight, "")} ${(weightUom?.description ?? "")}</#if>
+${ec.l10n.localize('Tracking')} ${(firstCarrierDetail?.organizationName ?? "")} ${(packageRouteSeg?.trackingCode ?? ec.l10n.localize('N/A'))}
 
 <#list shipmentPackageContentList as shipmentPackageContent>
     <#assign product = shipmentPackageContent.product>
-Description: ${(product.productName ?? shipmentPackageContent.productId)}
-Quantity: ${shipmentPackageContent.quantity}
+${ec.l10n.localize('Description')}: ${(product.productName ?? shipmentPackageContent.productId)}
+${ec.l10n.localize('Quantity')}: ${shipmentPackageContent.quantity}
 </#list>
 </#list>
 <#if has(shipment?.handlingInstructions)>
-Shipping Instructions
+${ec.l10n.localize('Shipping Instructions')}
 
 ${shipment.handlingInstructions}
 </#if>

@@ -3,51 +3,51 @@
 <#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
 <#assign dateFormat = dateFormat ?? "dd MMM yyyy">
 
-The following invoices are now past due and we have not received payment for the unpaid amounts listed below.
+${ec.l10n.localize('The following invoices are now past due and we have not received payment for the unpaid amounts listed below.')}
 
-Please contact us immediately to discuss payment options.
+${ec.l10n.localize('Please contact us immediately to discuss payment options.')}
 
-Past Due Invoices
+${ec.l10n.localize('Past Due Invoices')}
 
 <#list invoiceList as invoice>
-Your Order: ${invoice.otherPartyOrderId ?? ""}
-Ref #: ${invoice.referenceNumber ?? ""}
-Invoice: ${invoice.invoiceId}
-Date: ${ec.l10n.format(invoice.invoiceDate ?? null, dateFormat)}
-Due: ${ec.l10n.format(invoice.dueDate ?? null, dateFormat)}
-Total: ${ec.l10n.formatCurrency(invoice.invoiceTotal ?? 0, invoice.currencyUomId ?? "USD")}
-Unpaid: ${ec.l10n.formatCurrency(invoice.unpaidTotal ?? 0, invoice.currencyUomId ?? "USD")}
+${ec.l10n.localize('Your Order')}: ${invoice.otherPartyOrderId ?? ""}
+${ec.l10n.localize('Ref #')}: ${invoice.referenceNumber ?? ""}
+${ec.l10n.localize('Invoice')}: ${invoice.invoiceId}
+${ec.l10n.localize('Date')}: ${ec.l10n.format(invoice.invoiceDate ?? null, dateFormat)}
+${ec.l10n.localize('Due')}: ${ec.l10n.format(invoice.dueDate ?? null, dateFormat)}
+${ec.l10n.localize('Total')}: ${ec.l10n.formatCurrency(invoice.invoiceTotal ?? 0, invoice.currencyUomId ?? "USD")}
+${ec.l10n.localize('Unpaid')}: ${ec.l10n.formatCurrency(invoice.unpaidTotal ?? 0, invoice.currencyUomId ?? "USD")}
 
 </#list>
 
 <#if (paymentList?.length> 0)>
-Payments not yet Applied
+${ec.l10n.localize('Payments not yet Applied')}
 
 <#list paymentList as payment>
-Payment Ref #: ${payment.paymentRefNum ?? ""}
-Payment #: ${payment.paymentId}
-Date: ${ec.l10n.format(payment.effectiveDate ?? null, dateFormat)}
-Total: ${ec.l10n.formatCurrency(payment.amount ?? 0, payment.amountUomId ?? "USD")}
-Unapplied: ${ec.l10n.formatCurrency(payment.unappliedTotal ?? 0, payment.amountUomId ?? "USD")}
+${ec.l10n.localize('Payment Ref #')}: ${payment.paymentRefNum ?? ""}
+${ec.l10n.localize('Payment #')}: ${payment.paymentId}
+${ec.l10n.localize('Date')}: ${ec.l10n.format(payment.effectiveDate ?? null, dateFormat)}
+${ec.l10n.localize('Total')}: ${ec.l10n.formatCurrency(payment.amount ?? 0, payment.amountUomId ?? "USD")}
+${ec.l10n.localize('Unapplied')}: ${ec.l10n.formatCurrency(payment.unappliedTotal ?? 0, payment.amountUomId ?? "USD")}
 
 </#list>
 </#if>
 
 <#if (creditInvoiceList?.length> 0)>
-Credit Memos not yet Applied
+${ec.l10n.localize('Credit Memos not yet Applied')}
 
 <#list creditInvoiceList as invoice>
-Your Order: ${invoice.otherPartyOrderId ?? ""}
-Credit Ref #: ${invoice.referenceNumber ?? ""}
-Memo #: ${invoice.invoiceId}
-Date: ${ec.l10n.format(invoice.invoiceDate ?? null, dateFormat)}
-Due: ${ec.l10n.format(invoice.dueDate ?? null, dateFormat)}
-Total: ${ec.l10n.formatCurrency(invoice.invoiceTotal ?? 0, invoice.currencyUomId ?? "USD")}
-Unapplied: ${ec.l10n.formatCurrency(invoice.unpaidTotal ?? 0, invoice.currencyUomId ?? "USD")}
+${ec.l10n.localize('Your Order')}: ${invoice.otherPartyOrderId ?? ""}
+${ec.l10n.localize('Credit Ref #')}: ${invoice.referenceNumber ?? ""}
+${ec.l10n.localize('Memo #')}: ${invoice.invoiceId}
+${ec.l10n.localize('Date')}: ${ec.l10n.format(invoice.invoiceDate ?? null, dateFormat)}
+${ec.l10n.localize('Due')}: ${ec.l10n.format(invoice.dueDate ?? null, dateFormat)}
+${ec.l10n.localize('Total')}: ${ec.l10n.formatCurrency(invoice.invoiceTotal ?? 0, invoice.currencyUomId ?? "USD")}
+${ec.l10n.localize('Unapplied')}: ${ec.l10n.formatCurrency(invoice.unpaidTotal ?? 0, invoice.currencyUomId ?? "USD")}
 
 </#list>
 </#if>
 
-Total Past Due: ${ec.l10n.format(toDecimal(unpaidInvoiceTotal ?? 0).subtract(unappliedPaymentTotal ?? 0).subtract(creditInvoiceTotal ?? 0), "#,##0.00")}
+${ec.l10n.localize('Total Past Due')}: ${ec.l10n.format(toDecimal(unpaidInvoiceTotal ?? 0).subtract(unappliedPaymentTotal ?? 0).subtract(creditInvoiceTotal ?? 0), "#,##0.00")}
 
-Customer #: ${toParty.pseudoId}
+${ec.l10n.localize('Customer #')}: ${toParty.pseudoId}

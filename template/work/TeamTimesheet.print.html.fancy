@@ -39,31 +39,31 @@ along with this software (see the LICENSE.md file). If not, see
             <table style="width:7.5in;border:none"><tbody>
                 <tr>
                     <td style="width:3in;padding:2pt;border:solid black">
-                        <div style="font-size:8pt;text-align:center">Team</div>
+                        <div style="font-size:8pt;text-align:center">${ec.l10n.localize('Team')}</div>
                         <div style="font-size:12pt;text-align:center">${ec.resource.expand('PartyNameTemplate', '', teamDetail)}</div>
                     </td>
                     <td style="width:3in;padding:2pt;border:solid black">
-                        <div style="font-size:8pt;text-align:center">Company</div>
+                        <div style="font-size:8pt;text-align:center">${ec.l10n.localize('Company')}</div>
                         <div style="font-size:12pt;text-align:center"><#if (clientDetail != null)>${ec.resource.expand('PartyNameTemplate', '', clientDetail)}<#else>&#8199;</#if></div>
                     </td>
                     <td style="width:1.5in;padding:2pt;border:solid black">
-                        <div style="font-size:8pt;text-align:center">Date</div>
+                        <div style="font-size:8pt;text-align:center">${ec.l10n.localize('Date')}</div>
                         <div style="font-size:12pt;text-align:center"><#if (workEffort != null)>${ec.l10n.format(workEffort.actualStartDate, "dd MMM yyyy")}<#else>&#8199;</#if></div>
                     </td>
                 </tr>
                 <tr>
                     <td rowspan="2" style="padding:2pt;border:solid black">
-                        <div style="font-size:8pt;text-align:center">Team</div>
+                        <div style="font-size:8pt;text-align:center">${ec.l10n.localize('Team')}</div>
                         <div style="text-align:center">
                             ${raw(ec.resource.code128Svg(partyId, {height: '0.5in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
                         </div>
                     </td>
                     <td style="padding:2pt;border:solid black">
-                        <div style="font-size:8pt;text-align:center">Location</div>
+                        <div style="font-size:8pt;text-align:center">${ec.l10n.localize('Location')}</div>
                         <div style="font-size:12pt;text-align:center"><#if (facility != null)>${ec.resource.expand('FacilityNameTemplate', '', facility)}<#else>&#8199;</#if></div>
                     </td>
                     <td rowspan="2" style="padding:2pt;border:solid black">
-                        <div style="font-size:8pt;text-align:center">Event</div>
+                        <div style="font-size:8pt;text-align:center">${ec.l10n.localize('Event')}</div>
                         <#if has(workEffortId)>
                         <div style="text-align:center">
                             ${raw(ec.resource.code128Svg(workEffortId, {height: '0.5in', moduleWidth: '0.3mm', fontSize: '12pt', humanReadable: true}))}
@@ -73,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </tr>
                 <tr>
                     <td style="padding:2pt;border:solid black">
-                        <div style="font-size:8pt;text-align:center">Notes</div>
+                        <div style="font-size:8pt;text-align:center">${ec.l10n.localize('Notes')}</div>
                         <div style="font-size:12pt;text-align:center">&#8199;</div>
                     </td>
                 </tr>
@@ -84,18 +84,18 @@ along with this software (see the LICENSE.md file). If not, see
         <div class="page-body">
             <table style="width:7.5in;border-bottom:solid black">
                 <thead style="font-size:10pt;font-weight:bold;border-bottom:solid black"><tr>
-                    <td style="width:3in;padding:${cellPadding}"><div style="text-align:left">Team Member</div></td>
-                    <td style="width:1.5in;padding:${cellPadding}"><div style="text-align:center">Work Type</div></td>
-                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">Start</div></td>
-                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">End</div></td>
-                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">Hours</div></td>
+                    <td style="width:3in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Team Member')}</div></td>
+                    <td style="width:1.5in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Work Type')}</div></td>
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Start')}</div></td>
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('End')}</div></td>
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Hours')}</div></td>
                     <#-- <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">Break</div></td> -->
-                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">Pieces</div></td>
+                    <td style="width:0.75in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Pieces')}</div></td>
                 </tr></thead>
                 <tbody>
                 <#if (workEffort != null)>
                 <tr style="font-size:9pt;border-bottom:solid black;color:grey">
-                    <td style="padding:${cellPadding}"><div style="text-align:left">Default (event #${workEffortId})</div></td>
+                    <td style="padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Default (event #')}${workEffortId})</div></td>
                     <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">${workTypeEnum?.description ?? '\u2007'}</div></td>
                     <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">${ec.l10n.format(workEffort.actualStartDate, "HH:mm")}</div></td>
                     <td style="padding:${cellPadding};border-left:solid grey"><div style="text-align:center">&#8199;</div></td>

@@ -46,7 +46,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </div>
                 <#else>
                     <div style="font-size:13pt;text-align:center;font-weight:bold">${(fromParty?.organizationName ?? "")}${(fromParty?.firstName ?? "")} ${(fromParty?.lastName ?? "")}</div>
-                    <div style="font-size:12pt;text-align:center;margin-bottom:0.1in">Invoice</div>
+                    <div style="font-size:12pt;text-align:center;margin-bottom:0.1in">${ec.l10n.localize('Invoice')}</div>
                 </#if>
             </div>
             <div style="position:absolute;top:0in;right:2.0in;width:2.5in">
@@ -83,34 +83,34 @@ along with this software (see the LICENSE.md file). If not, see
             <div style="width:7.5in;height:0.8in">
                 <table style="margin-bottom:0.2in;width:7.5in"><tbody><tr>
                     <td style="padding:3pt;width:1.75in">
-                        <div style="font-weight:bold">Invoice #</div>
+                        <div style="font-weight:bold">${ec.l10n.localize('Invoice #')}</div>
                         <div>${invoiceId}</div>
-                        <div style="font-weight:bold">Customer #</div>
+                        <div style="font-weight:bold">${ec.l10n.localize('Customer #')}</div>
                         <div>${toParty.pseudoId}</div>
                     </td>
                     <#if has(invoice?.referenceNumber) || has(invoice?.otherPartyOrderId)>
                         <td style="padding:3pt;width:1.75in">
                             <#if has(invoice?.referenceNumber)>
-                                <div style="font-weight:bold">Ref #</div>
+                                <div style="font-weight:bold">${ec.l10n.localize('Ref #')}</div>
                                 <div>${invoice.referenceNumber}</div>
                             </#if>
                             <#if has(invoice?.otherPartyOrderId)>
-                                <div style="font-weight:bold">Your Order</div>
+                                <div style="font-weight:bold">${ec.l10n.localize('Your Order')}</div>
                                 <div>${invoice.otherPartyOrderId}</div>
                             </#if>
                         </td>
                     </#if>
                     <td style="padding:3pt;width:2in">
                         <#if (finalizedStatusHistoryList.length> 1)>
-                            <div style="font-weight:bold">AMENDED ${ec.l10n.format(finalizedStatusHistoryList[0].changedDate, dateFormat)}</div>
-                            <div>(previous ${ec.l10n.format(finalizedStatusHistoryList[1].changedDate, dateFormat)})</div>
+                            <div style="font-weight:bold">${ec.l10n.localize('AMENDED')} ${ec.l10n.format(finalizedStatusHistoryList[0].changedDate, dateFormat)}</div>
+                            <div>(${ec.l10n.localize('previous')} ${ec.l10n.format(finalizedStatusHistoryList[1].changedDate, dateFormat)})</div>
                         </#if>
-                        <div style="font-weight:bold">Invoice Date</div>
+                        <div style="font-weight:bold">${ec.l10n.localize('Invoice Date')}</div>
                         <div>${ec.l10n.format(invoice.invoiceDate, dateFormat)}</div>
                     </td>
                     <#if has(orderIdSet)>
                         <td style="padding:3pt;width:2in">
-                            <div style="font-weight:bold">Our Order</div>
+                            <div style="font-weight:bold">${ec.l10n.localize('Our Order')}</div>
                             <div><#list orderIdSet as orderId>${orderId}<#if orderId_has_next>, </#if></#list></div>
                         </td>
                     </#if>
@@ -120,7 +120,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <#-- Customer Billing Address - for envelope window make a total of 0.8in from left, 2in from top (1.2in tall, 4.5in wide) -->
                 <td style="padding:3pt;width:4.5in">
                     <div style="margin-left:0.5in;margin-top:0.3in;height:1.0in;font-size:10pt">
-                    <#if has(toBillingRep)><div>Attention: ${(toBillingRep?.organizationName ?? "")} ${(toBillingRep?.firstName ?? "")} ${(toBillingRep?.lastName ?? "")}</div></#if>
+                    <#if has(toBillingRep)><div>${ec.l10n.localize('Attention')}: ${(toBillingRep?.organizationName ?? "")} ${(toBillingRep?.firstName ?? "")} ${(toBillingRep?.lastName ?? "")}</div></#if>
                         <div>${(toParty?.organizationName ?? "")} ${(toParty?.firstName ?? "")} ${(toParty?.lastName ?? "")}</div>
                     <#if has(toContactInfo?.postalAddress)>
                         <div>${(toContactInfo?.postalAddress?.address1 ?? "")}<#if has(toContactInfo?.postalAddress?.unitNumber)> #${toContactInfo.postalAddress.unitNumber}</#if></div>
@@ -137,19 +137,19 @@ along with this software (see the LICENSE.md file). If not, see
                 <td style="padding:3pt;width:3in">
                     <#if !showOrig>
                         <#if toDecimal(unpaidTotal ?? 0).compare(0) == 0>
-                            <div style="font-weight:bold">PAID IN FULL</div>
+                            <div style="font-weight:bold">${ec.l10n.localize('PAID IN FULL')}</div>
                         <#else>
-                            <div style="font-weight:bold">Balance Due</div>
+                            <div style="font-weight:bold">${ec.l10n.localize('Balance Due')}</div>
                             <div>${ec.l10n.formatCurrency(unpaidTotal, invoice.currencyUomId)}</div>
                         </#if>
                     </#if>
                     <#if showOrig || toDecimal(unpaidTotal ?? 0).compare(0) != 0>
                         <#if (invoice.dueDate != null)>
-                            <div style="font-weight:bold">Due Date</div>
+                            <div style="font-weight:bold">${ec.l10n.localize('Due Date')}</div>
                             <div>${ec.l10n.format(invoice.dueDate, dateFormat)}</div>
                         </#if>
                         <#if has(settlementTerm)>
-                            <div style="font-weight:bold">Term</div>
+                            <div style="font-weight:bold">${ec.l10n.localize('Term')}</div>
                             <div>${settlementTerm.description}</div>
                         </#if>
                     </#if>
@@ -159,13 +159,13 @@ along with this software (see the LICENSE.md file). If not, see
             <#if hasProductItems && !hasTimeEntryItems>
                 <table style="width:100%">
                     <thead style="font-size:9pt;border-bottom:solid black"><tr>
-                        <td style="width:0.4in;padding:${cellPadding}"><div style="text-align:center">Item</div></td>
-                        <td style="width:1in;padding:${cellPadding}"><div>Product</div></td>
-                        <td style="width:1in;padding:${cellPadding}"><div>Lot</div></td>
-                        <td style="width:2.5in;padding:${cellPadding}"><div>Description</div></td>
-                        <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">Qty</div></td>
-                        <td style="width:0.9in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td>
-                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">Total</div></td>
+                        <td style="width:0.4in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Item')}</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div>${ec.l10n.localize('Product')}</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div>${ec.l10n.localize('Lot')}</div></td>
+                        <td style="width:2.5in;padding:${cellPadding}"><div>${ec.l10n.localize('Description')}</div></td>
+                        <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Qty')}</div></td>
+                        <td style="width:0.9in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Amount')}</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Total')}</div></td>
                     </tr></thead>
                     <tbody>
                         <#list topItemList as invoiceItem>
@@ -177,7 +177,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <td style="padding:${cellPadding}"><div> </div></td>
                             <td style="padding:${cellPadding}"><div> </div></td>
                             <td style="padding:${cellPadding}"><div> </div></td>
-                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">Total</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.localize('Total')}</div></td>
                             <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.formatCurrency(noAdjustmentTotal, invoice.currencyUomId)}</div></td>
                         </tr>
                     </tbody>
@@ -185,13 +185,13 @@ along with this software (see the LICENSE.md file). If not, see
             <#else>
                 <table style="width:100%">
                     <thead style="font-size:9pt;border-bottom:solid black"><tr>
-                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Item</div></td>
-                        <td style="width:1in;padding:${cellPadding}"><div>Type</div></td>
-                        <td style="width:0.8in;padding:${cellPadding}"><div>Date</div></td>
-                        <td style="width:2.8in;padding:${cellPadding}"><div>Description</div></td>
-                        <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">Qty</div></td>
-                        <td style="width:0.9in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td>
-                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">Total</div></td>
+                        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Item')}</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div>${ec.l10n.localize('Type')}</div></td>
+                        <td style="width:0.8in;padding:${cellPadding}"><div>${ec.l10n.localize('Date')}</div></td>
+                        <td style="width:2.8in;padding:${cellPadding}"><div>${ec.l10n.localize('Description')}</div></td>
+                        <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Qty')}</div></td>
+                        <td style="width:0.9in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Amount')}</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Total')}</div></td>
                     </tr></thead>
                     <tbody>
                     <#list topItemList as invoiceItem>
@@ -203,7 +203,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <td style="padding:${cellPadding}"><div> </div></td>
                             <td style="padding:${cellPadding}"><div> </div></td>
                             <td style="padding:${cellPadding}"><div> </div></td>
-                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">Total</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.localize('Total')}</div></td>
                             <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.formatCurrency(noAdjustmentTotal, invoice.currencyUomId)}</div></td>
                         </tr>
                     </tbody>
@@ -212,10 +212,10 @@ along with this software (see the LICENSE.md file). If not, see
 
             <table style="width:100%;margin-top:0.1in">
                 <thead style="font-size:9pt;border-bottom:solid black"><tr>
-                    <td style="width:2.0in;padding:${cellPadding}"><div>Type</div></td>
-                    <#if hasTimeEntryItems><td style="width:1.2in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td></#if>
-                    <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:center">Qty</div></td>
-                    <td style="width:1.2in;padding:${cellPadding}"><div style="text-align:right">Total</div></td>
+                    <td style="width:2.0in;padding:${cellPadding}"><div>${ec.l10n.localize('Type')}</div></td>
+                    <#if hasTimeEntryItems><td style="width:1.2in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Amount')}</div></td></#if>
+                    <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Qty')}</div></td>
+                    <td style="width:1.2in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Total')}</div></td>
                 </tr></thead>
                 <tbody>
                 <#list itemTypeSummaryMapList as itemTypeSummaryMap>
@@ -229,7 +229,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </#list>
                 <tr style="font-size:9pt">
                     <td style="padding:${cellPadding}"><div style="text-align:center"> </div></td>
-                    <td style="padding:${cellPadding};font-weight:bold"><div style="text-align:right">Total</div></td>
+                    <td style="padding:${cellPadding};font-weight:bold"><div style="text-align:right">${ec.l10n.localize('Total')}</div></td>
                     <#if hasTimeEntryItems><td style="padding:${cellPadding}"><div style="text-align:right"> </div></td></#if>
                     <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.formatCurrency(noAdjustmentTotal, invoice.currencyUomId)}</div></td>
                 </tr>
@@ -239,10 +239,10 @@ along with this software (see the LICENSE.md file). If not, see
             <#if !showOrig && has(adjustmentItemList)>
                 <table style="width:100%;margin-top:0.1in">
                     <thead style="font-size:9pt;border-bottom:solid black"><tr>
-                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:center">Adjustment</div></td>
-                        <td style="width:4in;padding:${cellPadding}"><div>Description</div></td>
-                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:center">Date</div></td>
-                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Adjustment')}</div></td>
+                        <td style="width:4in;padding:${cellPadding}"><div>${ec.l10n.localize('Description')}</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Date')}</div></td>
+                        <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Amount')}</div></td>
                     </tr></thead>
                     <tbody>
                         <#list adjustmentItemList as invoiceItem>
@@ -251,7 +251,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <td style="padding:${cellPadding}"><div style="text-align:center">${invoiceItem_index}</div></td>
                                 <td style="padding:${cellPadding}">
                                     <div>${(invoiceItem?.description ?? itemTypeEnum?.description ?? "")}</div>
-                                    <#if has(invoiceItem?.otherPartyProductId)><div>Your Product: ${invoiceItem.otherPartyProductId}</div></#if>
+                                    <#if has(invoiceItem?.otherPartyProductId)><div>${ec.l10n.localize('Your Product')}: ${invoiceItem.otherPartyProductId}</div></#if>
                                 </td>
                                 <td style="padding:${cellPadding}"><div style="text-align:center">${ec.l10n.format((invoiceItem.itemDate ?? ''), dateFormat)}</div></td>
                                 <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency(toDecimal(invoiceItem.quantity ?? 1).multiply(invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>
@@ -259,13 +259,13 @@ along with this software (see the LICENSE.md file). If not, see
                         </#list>
                         <tr style="font-size:9pt;border-top:solid black">
                             <td style="padding:${cellPadding}"><div> </div></td>
-                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">Adjustments Total</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.localize('Adjustments Total')}</div></td>
                             <td style="padding:${cellPadding}"><div> </div></td>
                             <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.formatCurrency(adjustmentTotal, invoice.currencyUomId)}</div></td>
                         </tr>
                         <tr style="font-size:9pt;border-top:solid black">
                             <td style="padding:${cellPadding}"><div> </div></td>
-                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">Invoice Total</div></td>
+                            <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.localize('Invoice Total')}</div></td>
                             <td style="padding:${cellPadding}"><div> </div></td>
                             <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.formatCurrency(invoiceTotal, invoice.currencyUomId)}</div></td>
                         </tr>
@@ -274,14 +274,14 @@ along with this software (see the LICENSE.md file). If not, see
             </#if>
 
         <#if !showOrig && has(paymentApplicationList)>
-            <div style="font-size:10pt;font-weight:bold;margin-top:0.1in">Applied Payments</div>
+            <div style="font-size:10pt;font-weight:bold;margin-top:0.1in">${ec.l10n.localize('Applied Payments')}</div>
             <table style="width:100%">
                 <thead style="font-size:9pt;border-bottom:solid black"><tr>
-                    <td style="width:1in;padding:${cellPadding}"><div>Payment</div></td>
-                    <td style="width:2in;padding:${cellPadding}"><div>Ref/Check</div></td>
-                    <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td>
-                    <td style="width:1in;padding:${cellPadding}"><div style="text-align:center">Date</div></td>
-                    <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">Applied</div></td>
+                    <td style="width:1in;padding:${cellPadding}"><div>${ec.l10n.localize('Payment')}</div></td>
+                    <td style="width:2in;padding:${cellPadding}"><div>${ec.l10n.localize('Ref/Check')}</div></td>
+                    <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Amount')}</div></td>
+                    <td style="width:1in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Date')}</div></td>
+                    <td style="width:1in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Applied')}</div></td>
                 </tr></thead>
                 <tbody>
                     <#list paymentApplicationList as paymentAppl>
@@ -298,7 +298,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <#assign payment = paymentAppl.payment>
                         </#if>
                         <tr style="font-size:8pt;border-bottom:thin solid black">
-                            <td style="padding:${cellPadding}"><div><#if has(otherInvoiceId)>Invc ${otherInvoiceId}<#else>${paymentAppl.paymentId}</#if></div></td>
+                            <td style="padding:${cellPadding}"><div><#if has(otherInvoiceId)>${ec.l10n.localize('Invc')} ${otherInvoiceId}<#else>${paymentAppl.paymentId}</#if></div></td>
                             <td style="padding:${cellPadding}"><div><#if has(otherInvoiceId)>${((otherInvoice.referenceNumber ?? ""))}<#else>${((payment.paymentRefNum ?? ""))}</#if></div></td>
                             <td style="padding:${cellPadding}"><div style="text-align:right"><#if has(otherInvoiceId)>${ec.l10n.formatCurrency((otherInvoice.invoiceTotal ?? ''), invoice.currencyUomId)}<#else>${ec.l10n.formatCurrency((payment.amount ?? ''), invoice.currencyUomId)}</#if></div></td>
                             <td style="padding:${cellPadding}"><div style="text-align:center"><#if has(otherInvoiceId)>${ec.l10n.format((otherInvoice.invoiceDate ?? ''), dateFormat)}<#else>${ec.l10n.format((payment.effectiveDate ?? ''), dateFormat)}</#if></div></td>
@@ -309,7 +309,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <td style="padding:${cellPadding}"><div> </div></td>
                         <td style="padding:${cellPadding}"><div> </div></td>
                         <td style="padding:${cellPadding}"><div> </div></td>
-                        <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">Payments Total</div></td>
+                        <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.localize('Payments Total')}</div></td>
                         <td style="padding:${cellPadding}"><div style="text-align:right;font-weight:bold">${ec.l10n.formatCurrency(appliedPaymentsTotal, invoice.currencyUomId)}</div></td>
                     </tr>
                 </tbody>

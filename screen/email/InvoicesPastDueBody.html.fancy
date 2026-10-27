@@ -3,13 +3,13 @@
 <#assign has = (v) => v != null && v !== '' && (typeof v === 'object' ? (typeof v.length === 'number' ? v.length > 0 : typeof v.toNumber === 'function' || Object.keys(v).length > 0) : true)>
 <#assign dateFormat = dateFormat ?? "dd MMM yyyy">
 
-<p>The following invoices are now past due and we have not received payment for the unpaid amounts listed below.</p>
+<p>${ec.l10n.localize('The following invoices are now past due and we have not received payment for the unpaid amounts listed below.')}</p>
 
-<p>Please contact us immediately to discuss payment options.</p>
+<p>${ec.l10n.localize('Please contact us immediately to discuss payment options.')}</p>
 
-<p><strong>Past Due Invoices</strong></p>
+<p><strong>${ec.l10n.localize('Past Due Invoices')}</strong></p>
 <table border="0" cellpadding="8px" cellspacing="3" width="100%">
-    <tr><td>Your Order</td><td>Ref #</td><td>Invoice #</td><td>Date</td><td>Due</td><td>Total</td><td>Unpaid</td></tr>
+    <tr><td>${ec.l10n.localize('Your Order')}</td><td>${ec.l10n.localize('Ref #')}</td><td>${ec.l10n.localize('Invoice #')}</td><td>${ec.l10n.localize('Date')}</td><td>${ec.l10n.localize('Due')}</td><td>${ec.l10n.localize('Total')}</td><td>${ec.l10n.localize('Unpaid')}</td></tr>
     <#list invoiceList as invoice>
         <tr>
             <td>${invoice.otherPartyOrderId ?? ""}</td>
@@ -24,9 +24,9 @@
 </table>
 
 <#if (paymentList?.length> 0)>
-<p><strong>Payments not yet Applied</strong></p>
+<p><strong>${ec.l10n.localize('Payments not yet Applied')}</strong></p>
 <table border="0" cellpadding="8px" cellspacing="3" width="100%">
-    <tr><td>Payment Ref #</td><td>Payment #</td><td>Date</td><td>Total</td><td>Unapplied</td></tr>
+    <tr><td>${ec.l10n.localize('Payment Ref #')}</td><td>${ec.l10n.localize('Payment #')}</td><td>${ec.l10n.localize('Date')}</td><td>${ec.l10n.localize('Total')}</td><td>${ec.l10n.localize('Unapplied')}</td></tr>
     <#list paymentList as payment>
         <tr>
             <td>${payment.paymentRefNum ?? ""}</td>
@@ -40,9 +40,9 @@
 </#if>
 
 <#if (creditInvoiceList?.length> 0)>
-<p><strong>Credit Memos not yet Applied</strong></p>
+<p><strong>${ec.l10n.localize('Credit Memos not yet Applied')}</strong></p>
 <table border="0" cellpadding="8px" cellspacing="3" width="100%">
-    <tr><td>Your Order</td><td>Credit Ref #</td><td>Memo #</td><td>Date</td><td>Due</td><td>Total</td><td>Unapplied</td></tr>
+    <tr><td>${ec.l10n.localize('Your Order')}</td><td>${ec.l10n.localize('Credit Ref #')}</td><td>${ec.l10n.localize('Memo #')}</td><td>${ec.l10n.localize('Date')}</td><td>${ec.l10n.localize('Due')}</td><td>${ec.l10n.localize('Total')}</td><td>${ec.l10n.localize('Unapplied')}</td></tr>
     <#list creditInvoiceList as invoice>
         <tr>
             <td>${invoice.otherPartyOrderId ?? ""}</td>
@@ -57,6 +57,6 @@
 </table>
 </#if>
 
-<p><strong>Total Past Due</strong> ${ec.l10n.format(toDecimal(unpaidInvoiceTotal ?? 0).subtract(unappliedPaymentTotal ?? 0).subtract(creditInvoiceTotal ?? 0), "#,##0.00")}</p>
+<p><strong>${ec.l10n.localize('Total Past Due')}</strong> ${ec.l10n.format(toDecimal(unpaidInvoiceTotal ?? 0).subtract(unappliedPaymentTotal ?? 0).subtract(creditInvoiceTotal ?? 0), "#,##0.00")}</p>
 
-<p><strong>Customer #</strong> ${toParty.pseudoId}</p>
+<p><strong>${ec.l10n.localize('Customer #')}</strong> ${toParty.pseudoId}</p>

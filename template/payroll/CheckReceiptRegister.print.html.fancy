@@ -28,7 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
 </style>
 <table class="check-receipt-register">
     <colgroup><col style="width: 60%"/><col style="width: 10%"/><col style="width: 10%"/><col style="width: 20%"/></colgroup>
-    <thead><tr><th>Name</th><th>Check #</th><th>Amount</th><th>Signature</th></tr></thead>
+    <thead><tr><th>${ec.l10n.localize('Name')}</th><th>${ec.l10n.localize('Check #')}</th><th>${ec.l10n.localize('Amount')}</th><th>${ec.l10n.localize('Signature')}</th></tr></thead>
     <tbody>
     <#list paymentList as payment>
         <#assign person = ec.entity.find("mantle.party.Person").condition("partyId", payment.toPartyId).useCache(true).one()>

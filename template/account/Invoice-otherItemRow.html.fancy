@@ -18,10 +18,10 @@
         <td style="padding:${cellPadding}"><div>${ec.l10n.format(invoiceItem.itemDate, dateFormat)}</div></td>
         <td style="padding:${cellPadding}">
             <div>${(invoiceItem.description ?? "")}</div>
-            <#if has(timeEntry?.workEffortId)><div>Task: ${timeEntry.workEffortId} - ${(workEffort.workEffortName ?? "")}</div></#if>
-            <#if has(rateTypeEnum)><div>Rate: ${rateTypeEnum.description}</div></#if>
-            <#if has(timeEntry)><div>${ec.l10n.format(timeEntry.fromDate, "dd MMM yyyy hh:mm")} to ${ec.l10n.format(timeEntry.thruDate, "dd MMM yyyy hh:mm")}, Break ${(timeEntry.breakHours ?? "0")}h</div></#if>
-            <#if has(invoiceItem?.otherPartyProductId)><div>Your Product: ${invoiceItem.otherPartyProductId}</div></#if>
+            <#if has(timeEntry?.workEffortId)><div>${ec.l10n.localize('Task')}: ${timeEntry.workEffortId} - ${(workEffort.workEffortName ?? "")}</div></#if>
+            <#if has(rateTypeEnum)><div>${ec.l10n.localize('Rate')}: ${rateTypeEnum.description}</div></#if>
+            <#if has(timeEntry)><div>${ec.l10n.format(timeEntry.fromDate, "dd MMM yyyy hh:mm")} ${ec.l10n.localize('to')} ${ec.l10n.format(timeEntry.thruDate, "dd MMM yyyy hh:mm")}, ${ec.l10n.localize('Break')} ${(timeEntry.breakHours ?? "0")}h</div></#if>
+            <#if has(invoiceItem?.otherPartyProductId)><div>${ec.l10n.localize('Your Product')}: ${invoiceItem.otherPartyProductId}</div></#if>
         </td>
         <td style="padding:${cellPadding}"><div style="text-align:center">${(invoiceItem.quantity ?? "1")}</div></td>
         <td style="padding:${cellPadding}"><div style="text-align:right">${ec.l10n.formatCurrency((invoiceItem.amount ?? 0), invoice.currencyUomId, 3)}</div></td>

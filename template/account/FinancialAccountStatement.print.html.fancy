@@ -36,19 +36,19 @@ along with this software (see the LICENSE.md file). If not, see
 </style>
 <section class="account-statement">
     <h1>${organizationDetail?.organizationName ?? ""}</h1>
-    <h2>Account Statement</h2>
+    <h2>${ec.l10n.localize('Account Statement')}</h2>
     <table class="summary"><colgroup><col style="width: 43%"/><col style="width: 28.5%"/><col style="width: 28.5%"/></colgroup><tbody><tr>
         <td>${ownerDetail?.organizationName ?? ""}${ownerDetail?.firstName ?? ""} ${ownerDetail?.lastName ?? ""}</td>
-        <td><strong>Account</strong><div>${accountCode}</div>
-            <strong>From</strong><div><#if fromDate != null>${ec.l10n.format(fromDate, dateFormat)}<#else>N/A</#if></div>
-            <strong>Through</strong><div>${ec.l10n.format(thruDate ?? ec.user.nowTimestamp, dateFormat)}</div></td>
-        <td><strong>Beginning Balance</strong><div>${ec.l10n.formatCurrency(beginningBalance, financialAccount.currencyUomId)}</div>
-            <strong>Ending Balance</strong><div>${ec.l10n.formatCurrency(endingBalance, financialAccount.currencyUomId)}</div></td>
+        <td><strong>${ec.l10n.localize('Account')}</strong><div>${accountCode}</div>
+            <strong>${ec.l10n.localize('From')}</strong><div><#if fromDate != null>${ec.l10n.format(fromDate, dateFormat)}<#else>${ec.l10n.localize('N/A')}</#if></div>
+            <strong>${ec.l10n.localize('Through')}</strong><div>${ec.l10n.format(thruDate ?? ec.user.nowTimestamp, dateFormat)}</div></td>
+        <td><strong>${ec.l10n.localize('Beginning Balance')}</strong><div>${ec.l10n.formatCurrency(beginningBalance, financialAccount.currencyUomId)}</div>
+            <strong>${ec.l10n.localize('Ending Balance')}</strong><div>${ec.l10n.formatCurrency(endingBalance, financialAccount.currencyUomId)}</div></td>
     </tr></tbody></table>
     <#if (financialAccountTransList?.length> 0)>
     <table class="transactions">
         <colgroup><col style="width: 8.6%"/><col style="width: 11.4%"/><col style="width: 14.3%"/><col style="width: 31.4%"/><col style="width: 14.3%"/><col style="width: 20%"/></colgroup>
-        <thead><tr><th>TX</th><th>Date</th><th>Reason</th><th>Comments</th><th class="money">Amount</th><th class="money">Balance</th></tr></thead>
+        <thead><tr><th>${ec.l10n.localize('TX')}</th><th>${ec.l10n.localize('Date')}</th><th>${ec.l10n.localize('Reason')}</th><th>${ec.l10n.localize('Comments')}</th><th class="money">${ec.l10n.localize('Amount')}</th><th class="money">${ec.l10n.localize('Balance')}</th></tr></thead>
         <tbody>
         <#list financialAccountTransList as trans>
             <tr style="font-size: ${tableFontSize}">
@@ -63,5 +63,5 @@ along with this software (see the LICENSE.md file). If not, see
         </tbody>
     </table>
     </#if>
-    <footer>Account ${accountCode} -- <#if fromDate != null>${ec.l10n.format(fromDate, dateFormat)} to <#else>All through </#if>${ec.l10n.format(thruDate ?? ec.user.nowTimestamp, dateFormat)}</footer>
+    <footer>${ec.l10n.localize('Account')} ${accountCode} -- <#if fromDate != null>${ec.l10n.format(fromDate, dateFormat)} ${ec.l10n.localize('to')} <#else>${ec.l10n.localize('All through')} </#if>${ec.l10n.format(thruDate ?? ec.user.nowTimestamp, dateFormat)}</footer>
 </section>

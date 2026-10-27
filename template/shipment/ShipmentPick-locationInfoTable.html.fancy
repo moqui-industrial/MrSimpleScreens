@@ -7,16 +7,16 @@
 <table style="width:7.5in;border-bottom:solid black">
     <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black"><tr>
         <td style="width:1.4in;padding:${cellPadding}"><div style="text-align:left">${titleString}</div></td>
-        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Ar</div></td>
-        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Ais</div></td>
-        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Sec</div></td>
-        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Lev</div></td>
-        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">Pos</div></td>
-        <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">Cont</div></td>
+        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Ar')}</div></td>
+        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Ais')}</div></td>
+        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Sec')}</div></td>
+        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Lev')}</div></td>
+        <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Pos')}</div></td>
+        <td style="width:0.6in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Cont')}</div></td>
 
-        <td style="width:3.0in;padding:${cellPadding}"><div>Lot</div></td>
-        <td style="width:0.5in;padding:${cellPadding}"><div style="text-align:center">Bin</div></td>
-        <td style="width:0.5in;padding:${cellPadding}"><div style="text-align:right">Quantity</div></td>
+        <td style="width:3.0in;padding:${cellPadding}"><div>${ec.l10n.localize('Lot')}</div></td>
+        <td style="width:0.5in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Bin')}</div></td>
+        <td style="width:0.5in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Quantity')}</div></td>
     </tr></thead>
     <tbody>
     <#list locationInfoList as locationInfo>

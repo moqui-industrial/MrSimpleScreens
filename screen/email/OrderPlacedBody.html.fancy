@@ -8,21 +8,21 @@
     <table border="0" cellpadding="8px" cellspacing="0" width="100%"><tr>
         <td width="50%">
             <#if has(detailLinkPath)>
-                <h1><a href="<#if detailLinkPath.startsWith("http")>${detailLinkPath}<#else>http://${storeDomain}/${detailLinkPath}</#if>?orderId=${orderId}">Order ${orderId}<#if (orderPartInfoList.length> 1)> Part ${orderPart.orderPartSeqId}</#if></a></h1>
+                <h1><a href="<#if detailLinkPath.startsWith("http")>${detailLinkPath}<#else>http://${storeDomain}/${detailLinkPath}</#if>?orderId=${orderId}">${ec.l10n.localize('Order')} ${orderId}<#if (orderPartInfoList.length> 1)> ${ec.l10n.localize('Part')} ${orderPart.orderPartSeqId}</#if></a></h1>
             <#else>
-                <h1>Order ${orderId}<#if (orderPartInfoList.length> 1)> Part ${orderPart.orderPartSeqId}</#if></h1>
+                <h1>${ec.l10n.localize('Order')} ${orderId}<#if (orderPartInfoList.length> 1)> ${ec.l10n.localize('Part')} ${orderPart.orderPartSeqId}</#if></h1>
             </#if>
-            <h3>Total ${ec.l10n.formatCurrency(orderPart.partTotal, orderHeader.currencyUomId)}</h3>
-            <h3>Placed on ${ec.l10n.format(orderHeader.placedDate, "dd MMM yyyy")}</h3>
-            <h3>Placed by ${(orderPartInfo?.customerDetail?.firstName ?? "")} ${(orderPartInfo?.customerDetail?.middleName ?? "")} ${(orderPartInfo?.customerDetail?.lastName ?? "")}</h3>
+            <h3>${ec.l10n.localize('Total')} ${ec.l10n.formatCurrency(orderPart.partTotal, orderHeader.currencyUomId)}</h3>
+            <h3>${ec.l10n.localize('Placed on')} ${ec.l10n.format(orderHeader.placedDate, "dd MMM yyyy")}</h3>
+            <h3>${ec.l10n.localize('Placed by')} ${(orderPartInfo?.customerDetail?.firstName ?? "")} ${(orderPartInfo?.customerDetail?.middleName ?? "")} ${(orderPartInfo?.customerDetail?.lastName ?? "")}</h3>
             <#if has(orderPart?.otherPartyOrderId)><h3>PO ${orderPart.otherPartyOrderId}</h3></#if>
         </td>
         <td width="50%">
-            <#if has(orderPartInfo?.shipmentMethodEnum)><strong>Ship By</strong> ${orderPartInfo.shipmentMethodEnum.description}<br/></#if>
+            <#if has(orderPartInfo?.shipmentMethodEnum)><strong>${ec.l10n.localize('Ship By')}</strong> ${orderPartInfo.shipmentMethodEnum.description}<br/></#if>
             <#if has(contactInfo?.postalAddress)>
                 <#if has(contactInfo?.postalAddress?.toName) || has(contactInfo?.postalAddress?.attnName)>
-                    <#if has(contactInfo?.postalAddress?.toName)><strong>To: ${contactInfo.postalAddress.toName}</strong><br/></#if>
-                    <#if has(contactInfo?.postalAddress?.attnName)><strong>Attn: ${contactInfo.postalAddress.attnName}</strong><br/></#if>
+                    <#if has(contactInfo?.postalAddress?.toName)><strong>${ec.l10n.localize('To')}: ${contactInfo.postalAddress.toName}</strong><br/></#if>
+                    <#if has(contactInfo?.postalAddress?.attnName)><strong>${ec.l10n.localize('Attn')}: ${contactInfo.postalAddress.attnName}</strong><br/></#if>
                 <#else>
                     <strong>${(orderPartInfo?.customerDetail?.organizationName ?? "")} ${(orderPartInfo?.customerDetail?.firstName ?? "")} ${(orderPartInfo?.customerDetail?.middleName ?? "")} ${(orderPartInfo?.customerDetail?.lastName ?? "")}</strong><br/>
                 </#if>
@@ -40,13 +40,13 @@
     </tr></table>
     <table border="0" cellpadding="8px" cellspacing="0" width="100%">
         <tr>
-            <td align="center"><strong>Item</strong></td>
+            <td align="center"><strong>${ec.l10n.localize('Item')}</strong></td>
             <#-- <td><strong>Type</strong></td> -->
-            <td><strong>Description</strong></td>
+            <td><strong>${ec.l10n.localize('Description')}</strong></td>
             <#-- <td><strong>Ship By</strong></td> -->
-            <td align="center"><strong>Qty</strong></td>
-            <td align="right"><strong>Amount</strong></td>
-            <td align="right"><strong>Total</strong></td>
+            <td align="center"><strong>${ec.l10n.localize('Qty')}</strong></td>
+            <td align="right"><strong>${ec.l10n.localize('Amount')}</strong></td>
+            <td align="right"><strong>${ec.l10n.localize('Total')}</strong></td>
         </tr>
         <#assign taxTotal = toDecimal(0)>
         <#assign shippingTotal = toDecimal(0)>
@@ -71,32 +71,32 @@
         </#list>
         <tr>
             <td>&nbsp;</td><!-- <td>&nbsp;</td> -->
-            <td>Shipping</td>
+            <td>${ec.l10n.localize('Shipping')}</td>
             <#-- <td>&nbsp;</td> --><td>&nbsp;</td><td>&nbsp;</td>
             <td align="right">${ec.l10n.formatCurrency(shippingTotal, orderHeader.currencyUomId)}</td>
         </tr>
         <#if (taxTotal.compare(0) > 0)>
             <tr>
                 <td>&nbsp;</td><!-- <td>&nbsp;</td> -->
-                <td>Sales Tax</td>
+                <td>${ec.l10n.localize('Sales Tax')}</td>
             <#-- <td>&nbsp;</td> --><td>&nbsp;</td><td>&nbsp;</td>
                 <td align="right">${ec.l10n.formatCurrency(taxTotal, orderHeader.currencyUomId)}</td>
             </tr>
         </#if>
         <tr>
             <td>&nbsp;</td><!-- <td>&nbsp;</td> -->
-            <td><strong>Total</strong></td>
+            <td><strong>${ec.l10n.localize('Total')}</strong></td>
             <#-- <td>&nbsp;</td> --><td>&nbsp;</td><td>&nbsp;</td>
             <td align="right"><strong>${ec.l10n.formatCurrency(orderPart.partTotal, orderHeader.currencyUomId)}</strong></td>
         </tr>
     </table>
 
     <#if has(orderPartInfo?.orderPart?.shippingInstructions)>
-        <strong>Shipping Instructions</strong><br/>
+        <strong>${ec.l10n.localize('Shipping Instructions')}</strong><br/>
         ${orderPartInfo.orderPart.shippingInstructions}<br/>
     </#if>
     <#if has(orderPartInfo?.orderPart?.giftMessage)>
-        <strong>Gift Message</strong><br/>
+        <strong>${ec.l10n.localize('Gift Message')}</strong><br/>
         ${orderPartInfo.orderPart.giftMessage}<br/>
     </#if>
 </#list>

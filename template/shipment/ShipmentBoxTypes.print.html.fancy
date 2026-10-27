@@ -35,16 +35,16 @@ along with this software (see the LICENSE.md file). If not, see
 <#-- The XSL-FO region-before: a table head, which Chromium repeats at the top of every page the body runs onto. -->
 <table class="print-running"><thead><tr><td><div class="page-header">
         <#if has(fromPartyDetail)><div style="font-size:14pt;text-align:center">${(fromPartyDetail.organizationName ?? "")}${(fromPartyDetail.firstName ?? "")} ${(fromPartyDetail.lastName ?? "")}</div></#if>
-            <div style="font-size:12pt;text-align:center;margin-bottom:0.1in">Box Types</div>
+            <div style="font-size:12pt;text-align:center;margin-bottom:0.1in">${ec.l10n.localize('Box Types')}</div>
         </div></td></tr></thead><tbody><tr><td>
 
         <div class="page-body">
             <table style="width:7.5in;border-bottom:solid black;margin-top:10pt">
                 <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black"><tr>
                     <td style="width:3.0in;padding:${cellPadding}"><div style="text-align:center">ID</div></td>
-                    <td style="width:2.5in;padding:${cellPadding}"><div>Description</div></td>
-                    <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:center">L x W x H</div></td>
-                    <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:center">Weight</div></td>
+                    <td style="width:2.5in;padding:${cellPadding}"><div>${ec.l10n.localize('Description')}</div></td>
+                    <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('L x W x H')}</div></td>
+                    <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:center">${ec.l10n.localize('Weight')}</div></td>
                 </tr></thead>
                 <tbody>
                 <#list boxTypeList as boxType>

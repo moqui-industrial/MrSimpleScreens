@@ -11,6 +11,6 @@
 <#if pa?.address1><#assign lines = lines.concat([pa.address1 + (pa.unitNumber ? ' #' + pa.unitNumber : '')])></#if>
 <#if pa?.address2><#assign lines = lines.concat([pa.address2])></#if>
 <#if pa><#assign lines = lines.concat([((pa.city ?? '') + (methodInfo.postalAddressStateGeo?.geoCodeAlpha2 ? ', ' + methodInfo.postalAddressStateGeo.geoCodeAlpha2 : '') + ' ' + (pa.postalCode ?? '') + (pa.postalCodeExt ? '-' + pa.postalCodeExt : '')).trim()])></#if>
-<#if tel><#assign lines = lines.concat(['Phone: ' + (tel.countryCode ? tel.countryCode + '-' : '') + (tel.areaCode ? tel.areaCode + '-' : '') + (tel.contactNumber ?? '')])></#if>
+<#if tel><#assign lines = lines.concat([ec.l10n.localize('Phone') + ': ' + (tel.countryCode ? tel.countryCode + '-' : '') + (tel.areaCode ? tel.areaCode + '-' : '') + (tel.contactNumber ?? '')])></#if>
 <#if methodInfo?.emailAddress><#assign lines = lines.concat([methodInfo.emailAddress])></#if>
 ${JSON.stringify(lines.map((line, i) => ({t: 'text', id: 'MethodLine' + i, text: line})))}

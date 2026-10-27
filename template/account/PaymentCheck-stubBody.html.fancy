@@ -17,7 +17,7 @@
 <#assign detailTableFontSize = (detailTableFontSize ?? "8pt")>
 
 <div style="margin:0.3in;padding-top:0.1in;overflow:hidden">
-    <div style="text-align:left;margin-bottom:0.1in">${(paymentInfo?.fromPartyDetail?.organizationName ?? "")}${(paymentInfo?.fromPartyDetail?.firstName ?? "")} ${(paymentInfo?.fromPartyDetail?.lastName ?? "")} - Payment #${paymentInfo.payment.paymentId}<#if has(paymentInfo?.payment?.paymentRefNum)> - Check #${paymentInfo.payment.paymentRefNum}</#if><#if has(paymentInfo?.distGroupEnum)> - ${paymentInfo.distGroupEnum.description}</#if></div>
+    <div style="text-align:left;margin-bottom:0.1in">${(paymentInfo?.fromPartyDetail?.organizationName ?? "")}${(paymentInfo?.fromPartyDetail?.firstName ?? "")} ${(paymentInfo?.fromPartyDetail?.lastName ?? "")} - ${ec.l10n.localize('Payment')} #${paymentInfo.payment.paymentId}<#if has(paymentInfo?.payment?.paymentRefNum)> - ${ec.l10n.localize('Check #')}${paymentInfo.payment.paymentRefNum}</#if><#if has(paymentInfo?.distGroupEnum)> - ${paymentInfo.distGroupEnum.description}</#if></div>
     <#if has(paymentInfo?.payment?.memo)>
         <div style="text-align:left;margin-bottom:0.1in">${paymentInfo.payment.memo}</div>
     </#if>
@@ -25,11 +25,11 @@
     <#if has(paymentInfo?.invoiceList)>
         <table style="width:7.5in">
             <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black"><tr>
-                <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:left">Our Ref #</div></td>
-                <td style="width:2.0in;padding:${cellPadding}"><div style="text-align:left">Your Ref #</div></td>
-                <td style="width:1.3in;padding:${cellPadding}"><div style="text-align:left">Invoice Date</div></td>
-                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Invoice Amount</div></td>
-                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Amount Paid</div></td>
+                <td style="width:1.0in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Our Ref #')}</div></td>
+                <td style="width:2.0in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Your Ref #')}</div></td>
+                <td style="width:1.3in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Invoice Date')}</div></td>
+                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Invoice Amount')}</div></td>
+                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Amount Paid')}</div></td>
             </tr></thead>
             <tbody>
                 <#list paymentInfo.invoiceList as invoice>
@@ -50,11 +50,11 @@
             <#assign invoiceItemList = ec.entity.find("mantle.account.invoice.InvoiceItem").condition("invoiceId", invoice.invoiceId).list()>
             <table style="width:7.5in">
                 <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black;border-top:solid black"><tr>
-                    <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:left">Item</div></td>
-                    <td style="width:3.3in;padding:${cellPadding}"><div style="text-align:left">Description</div></td>
-                    <td style="width:0.7in;padding:${cellPadding}"><div style="text-align:right">Qty</div></td>
-                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Amount</div></td>
-                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">Total</div></td>
+                    <td style="width:0.3in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Item')}</div></td>
+                    <td style="width:3.3in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Description')}</div></td>
+                    <td style="width:0.7in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Qty')}</div></td>
+                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Amount')}</div></td>
+                    <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('Total')}</div></td>
                 </tr></thead>
                 <tbody>
                     <#list invoiceItemList as invoiceItem>
@@ -74,10 +74,10 @@
     <#if (paymentInfo.financialAccountTrans != null)>
         <table style="width:7in">
             <thead style="font-size:9pt;font-weight:bold;border-bottom:solid black"><tr>
-                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">Account #</div></td>
-                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">TX #</div></td>
-                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">TX Date</div></td>
-                <td style="width:2in;padding:${cellPadding}"><div style="text-align:right">TX Amount</div></td>
+                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('Account #')}</div></td>
+                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('TX #')}</div></td>
+                <td style="width:1.6in;padding:${cellPadding}"><div style="text-align:left">${ec.l10n.localize('TX Date')}</div></td>
+                <td style="width:2in;padding:${cellPadding}"><div style="text-align:right">${ec.l10n.localize('TX Amount')}</div></td>
             </tr></thead>
             <tbody>
                 <tr style="font-size:${tableFontSize};border-bottom:thin solid black">
